@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:18
+    container_name: db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/18/data
+    ports:
+      - "5432:5432"
+    
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  go_pgadmin:
+    image: elestio/pgadmin:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL} 
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+# set when backend ready for image
+# services:
+#   my-project-with-air:
+#     image: cosmtrek/air
+#     # working_dir value has to be the same of mapped volume
+#     working_dir: /project-package
+#     ports:
+#       - <any>:<any>
+#     environment:
+#       - ENV_A=${ENV_A}
+#       - ENV_B=${ENV_B}
+#       - ENV_C=${ENV_C}
+#     volumes:
+#       - ./project-relative-path/:/project-package/
+
+volumes:
+  postgres_data:
+  pgadmin_data:

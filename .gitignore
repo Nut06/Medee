@@ -137,3 +137,17 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Binary files
+*.exe
+*.bin
+tmp/
+
+# Environment Variables & Config
+.env
+.air.toml # Air config file (ถ้าต้องการซ่อนเฉพาะ config ที่ละเอียดอ่อน)
+
+# Go build cache
+.cache/
+go.sum
+vendor/
