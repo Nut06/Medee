@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func GenerateAccessToken(ID string) (string, error){
+func GenerateAccessToken(ID uuid.UUID) (string, error){
 	claims := jwt.MapClaims{
 		"sub":ID,
 		"exp": time.Now().Add(15 * time.Minute).Unix(),
