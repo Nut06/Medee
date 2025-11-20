@@ -1,0 +1,35 @@
+import type { Project } from "./project.type";
+
+export type Role = "candidate" | "company";
+
+export interface User {
+  id?: string;
+  name: string;
+  email: string;
+  phoneNumber?: string;
+  AvatarURL?: string;
+  role?: Role;
+  projects?: Project[];
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterResponse {
+  id: string;
+  name: string;
+  email: string;
+}
