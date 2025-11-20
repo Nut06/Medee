@@ -1,6 +1,10 @@
+import { LoginForm } from "@/components/LoginForm"
+
 function LoginPage() {
   return (
-    <div>LoginPage</div>
+    <div className="flex flex-row items-center h-screen">
+      <LoginForm/>
+    </div>
   )
 }
 

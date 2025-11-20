@@ -17,19 +17,20 @@ import { Input } from "@/components/ui/input"
 import { useAuthForm } from "@/hooks/userAuthForm"
 import type { LoginRequest } from "@/utils/types/user.type"
 
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address."),
-  password: z.string().min(6, "Password must be at least 6 characters."),
+const registerSchema = z.object({
+  name: z.string().min(1, "กรุณากรอกชื่อ"),
+  email: z.string().email("กรุณากรอก Email"),
+  password: z.string().min(6, "กรุณากรอกรหัสผ่าน"),
 })
 
-type LoginFormValues = z.infer<typeof loginSchema>
+type RegisterFormValues = z.infer<typeof registerSchema>
 
-export const LoginForm = () => {
+export const RegisterForm = () => {
   const { email, password, setField, loginUser, loading, error } = useAuthForm()
   const navigate = useNavigate();
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       email,
       password,
@@ -37,7 +38,7 @@ export const LoginForm = () => {
   })
 
   const handleLoginSubmit = async (
-    values: LoginFormValues
+    values: RegisterFormValues
   ): Promise<void> => {
     const payload: LoginRequest = {
       email: values.email,
@@ -45,6 +46,7 @@ export const LoginForm = () => {
     }
 
     setField("email", values.email)
+    setField("name", values.name)
     setField("password", values.password)
     await loginUser(payload)
     navigate("/candidate")
@@ -57,9 +59,9 @@ export const LoginForm = () => {
           <BriefcaseBusiness className="size-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold">Welcome Back</h1>
-          <p className="pt-1.5 text-sm text-muted-foreground">
-            กรุณากรอก Email และ Password เพื่อเข้าสู่ระบบ
+          <h1 className="text-2xl font-semibold">ยินดีต้อนรับสู่ Medee</h1>
+          <p className="text-sm text-muted-foreground">
+            กรุณากรอกข้อมูลเพื่อสมัครเป็นสมาชิก
           </p>
         </div>
       </div>
@@ -69,6 +71,32 @@ export const LoginForm = () => {
           onSubmit={form.handleSubmit(handleLoginSubmit)}
           className="space-y-6"
         >
+        <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="name"
+                      placeholder="นายสมชาย ใจดี"
+                      className="pl-10"
+                      autoComplete="name"
+                      {...field}
+                      onChange={(event) => {
+                        field.onChange(event)
+                        setField("name", event.target.value)
+                      }}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="email"
@@ -123,12 +151,6 @@ export const LoginForm = () => {
             )}
           />
 
-          <div className="flex items-center justify-end text-sm">
-            <a href="#" className="font-medium text-primary hover:underline">
-              ลืมรหัสผ่าน?
-            </a>
-          </div>
-
           {error && (
             <p className="text-sm font-medium text-destructive">
               {error || "Unable to log in. Please try again."}
@@ -136,15 +158,15 @@ export const LoginForm = () => {
           )}
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Logging In..." : "เข้าสู่ระบบ"}
+            {loading ? "Logging In..." : "ลงทะเบียน"}
           </Button>
         </form>
       </Form>
 
       <p className="flex gap-x-3 justify-self-center mt-8 text-center text-sm text-muted-foreground">
-        ยังไม่มีบัญชี ? {" "}
-        <Link to="/register" className="font-medium text-primary hover:underline">
-          ลงทะเบียน
+        มีบัญชีแล้ว ? {" "}
+        <Link to="/login" className="font-medium text-primary hover:underline">
+          เข้าสู่ระบบ
         </Link>
       </p>
     </div>
