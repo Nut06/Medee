@@ -5,8 +5,10 @@ import (
 	"backend/internal/database"
 	"backend/internal/user"
 	"log"
-
+	"os"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 )
 
@@ -32,10 +34,18 @@ func NewServer() *fiber.App{
 		},
 	)
 
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: os.Getenv("CORS"),
+		AllowHeaders: "Origin, Content-type, Accept, Authorization",
+		AllowMethods: "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+		AllowCredentials: true,
+		MaxAge: 3600,
+	}))
+
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
-	// app.Use(logger.New())
+	app.Use(logger.New())
 	Auth(app)
 	database.ConnectDB()
 	user.InitUserModel()

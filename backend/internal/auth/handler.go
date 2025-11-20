@@ -20,7 +20,7 @@ func RegisterHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	}
-	return c.Status(fiber.StatusBadRequest).JSON(res)
+	return c.Status(fiber.StatusOK).JSON(res)
 }
 
 var fifteenMinutes = 60 * 15

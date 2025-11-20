@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useAuthForm } from "@/hooks/userAuthForm"
-import type { LoginRequest } from "@/utils/types/user.type"
+import type { RegisterRequest } from "@/utils/types/user.type"
 
 const registerSchema = z.object({
   name: z.string().min(1, "กรุณากรอกชื่อ"),
@@ -26,7 +26,7 @@ const registerSchema = z.object({
 type RegisterFormValues = z.infer<typeof registerSchema>
 
 export const RegisterForm = () => {
-  const { email, password, setField, loginUser, loading, error } = useAuthForm()
+  const { email, password, setField, registerUser, loading, error } = useAuthForm()
   const navigate = useNavigate();
 
   const form = useForm<RegisterFormValues>({
@@ -40,15 +40,16 @@ export const RegisterForm = () => {
   const handleLoginSubmit = async (
     values: RegisterFormValues
   ): Promise<void> => {
-    const payload: LoginRequest = {
+    const payload: RegisterRequest = {
       email: values.email,
       password: values.password,
+      name: values.name,
     }
 
     setField("email", values.email)
     setField("name", values.name)
     setField("password", values.password)
-    await loginUser(payload)
+    await registerUser(payload)
     navigate("/candidate")
   }
 
