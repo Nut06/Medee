@@ -12,22 +12,26 @@ interface UserState {
 export const useUserStore = create<UserState>((set) => ({
     user: null,
     
-    setUser:(userOrPartial, key, value):void => {
-        if (userOrPartial && typeof userOrPartial === 'object' && !key) {
-            set({ user: userOrPartial as User})
-        }
+    setUser: (payload, key, value) => {
+    if (key) {
+        set((state) =>
+        state.user ? { user: { ...state.user, [key]: value as User[keyof User] } } : state
+        )
+        return
+    }
 
-        else if(key){
-            set((state) => ({
-                user: state.user
-                ? { ...state.user, [key]:value}
-                : state.user
-            }))
-        }
-        else if(userOrPartial === null){
-            set({ user:null })
-        }
-    },
+    if (!payload) {
+        set({ user: null, isAuth: false })
+        return
+    }
+
+    set((state) => ({
+        user: { ...(state.user ?? {}), ...(payload as Partial<User>) },
+        isAuth: true,
+    }))
+},
+
+
 
     isAuth:false,
     setAuth: (b: boolean) => {

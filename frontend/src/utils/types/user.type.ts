@@ -4,8 +4,8 @@ export type Role = "candidate" | "company";
 
 export interface User {
   id?: string;
-  name: string;
-  email: string;
+  name?: string;
+  email?: string;
   phoneNumber?: string;
   AvatarURL?: string;
   role?: Role;

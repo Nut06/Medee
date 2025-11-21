@@ -21,7 +21,7 @@ export const AppRoutes = () => {
                     <Route path="/company" element={<CompanyPage/>}/>
                 </Route>
                 <Route element={<RequireRole role="candidate"/>}>
-                    <Route path="/company" element={<CandidatePage/>}/>
+                    <Route path="/candidate" element={<CandidatePage/>}/>
                 </Route>
             </Route>
         </Routes>
