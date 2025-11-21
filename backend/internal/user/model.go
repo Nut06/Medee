@@ -14,13 +14,13 @@ const (
 )
 
 type User struct {
-	ID           uuid.UUID  `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	Name         string  `json:"name"`
-	Email        string  `json:"email" gorm:"unique"`
-	Password     *string `gorm:"uniqueIndex"`
+	ID           uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	Name         string    `json:"name"`
+	Email        string    `json:"email" gorm:"unique"`
+	Password     *string   `gorm:"uniqueIndex"`
 	PhoneNumber  *string
 	AvatarURL    *string
-	Role         UserRole `gorm:"type:varchar(20);default:candidate"`
+	Role         *string `gorm:"type:varchar(20);default:candidate"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	RefreshToken []RefreshToken `gorm:"foreignKey:UserID"`

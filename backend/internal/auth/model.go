@@ -10,8 +10,9 @@ type RegisterRequest struct {
 
 type RegisterRespone struct {
 	ID    uuid.UUID `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Name  string    `json:"name"`
+	Email string    `json:"email"`
+	Role  string    `json:"role"`
 }
 
 type LoginRequest struct {
@@ -21,8 +22,9 @@ type LoginRequest struct {
 
 type LoginResponse struct {
 	UserID uuid.UUID `json:"id"`
-	Name   string `json:"name"`
-	Email  string `json:"email"`
+	Name   string    `json:"name"`
+	Email  string    `json:"email"`
+	Role  string    `json:"role"`
 }
 
 type Token struct {

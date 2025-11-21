@@ -20,10 +20,12 @@ func register(input *RegisterRequest) (*RegisterRespone, error) {
 		return nil, err
 	}
 
+	role := string(user.RoleCandidate)
 	hpwd := string(hashed)
 	newUser := &user.User{
 		Name:     input.Name,
 		Email:    input.Email,
+		Role:     &role,
 		Password: &hpwd,
 	}
 
@@ -31,12 +33,16 @@ func register(input *RegisterRequest) (*RegisterRespone, error) {
 		return nil, err
 	}
 
+	createdUser, _ := FindByEmail(input.Email);
+
 	return &RegisterRespone{
-		ID:    newUser.ID,
-		Name:  newUser.Name,
-		Email: newUser.Email,
+		ID:    createdUser.ID,
+		Name:  createdUser.Name,
+		Email: createdUser.Email,
+		Role:  string(*createdUser.Role),
 	}, nil
 }
+
 
 func login(input *LoginRequest) (*LoginResponse, *Token, error) {
 	foundUser, err := FindByEmail(input.Email)
@@ -58,6 +64,7 @@ func login(input *LoginRequest) (*LoginResponse, *Token, error) {
 			UserID: foundUser.ID,
 			Name:   foundUser.Name,
 			Email:  foundUser.Email,
+			Role:   string(*foundUser.Role),
 		}, &Token{
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,
@@ -69,7 +76,7 @@ func comparePassword(hpw string, pw string) error {
 }
 
 func FindByEmail(email string) (*user.User, error) {
-	
+
 	var user user.User
 	if err := database.DB.Where("email = ?", email).First(&user).Error; err != nil {
 		return nil, err

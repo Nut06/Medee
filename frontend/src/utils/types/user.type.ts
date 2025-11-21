@@ -21,10 +21,11 @@ export interface LoginResponse {
   id: string;
   name: string;
   email: string;
+  role: string;
 }
 
 export interface RegisterRequest {
-    name: string
+  name: string;
   email: string;
   password: string;
 }
@@ -33,4 +34,5 @@ export interface RegisterResponse {
   id: string;
   name: string;
   email: string;
+  role: string;
 }
