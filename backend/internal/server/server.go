@@ -3,12 +3,12 @@ package server
 
 import (
 	"backend/internal/database"
-	"backend/internal/user"
 	"log"
 	"os"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 )
 
@@ -46,8 +46,33 @@ func NewServer() *fiber.App{
 		return c.SendString("Hello, World!")
 	})
 	app.Use(logger.New())
-	Auth(app)
-	database.ConnectDB()
-	user.InitUserModel()
+	db := database.ConnectDB()
+	database.AutoMigrate(db)
+	Auth(app, db)
 	return  app
+}
+
+type FiberServer struct {
+	*fiber.App
+	db database.Service
+}
+
+func New() *FiberServer {
+	server := &FiberServer{
+		App: fiber.New(
+				fiber.Config{
+				ErrorHandler: func(c *fiber.Ctx, err error) error {
+					log.Printf("Error occur %v", err)
+
+					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+						"message":"Something went wrong",
+					})
+				},
+				ReduceMemoryUsage: true,
+				StrictRouting: true,
+				CaseSensitive: true,
+			}),
+		db: database.New(),
+	}
+	return  server
 }
