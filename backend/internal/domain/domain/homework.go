@@ -15,7 +15,7 @@ const (
 )
 
 type ProjectTask struct {
-	ID          uuid.UUID  `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID          uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	ProjectID   uuid.UUID  `gorm:"type:uuid;index"`
 	AssigneeID  *uuid.UUID `gorm:"type:uuid;index"` // candidate user
 	Title       string

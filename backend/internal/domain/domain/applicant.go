@@ -7,7 +7,7 @@ import (
 )
 
 type ApplicantProfile struct {
-	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID          uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	UserID      uuid.UUID `gorm:"type:uuid;uniqueIndex"` // one-to-one
 	Summary     *string   `gorm:"type:text"`             // About Me
 	Address     *string
@@ -22,7 +22,7 @@ type ApplicantProfile struct {
 }
 
 type WorkExperience struct {
-	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID          uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	UserID      uuid.UUID `gorm:"type:uuid;index"`
 	Position    string
 	CompanyName string
@@ -32,7 +32,7 @@ type WorkExperience struct {
 }
 
 type Education struct {
-	ID             uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID             uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	UserID         uuid.UUID `gorm:"type:uuid;index"`
 	Degree         string
 	Institution    string

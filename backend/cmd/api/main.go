@@ -3,11 +3,20 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"backend/internal/server"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Print("No .env was found")
+	}
+	
+	fmt.Printf("DB port is at: %s\n", os.Getenv("DB_PORT"))
 	app := server.NewServer()
 
 	fmt.Println("Server is running on http://localhost:3000")

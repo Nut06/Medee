@@ -9,16 +9,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/joho/godotenv"
 )
 
 
 func NewServer() *fiber.App{
-	err := godotenv.Load()
-	if err != nil {
-		log.Print("No .env was found")
-	}
-
+	
 	app := fiber.New(
 		fiber.Config{
 			ErrorHandler: func(c *fiber.Ctx, err error) error {
@@ -49,6 +44,7 @@ func NewServer() *fiber.App{
 	db := database.ConnectDB()
 	database.AutoMigrate(db)
 	Auth(app, db)
+	
 	return  app
 }
 
@@ -57,22 +53,22 @@ type FiberServer struct {
 	db database.Service
 }
 
-func New() *FiberServer {
-	server := &FiberServer{
-		App: fiber.New(
-				fiber.Config{
-				ErrorHandler: func(c *fiber.Ctx, err error) error {
-					log.Printf("Error occur %v", err)
+// func New() *FiberServer {
+// 	server := &FiberServer{
+// 		App: fiber.New(
+// 				fiber.Config{
+// 				ErrorHandler: func(c *fiber.Ctx, err error) error {
+// 					log.Printf("Error occur %v", err)
 
-					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-						"message":"Something went wrong",
-					})
-				},
-				ReduceMemoryUsage: true,
-				StrictRouting: true,
-				CaseSensitive: true,
-			}),
-		db: database.New(),
-	}
-	return  server
-}
+// 					return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+// 						"message":"Something went wrong",
+// 					})
+// 				},
+// 				ReduceMemoryUsage: true,
+// 				StrictRouting: true,
+// 				CaseSensitive: true,
+// 			}),
+// 		db: database.New(),
+// 	}
+// 	return  server
+// }

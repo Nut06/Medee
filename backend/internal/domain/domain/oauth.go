@@ -15,7 +15,7 @@ const (
 )
 
 type OAuthAccount struct {
-	ID             uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID             uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	UserID         uuid.UUID `gorm:"type:uuid;index"`
 	Provider       Provider  `gorm:"type:varchar(20)"`
 	ProviderUserID string    `gorm:"index"`

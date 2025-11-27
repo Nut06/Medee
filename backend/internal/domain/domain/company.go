@@ -7,7 +7,7 @@ import (
 )
 
 type Company struct {
-	ID         uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID         uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	Name       string
 	LogoURL    *string
 	CoverURL   *string
@@ -29,7 +29,7 @@ const (
 )
 
 type CompanyMember struct {
-	ID        uuid.UUID         `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID        uuid.UUID         `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	CompanyID uuid.UUID         `gorm:"type:uuid;index"`
 	UserID    uuid.UUID         `gorm:"type:uuid;index"`
 	Role      CompanyMemberRole `gorm:"type:varchar(30)"`

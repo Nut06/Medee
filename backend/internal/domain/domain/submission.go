@@ -18,7 +18,7 @@ const (
 )
 
 type Application struct {
-	ID          uuid.UUID         `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID          uuid.UUID         `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	ProjectID   uuid.UUID         `gorm:"type:uuid;index"`
 	CandidateID uuid.UUID         `gorm:"type:uuid;index"` // UserID (candidate)
 	CoverLetter *string           `gorm:"type:text"`
@@ -36,7 +36,7 @@ const (
 )
 
 type Submission struct {
-    ID            uuid.UUID        `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+    ID            uuid.UUID        `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
     ApplicationID uuid.UUID        `gorm:"type:uuid;index"`
     FileURL       string
     ExtraLink     *string          // GitHub, Video, etc.

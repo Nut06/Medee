@@ -16,7 +16,7 @@ const (
 )
 
 type Notification struct {
-	ID        uuid.UUID        `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID        uuid.UUID        `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	UserID    uuid.UUID        `gorm:"type:uuid;index"`
 	Type      NotificationType `gorm:"type:varchar(30)"`
 	Title     string

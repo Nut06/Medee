@@ -15,7 +15,8 @@ const (
 )
 
 type User struct {
-	ID           uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	// ID           uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID           uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	Name         string    `json:"name"`
 	Email        string    `json:"email" gorm:"unique"`
 	Password     *string   `gorm:"uniqueIndex"`

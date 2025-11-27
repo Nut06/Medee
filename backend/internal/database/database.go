@@ -16,26 +16,37 @@ import (
 var DB *gorm.DB
 
 var (
-	host     = os.Getenv("DB_HOST")
-	port     = os.Getenv("DB_PORT")
-	username     = os.Getenv("DB_USER")
-	password = os.Getenv("DB_PASSWORD")
-	database   = os.Getenv("DB_NAME")
-	sslmode  = "disable"
+	// host     = os.Getenv("DB_HOST")
+	// port     = os.Getenv("DB_PORT")
+	// username     = os.Getenv("DB_USER")
+	// password = os.Getenv("DB_PASSWORD")
+	// database   = os.Getenv("DB_NAME")
+	// sslmode  = "disable"
 	dbInstance *service
-	schema = os.Getenv(" 0[]")
+	// schema = os.Getenv(" 0[]")
 )
 
 func ConnectDB() *gorm.DB {
 	// define db config
+	host     := os.Getenv("DB_HOST")
+	port     := os.Getenv("DB_PORT")
+	username     := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	database   := os.Getenv("DB_NAME")
+	sslmode  := "disable"
+	fmt.Printf("DB port is at: %s from DB\n", os.Getenv("DB_PORT"))
+
+	fmt.Printf("value of host is : %s \n", host)
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		host, username, password, database, port, sslmode)
 
+	fmt.Printf("Valus of dsn is %s: \n",dsn)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect to DB: %v", err)
 		os.Exit(1)
 	}
+
 	fmt.Println("Db is :", db)
 	log.Println("connect to DB successfull")
 	DB = db
@@ -53,23 +64,23 @@ type service struct {
 }
 
 
-func New() Service {
-	if dbInstance != nil {
-		return dbInstance
-	}
-	connStr := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
-		host, username, password, database, port, sslmode)
+// func New() Service {
+// 	if dbInstance != nil {
+// 		return dbInstance
+// 	}
+// 	connStr := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+// 		host, username, password, database, port, sslmode)
 
-	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
+// 	db, err := gorm.Open(postgres.Open(connStr), &gorm.Config{})
 
-	if err != nil {
-		log.Fatal(err)
-	}
-	dbInstance = &service{
-		db: db,
-	}
-	return dbInstance
-}
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	dbInstance = &service{
+// 		db: db,
+// 	}
+// 	return dbInstance
+// }
 
 func AutoMigrate(db *gorm.DB) {
 	db.AutoMigrate(
@@ -134,11 +145,11 @@ func (s *service) Health() map[string]string{
 	return stats
 }
 
-func (s *service) Close() error {
-	db, err := s.db.DB()
-	if err != nil {
-		return  err
-	}
-	log.Printf("Disconnected from database: %s", database)
-	return db.Close()
-}
+// func (s *service) Close() error {
+// 	db, err := s.db.DB()
+// 	if err != nil {
+// 		return  err
+// 	}
+// 	log.Printf("Disconnected from database: %s", database)
+// 	return db.Close()
+// }

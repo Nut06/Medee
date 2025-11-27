@@ -24,7 +24,7 @@ const (
 )
 
 type Project struct {
-	ID            uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID            uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	CompanyID     uuid.UUID `gorm:"type:uuid;index"`
 	CreatedByUser uuid.UUID `gorm:"type:uuid;index"`
 	Title         string
@@ -43,7 +43,7 @@ type Project struct {
 }
 
 type ProjectSkill struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	ProjectID uuid.UUID `gorm:"type:uuid;index"`
 	SkillID   uuid.UUID `gorm:"type:uuid;index"`
 }
