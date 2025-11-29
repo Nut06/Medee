@@ -3,7 +3,7 @@ package server
 
 import (
 	authadapter "backend/internal/adapter/auth"
-
+	useradapter "backend/internal/adapter/user"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
@@ -24,8 +24,11 @@ func authRoute(router fiber.Router, db *gorm.DB) {
 	router.Post("/logout", h.Logout)
 }
 
-func userRoute(router fiber.Router) {
-	// router.Get()
+func userRoute(router fiber.Router, db *gorm.DB) {
+	h := useradapter.NewHTTPHandler(db)
+	router.Get("/user", h.GetUser)
+	router.Put("/user", h.UpdateProfile)
+	router.Put("/user/avatar", h.UploadAvatar)
 }
 
 

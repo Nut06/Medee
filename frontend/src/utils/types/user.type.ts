@@ -37,3 +37,18 @@ export interface RegisterResponse {
   email: string;
   role: string;
 }
+
+export interface UpdateUserRequest {
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  AvatarURL?: string;
+  role?: Role;
+}
+
+export interface UpdateUserResponse {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
