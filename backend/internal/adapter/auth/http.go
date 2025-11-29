@@ -53,30 +53,23 @@ func NewHTTPHandler( db *gorm.DB ) *HTTPHandler {
 		NewJWTService(os.Getenv("JWT_SECRET"), 15*time.Minute, 7*24*time.Hour),
 		repo,
 	)
-
-	if cfg.AccessCookieName == "" {
-		cfg.AccessCookieName = "access_token"
-	}
-	if cfg.RefreshCookieName == "" {
-		cfg.RefreshCookieName = "refresh_token"
-	}
-	if cfg.SameSite == "" {
-		cfg.SameSite = "Strict"
-	}
+	cfg.AccessCookieName = "access_token"
+	cfg.RefreshCookieName = "refresh_token"
+	cfg.SameSite = "Strict"
 	return &HTTPHandler{uc: usecase, cfg: cfg}
 }
 
 
 func (h *HTTPHandler) Register(c *fiber.Ctx) error {
-	ctx := h.context(c)
 
 	var req auth.RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
 	}
 
-	res, err := h.uc.Register(ctx, authapp.RegisterCommand{
-		Name:     req.Name,
+	res, err := h.uc.Register(c.Context(), authapp.RegisterCommand{
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
 		Email:    req.Email,
 		Password: req.Password,
 		Role:     req.Role,

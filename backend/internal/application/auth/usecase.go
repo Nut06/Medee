@@ -29,7 +29,8 @@ func NewUsecase(
 }
 
 type RegisterCommand struct {
-	Name     string
+	FirstName     string
+	LastName     string
 	Email    string
 	Password string
 	Role     string
@@ -37,7 +38,8 @@ type RegisterCommand struct {
 
 type RegisterResult struct {
 	ID    string
-	Name  string
+	FirstName string
+	LastName string
 	Email string
 	Role  string
 }
@@ -49,7 +51,8 @@ type LoginCommand struct {
 
 type LoginResult struct {
 	ID    string
-	Name  string
+	FirstName  string
+	LastName string
 	Email string
 	Role  string
 }
@@ -74,7 +77,8 @@ func (uc *Usecase) Register(ctx context.Context, cmd RegisterCommand) (*Register
 	}
 
 	newUser := auth.User{
-		Name:         cmd.Name,
+		FirstName:    cmd.FirstName,
+		LastName:     cmd.LastName,
 		Email:        cmd.Email,
 		Role:         role,
 		PasswordHash: hash,
@@ -87,7 +91,8 @@ func (uc *Usecase) Register(ctx context.Context, cmd RegisterCommand) (*Register
 
 	return &RegisterResult{
 		ID:    created.ID.String(),
-		Name:  created.Name,
+		FirstName:  created.FirstName,
+		LastName: created.LastName,
 		Email: created.Email,
 		Role:  created.Role,
 	}, nil
@@ -123,7 +128,8 @@ func (uc *Usecase) Login(ctx context.Context, cmd LoginCommand) (*LoginResult, *
 
 	return &LoginResult{
 			ID:    u.ID.String(),
-			Name:  u.Name,
+			FirstName:  u.FirstName,
+			LastName: u.LastName,
 			Email: u.Email,
 			Role:  u.Role,
 		}, &auth.TokenPair{

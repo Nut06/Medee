@@ -16,15 +16,14 @@ const (
 
 type User struct {
 	// ID           uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	ID           uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	Name         string    `json:"name"`
-	FirstName    string    `json:"first_name"`
-	LastName     string    `json:"last_name"`
-	Email        string    `json:"email" gorm:"unique"`
-	Password     *string   `gorm:"uniqueIndex"`
-	PhoneNumber  *string
-	AvatarURL    *string	`json:"avatar_url"`
-	Role         *string `gorm:"type:varchar(20);default:candidate"`
+	ID          uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	FirstName   string    `json:"first_name"`
+	LastName    string    `json:"last_name"`
+	Email       string    `json:"email" gorm:"unique"`
+	Password    *string   `gorm:"uniqueIndex"`
+	PhoneNumber *string
+	AvatarURL   *string `json:"avatar_url"`
+	Role        *string `gorm:"type:varchar(20);default:candidate"`
 
 	CreatedAt    time.Time
 	UpdatedAt    time.Time

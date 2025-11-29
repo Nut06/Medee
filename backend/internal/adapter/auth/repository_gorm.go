@@ -71,7 +71,8 @@ func mapToDomainUser(u *domain.User) auth.User {
 	}
 	return auth.User{
 		ID:           u.ID,
-		Name:         u.Name,
+		FirstName:    u.FirstName,
+		LastName:     u.LastName,
 		Email:        u.Email,
 		Role:         role,
 		PasswordHash: pw,
@@ -84,7 +85,8 @@ func mapToEntityUser(u auth.User) *domain.User {
 	
 	return &domain.User{
 		ID:       u.ID,
-		Name:     u.Name,
+		FirstName: u.FirstName,
+		LastName:  u.LastName,
 		Email:    u.Email,
 		Role:     &role,
 		Password: &pw,

@@ -37,10 +37,9 @@ func (r *UserRepository) Update(ctx context.Context, id string, req *domain.User
 		}
 		return nil, err
 	}
-	u.Name = req.Name
+	u.FirstName = req.FirstName
+	u.LastName = req.LastName
 	u.Email = req.Email
-	u.Role = req.Role
-	u.Password = req.Password
 	if err := r.db.WithContext(ctx).Save(&u).Error; err != nil {
 		return nil, err
 	}

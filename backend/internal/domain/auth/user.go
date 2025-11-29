@@ -6,14 +6,16 @@ import "github.com/google/uuid"
 // Keep it free from infrastructure concerns (no JSON or GORM tags).
 type User struct {
 	ID           uuid.UUID
-	Name         string
+	FirstName    string
+	LastName     string
 	Email        string
 	Role         string
 	PasswordHash string
 }
 
 type RegisterRequest struct {
-	Name     string `json:"name"`
+	FirstName     string `json:"first_name"`
+	LastName     string `json:"last_name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Role     string `json:"role"`
@@ -21,7 +23,8 @@ type RegisterRequest struct {
 
 type RegisterResponse struct {
 	ID    string `json:"id"`
-	Name  string `json:"name"`
+	FirstName  string `json:"first_name"`
+	LastName string `json:"last_name"`
 	Email string `json:"email"`
 	Role  string `json:"role"`
 }
@@ -34,7 +37,8 @@ type LoginRequest struct {
 
 type LoginResponse struct {
 	ID    string `json:"id"`
-	Name  string `json:"name"`
+	FirstName  string `json:"first_name"`
+	LastName string `json:"last_name"`
 	Email string `json:"email"`
 	Role  string `json:"role"`
 }
