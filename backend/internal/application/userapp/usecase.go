@@ -35,3 +35,6 @@ func (s *Usecase) UploadAvatar(ctx context.Context, id string, file *multipart.F
 	return s.repo.UploadAvatar(ctx, id, file)
 }
 
+func (s *Usecase) DeleteAvatar(ctx context.Context, id string) (*domain.User, error) {
+	return s.repo.DeleteAvatar(ctx, id)
+}

@@ -29,6 +29,5 @@ func userRoute(router fiber.Router, db *gorm.DB) {
 	router.Get("/user", h.GetUser)
 	router.Put("/user", h.UpdateProfile)
 	router.Put("/user/avatar", h.UploadAvatar)
+	router.Delete("/user/avatar", h.DeleteAvatar)
 }
-
-

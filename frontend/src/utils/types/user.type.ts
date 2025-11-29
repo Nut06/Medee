@@ -4,8 +4,10 @@ export type Role = "candidate" | "company";
 
 export interface User {
   id?: string;
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
+  bio?: string;
   phoneNumber?: string;
   AvatarURL?: string;
   role?: Role;
@@ -19,13 +21,15 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   role: string;
 }
 
 export interface RegisterRequest {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   role: string;
@@ -33,13 +37,15 @@ export interface RegisterRequest {
 
 export interface RegisterResponse {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   role: string;
 }
 
 export interface UpdateUserRequest {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
   phoneNumber?: string;
   AvatarURL?: string;
@@ -48,7 +54,8 @@ export interface UpdateUserRequest {
 
 export interface UpdateUserResponse {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   role: string;
 }

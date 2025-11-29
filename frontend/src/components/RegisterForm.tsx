@@ -18,7 +18,8 @@ import { useAuthForm } from "@/hooks/userAuthForm"
 import type { RegisterRequest } from "@/utils/types/user.type"
 
 const registerSchema = z.object({
-  name: z.string().min(1, "กรุณากรอกชื่อ"),
+  firstName: z.string().min(1, "กรุณากรอกชื่อ"),
+  lastName: z.string().min(1, "กรุณากรอกนามสกุล"),
   email: z.string().email("กรุณากรอก Email"),
   password: z.string().min(6, "กรุณากรอกรหัสผ่าน"),
 })
@@ -41,13 +42,16 @@ export const RegisterForm = () => {
     values: RegisterFormValues
   ): Promise<void> => {
     const payload: RegisterRequest = {
+      role: "candidate",
       email: values.email,
       password: values.password,
-      name: values.name,
+      firstName: values.firstName,
+      lastName: values.lastName,
     }
 
     setField("email", values.email)
-    setField("name", values.name)
+    setField("firstName", values.firstName)
+    setField("lastName", values.lastName)
     setField("password", values.password)
     await registerUser(payload)
     navigate("/candidate")
@@ -74,7 +78,7 @@ export const RegisterForm = () => {
         >
         <FormField
             control={form.control}
-            name="name"
+            name="firstName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Name</FormLabel>
@@ -83,13 +87,13 @@ export const RegisterForm = () => {
                     <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       type="name"
-                      placeholder="นายสมชาย ใจดี"
+                      placeholder="สมชาย"
                       className="pl-10"
                       autoComplete="name"
                       {...field}
                       onChange={(event) => {
                         field.onChange(event)
-                        setField("name", event.target.value)
+                        setField("firstName", event.target.value)
                       }}
                     />
                   </div>
@@ -98,6 +102,34 @@ export const RegisterForm = () => {
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="name"
+                      placeholder="ใจดี"
+                      className="pl-10"
+                      autoComplete="name"
+                      {...field}
+                      onChange={(event) => {
+                        field.onChange(event)
+                        setField("lastName", event.target.value)
+                      }}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="email"

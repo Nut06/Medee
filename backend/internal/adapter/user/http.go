@@ -58,3 +58,12 @@ func (h *HTTPHandler) UpdateProfile(c *fiber.Ctx) error {
 	}
 	return c.JSON(res)
 }
+
+func (h *HTTPHandler) DeleteAvatar(c *fiber.Ctx) error {
+	userId := c.Query("id")
+	user, err := h.usecase.DeleteAvatar(c.Context(), userId)
+	if err != nil {
+		return err
+	}
+	return c.JSON(user)
+}

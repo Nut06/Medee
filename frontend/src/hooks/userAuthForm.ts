@@ -1,10 +1,15 @@
 import { loginLocal, register } from "@/services/authService";
 import { useUserStore } from "@/stores/userStore";
-import type { LoginRequest, RegisterRequest, User } from "@/utils/types/user.type";
+import type {
+  LoginRequest,
+  RegisterRequest,
+  User,
+} from "@/utils/types/user.type";
 import { useReducer } from "react";
 
 type AuthFormState = {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   error: string;
@@ -16,7 +21,8 @@ type Action =
   | { type: "RESET" };
 
 const initialState: AuthFormState = {
-  name: "",
+  firstName: "",
+  lastName: "",
   email: "",
   password: "",
   error: "",
@@ -47,7 +53,7 @@ export function useAuthForm() {
   const registerUser = async (input: RegisterRequest): Promise<void> => {
     try {
       setField("loading", true);
-      const data = await register(input) as Partial<User>;
+      const data = (await register(input)) as Partial<User>;
       setUser(data);
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -64,7 +70,7 @@ export function useAuthForm() {
   const loginUser = async (input: LoginRequest): Promise<void> => {
     try {
       setField("loading", true);
-      const data = await loginLocal(input) as Partial<User>;
+      const data = (await loginLocal(input)) as Partial<User>;
       setUser(data);
     } catch (error: unknown) {
       if (error instanceof Error) {
