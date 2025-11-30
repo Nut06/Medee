@@ -86,6 +86,7 @@ func (uc *Usecase) Register(ctx context.Context, cmd RegisterCommand) (*Register
 	if err != nil {
 		return nil, nil, err
 	}
+	
 	refreshToken, refreshExp, err := uc.tokens.GenerateRefresh(ctx, created.ID)
 	if err != nil {
 		return nil, nil, err

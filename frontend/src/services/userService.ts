@@ -11,16 +11,16 @@ export const getUser = async ():Promise<User> => {
   return data;
 };
 
-export const updateUser = async (id: string, input: UpdateUserRequest):Promise<User> => {
-  const res = await api.put<User>(`/user/${id}`, input);
+export const updateUser = async (input: UpdateUserRequest):Promise<User> => {
+  const res = await api.put<User>(`/user`, input);
   const data = (await res.data) as User;
   return data;
 };
 
-export const uploadAvatar = async (id: string, file: File):Promise<User> => {
+export const uploadAvatar = async (file: File):Promise<User> => {
   const formData = new FormData();
   formData.append("avatar", file);
-  const res = await api.post(`/user/${id}/avatar`, formData, {
+  const res = await api.put<User>(`/user/avatar`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -29,8 +29,8 @@ export const uploadAvatar = async (id: string, file: File):Promise<User> => {
   return data;
 };
 
-export const deleteAvatar = async (id: string):Promise<User> => {
-  const res = await api.delete<User>(`/user/${id}/avatar`);
+export const deleteAvatar = async ():Promise<User> => {
+  const res = await api.delete<User>(`/user/avatar`);
   const data = (await res.data) as User;
   return data;
 };

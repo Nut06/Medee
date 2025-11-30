@@ -25,7 +25,7 @@ export const useProfile = () => {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
       email: user?.email || "",
-    bio: user?.bio || "",
+      bio: user?.bio || "",
     },
   });
 
@@ -33,7 +33,7 @@ export const useProfile = () => {
     if (!user?.id) return;
     setIsLoading(true);
     try {
-      const updatedUser = await updateUser(user.id, data);
+      const updatedUser = await updateUser(data);
       setUser(updatedUser);
       toast.success("Profile updated successfully");
     } catch (error) {
@@ -48,7 +48,7 @@ export const useProfile = () => {
     if (!user?.id) return;
     setIsLoading(true);
     try {
-      const updatedUser = await uploadAvatar(user.id, file);
+      const updatedUser = await uploadAvatar(file);
       setUser(updatedUser); // Update store with new avatar URL
       toast.success("Avatar updated successfully");
     } catch (error) {
@@ -58,11 +58,11 @@ export const useProfile = () => {
       setIsLoading(false);
     }
   };
-    const onDeleteAvatar = async () => {
+  const onDeleteAvatar = async () => {
     if (!user?.id) return;
     setIsLoading(true);
     try {
-      const updatedUser = await deleteAvatar(user.id);
+      const updatedUser = await deleteAvatar();
       setUser(updatedUser); // Update store with new avatar URL
       toast.success("Avatar deleted successfully");
     } catch (error) {

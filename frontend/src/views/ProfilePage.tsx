@@ -1,6 +1,6 @@
 import { useUserStore } from "@/stores/userStore";
 
-export default function CandidatePage() {
+export default function ProfilePage() {
   const { user } = useUserStore();
 
   return (

@@ -21,10 +21,16 @@ type CookieConfig struct {
 	RefreshMaxAge     int
 }
 
+var (
+	fifteenMinutes = 15 * time.Minute
+	sevenDays      = 7 * 24 * time.Hour
+)
+
 type HTTPHandler struct {
 	uc  *authapp.Usecase
 	cfg *CookieConfig
 }
+
 
 func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
 	repo := NewGormRepository(db)
@@ -35,7 +41,7 @@ func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
 	usecase := authapp.NewUsecase(
 		repo,
 		NewBcryptHasher(0),
-		NewJWTService(os.Getenv("JWT_SECRET"), 15*time.Minute, 7*24*time.Hour),
+		NewJWTService(os.Getenv("JWT_SECRET"), fifteenMinutes, sevenDays),
 		repo,
 	)
 	cfg.AccessCookieName = "access_token"
@@ -57,6 +63,7 @@ func (h *HTTPHandler) Register(c *fiber.Ctx) error {
 		Email:     req.Email,
 		Password:  req.Password,
 	})
+
 	if err != nil {
 		return h.handleError(err)
 	}

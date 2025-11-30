@@ -10,8 +10,9 @@ export interface User {
   bio?: string;
   phoneNumber?: string;
   AvatarURL?: string;
-  company?: Company;  
-  projects?: Project[];
+  company?: Company;
+  companies?: Company[]; // List of companies the user belongs to
+  projects?: Project[]; // List of projects the user belongs to
   skills?: Skill[];
 }
 
@@ -31,6 +32,7 @@ export interface LoginResponse {
   firstName: string;
   lastName: string;
   email: string;
+  companies?: Company[];
 }
 
 export interface RegisterRequest {
@@ -45,6 +47,7 @@ export interface RegisterResponse {
   firstName: string;
   lastName: string;
   email: string;
+  companies?: Company[];
 }
 
 export interface UpdateUserRequest {
@@ -66,4 +69,54 @@ export interface UpdateUserResponse {
 
 export interface Skill {
   name?: string;
+}
+
+export interface PortfolioItem {
+  id?: string;
+  title: string;
+  description: string;
+  imageURL?: string;
+  githubURL?: string;
+  demoURL?: string;
+}
+
+export interface WorkExperience {
+  id?: string;
+  position: string;
+  companyName: string;
+  startDate?: string; // ISO Date string
+  endDate?: string; // ISO Date string
+  description?: string;
+}
+
+export interface Education {
+  id?: string;
+  instituteName: string; // Simplified for frontend, backend might need ID
+  degree: string;
+  fieldOfStudy: string; // Simplified
+  graduationYear?: number;
+}
+
+// For API Requests
+export interface AddExperienceRequest {
+  position: string;
+  companyName: string;
+  startDate?: string;
+  endDate?: string;
+  description?: string;
+}
+
+export interface AddEducationRequest {
+  instituteName: string;
+  degree: string;
+  fieldOfStudy: string;
+  graduationYear?: number;
+}
+
+export interface AddProjectRequest {
+  title: string;
+  description: string;
+  imageURL?: string;
+  githubURL?: string;
+  demoURL?: string;
 }

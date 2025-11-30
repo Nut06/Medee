@@ -1,10 +1,10 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { BriefcaseBusiness, Lock, Mail } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { Link, useNavigate } from "react-router-dom"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { BriefcaseBusiness, Lock, Mail } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import { z } from "zod";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,22 +12,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { useAuthForm } from "@/hooks/userAuthForm"
-import type { RegisterRequest } from "@/utils/types/user.type"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useAuthForm } from "@/hooks/userAuthForm";
+import { register } from "@/services/authService";
+import type { RegisterRequest } from "@/utils/types/user.type";
 
 const registerSchema = z.object({
   firstName: z.string().min(1, "กรุณากรอกชื่อ"),
   lastName: z.string().min(1, "กรุณากรอกนามสกุล"),
   email: z.string().email("กรุณากรอก Email"),
   password: z.string().min(6, "กรุณากรอกรหัสผ่าน"),
-})
+});
 
-type RegisterFormValues = z.infer<typeof registerSchema>
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export const RegisterForm = () => {
-  const { email, password, setField, registerUser, loading, error } = useAuthForm()
+  const { email, password, setField, loading, error } = useAuthForm();
   const navigate = useNavigate();
 
   const form = useForm<RegisterFormValues>({
@@ -36,7 +37,7 @@ export const RegisterForm = () => {
       email,
       password,
     },
-  })
+  });
 
   const handleLoginSubmit = async (
     values: RegisterFormValues
@@ -46,15 +47,29 @@ export const RegisterForm = () => {
       password: values.password,
       firstName: values.firstName,
       lastName: values.lastName,
-    }
+    };
 
-    setField("email", values.email)
-    setField("firstName", values.firstName)
-    setField("lastName", values.lastName)
-    setField("password", values.password)
-    await registerUser(payload)
-    navigate("/candidate")
-  }
+    setField("email", values.email);
+    setField("firstName", values.firstName);
+    setField("lastName", values.lastName);
+    setField("password", values.password);
+
+    try {
+      setField("loading", true);
+      const user = await register(payload);
+
+      // Redirect based on company membership
+      if (user.companies && user.companies.length > 0) {
+        navigate("/company");
+      } else {
+        navigate("/user");
+      }
+    } catch (error) {
+      console.error("Registration failed:", error);
+    } finally {
+      setField("loading", false);
+    }
+  };
 
   return (
     <div className="mx-auto w-full max-w-sm rounded-3xl border bg-background px-8 py-10 shadow-lg">
@@ -75,7 +90,7 @@ export const RegisterForm = () => {
           onSubmit={form.handleSubmit(handleLoginSubmit)}
           className="space-y-6"
         >
-        <FormField
+          <FormField
             control={form.control}
             name="firstName"
             render={({ field }) => (
@@ -91,8 +106,8 @@ export const RegisterForm = () => {
                       autoComplete="name"
                       {...field}
                       onChange={(event) => {
-                        field.onChange(event)
-                        setField("firstName", event.target.value)
+                        field.onChange(event);
+                        setField("firstName", event.target.value);
                       }}
                     />
                   </div>
@@ -118,8 +133,8 @@ export const RegisterForm = () => {
                       autoComplete="name"
                       {...field}
                       onChange={(event) => {
-                        field.onChange(event)
-                        setField("lastName", event.target.value)
+                        field.onChange(event);
+                        setField("lastName", event.target.value);
                       }}
                     />
                   </div>
@@ -145,8 +160,8 @@ export const RegisterForm = () => {
                       autoComplete="email"
                       {...field}
                       onChange={(event) => {
-                        field.onChange(event)
-                        setField("email", event.target.value)
+                        field.onChange(event);
+                        setField("email", event.target.value);
                       }}
                     />
                   </div>
@@ -172,8 +187,8 @@ export const RegisterForm = () => {
                       autoComplete="current-password"
                       {...field}
                       onChange={(event) => {
-                        field.onChange(event)
-                        setField("password", event.target.value)
+                        field.onChange(event);
+                        setField("password", event.target.value);
                       }}
                     />
                   </div>
@@ -196,11 +211,11 @@ export const RegisterForm = () => {
       </Form>
 
       <p className="flex gap-x-3 justify-self-center mt-8 text-center text-sm text-muted-foreground">
-        มีบัญชีแล้ว ? {" "}
+        มีบัญชีแล้ว ?{" "}
         <Link to="/login" className="font-medium text-primary hover:underline">
           เข้าสู่ระบบ
         </Link>
       </p>
     </div>
-  )
-}
+  );
+};

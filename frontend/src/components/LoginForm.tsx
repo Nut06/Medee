@@ -1,10 +1,10 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { BriefcaseBusiness, Lock, Mail } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { Link, useNavigate } from "react-router-dom"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { BriefcaseBusiness, Lock, Mail } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import { z } from "zod";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,20 +12,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { useAuthForm } from "@/hooks/userAuthForm"
-import type { LoginRequest } from "@/utils/types/user.type"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useAuthForm } from "@/hooks/userAuthForm";
+import type { LoginRequest } from "@/utils/types/user.type";
+import { loginLocal } from "@/services/authService";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
   password: z.string().min(6, "Password must be at least 6 characters."),
-})
+});
 
-type LoginFormValues = z.infer<typeof loginSchema>
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const LoginForm = () => {
-  const { email, password, setField, loginUser, loading, error } = useAuthForm()
+  const { email, password, setField, loading, error } = useAuthForm();
   const navigate = useNavigate();
 
   const form = useForm<LoginFormValues>({
@@ -34,21 +35,34 @@ export const LoginForm = () => {
       email,
       password,
     },
-  })
+  });
 
-  const handleLoginSubmit = async (
-    values: LoginFormValues
-  ): Promise<void> => {
+  const handleLoginSubmit = async (values: LoginFormValues): Promise<void> => {
     const payload: LoginRequest = {
       email: values.email,
       password: values.password,
-    }
+    };
 
-    setField("email", values.email)
-    setField("password", values.password)
-    await loginUser(payload)
-    navigate("/candidate")
-  }
+    setField("email", values.email);
+    setField("password", values.password);
+
+    try {
+      setField("loading", true);
+      const user = await loginLocal(payload);
+
+      // Redirect based on company membership
+      if (user.companies && user.companies.length > 0) {
+        navigate("/company");
+      } else {
+        navigate("/user");
+      }
+    } catch (error) {
+      // Error handling is done in useAuthForm, but we need to catch here to stop navigation
+      console.error("Login failed:", error);
+    } finally {
+      setField("loading", false);
+    }
+  };
 
   return (
     <div className="mx-auto w-full max-w-sm rounded-3xl border bg-background px-8 py-10 shadow-lg">
@@ -85,8 +99,8 @@ export const LoginForm = () => {
                       autoComplete="email"
                       {...field}
                       onChange={(event) => {
-                        field.onChange(event)
-                        setField("email", event.target.value)
+                        field.onChange(event);
+                        setField("email", event.target.value);
                       }}
                     />
                   </div>
@@ -112,8 +126,8 @@ export const LoginForm = () => {
                       autoComplete="current-password"
                       {...field}
                       onChange={(event) => {
-                        field.onChange(event)
-                        setField("password", event.target.value)
+                        field.onChange(event);
+                        setField("password", event.target.value);
                       }}
                     />
                   </div>
@@ -142,11 +156,14 @@ export const LoginForm = () => {
       </Form>
 
       <p className="flex gap-x-3 justify-self-center mt-8 text-center text-sm text-muted-foreground">
-        ยังไม่มีบัญชี ? {" "}
-        <Link to="/register" className="font-medium text-primary hover:underline">
+        ยังไม่มีบัญชี ?{" "}
+        <Link
+          to="/register"
+          className="font-medium text-primary hover:underline"
+        >
           ลงทะเบียน
         </Link>
       </p>
     </div>
-  )
-}
+  );
+};

@@ -1,29 +1,29 @@
-import {Routes, Route, Navigate} from "react-router-dom"
-import RegisterPage from "@/views/RegisterPage"
-import LoginPage from "@/views/LoginPage"
+import { Routes, Route, Navigate } from "react-router-dom";
+import RegisterPage from "@/views/RegisterPage";
+import LoginPage from "@/views/LoginPage";
 import ProtectedRoute from "./ProtectedRoutes";
 import RequireRole from "./RequireRole";
 import CompanyPage from "@/views/CompanyPage";
-import CandidatePage from "@/views/CandidatePage";
+import ProfilePage from "@/views/ProfilePage";
 
 export const AppRoutes = () => {
-    return(
-        <Routes>
-            <Route path="/" element={<Navigate to="/register" replace/>}></Route>
-            {/* public route */}
-            <Route path="/register" element={<RegisterPage />}></Route>
-            <Route path="/login" element={<LoginPage />}></Route>
-            {/* <Route path="/auth/callback" element={<AuthCallback />}></Route> */}
-            
-            {/* protected route */}
-            <Route element={<ProtectedRoute />}>
-                <Route element={<RequireRole role="company"/>}>
-                    <Route path="/company" element={<CompanyPage/>}/>
-                </Route>
-                <Route element={<RequireRole role="user"/>}>
-                    <Route path="/user" element={<CandidatePage/>}/>
-                </Route>
-            </Route>
-        </Routes>
-    );
+  return (
+    <Routes>
+      <Route path="/" element={<Navigate to="/register" replace />}></Route>
+      {/* public route */}
+      <Route path="/register" element={<RegisterPage />}></Route>
+      <Route path="/login" element={<LoginPage />}></Route>
+      {/* <Route path="/auth/callback" element={<AuthCallback />}></Route> */}
+
+      {/* protected route */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<RequireRole role="company" />}>
+          <Route path="/company" element={<CompanyPage />} />
+        </Route>
+        <Route element={<RequireRole role="user" />}>
+          <Route path="/user" element={<ProfilePage />} />
+        </Route>
+      </Route>
+    </Routes>
+  );
 };
