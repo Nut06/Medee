@@ -1,6 +1,6 @@
 import type { Project } from "./project.type";
 
-export type Role = "candidate" | "company";
+export type Role = "user" | "company";
 
 export interface User {
   id?: string;
@@ -12,11 +12,18 @@ export interface User {
   AvatarURL?: string;
   role?: Role;
   projects?: Project[];
+  skills?: Skill[];
 }
 
 export interface LoginRequest {
   email: string;
   password: string;
+}
+
+export interface Company {
+  id?: string;
+  name?: string;
+  description?: string;
 }
 
 export interface LoginResponse {
@@ -50,6 +57,7 @@ export interface UpdateUserRequest {
   phoneNumber?: string;
   AvatarURL?: string;
   role?: Role;
+  skills?: Skill[];
 }
 
 export interface UpdateUserResponse {
@@ -58,4 +66,8 @@ export interface UpdateUserResponse {
   lastName: string;
   email: string;
   role: string;
+}
+
+export interface Skill {
+  name?: string;
 }

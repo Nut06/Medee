@@ -15,7 +15,7 @@ export default function RequireRole({ role }: Props) {
   const userRole = user.role;
 
   if (userRole !== role)
-    return <Navigate to="/candidate" replace state={{ from: location }} />;
+    return <Navigate to="/user" replace state={{ from: location }} />;
 
   return <Outlet />;
 }

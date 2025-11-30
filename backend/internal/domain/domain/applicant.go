@@ -34,8 +34,22 @@ type WorkExperience struct {
 type Education struct {
 	ID             uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	UserID         uuid.UUID `gorm:"type:uuid;index"`
+	InstituteID    uuid.UUID `gorm:"type:uuid;index"`
+	FieldOfStudyID uuid.UUID `gorm:"type:uuid;index"`
 	Degree         string
-	Institution    string
-	FieldOfStudy   string
 	GraduationYear *int
+}
+
+type Institute struct {
+	ID          uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Name        string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+type FieldOfStudy struct {
+	ID          uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Name        string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }

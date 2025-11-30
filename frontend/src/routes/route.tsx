@@ -20,8 +20,8 @@ export const AppRoutes = () => {
                 <Route element={<RequireRole role="company"/>}>
                     <Route path="/company" element={<CompanyPage/>}/>
                 </Route>
-                <Route element={<RequireRole role="candidate"/>}>
-                    <Route path="/candidate" element={<CandidatePage/>}/>
+                <Route element={<RequireRole role="user"/>}>
+                    <Route path="/user" element={<CandidatePage/>}/>
                 </Route>
             </Route>
         </Routes>

@@ -25,3 +25,4 @@ func (s *UserService) GetProfile(ctx context.Context, id string) (*domain.User, 
 func (s *UserService) UploadAvatar(ctx context.Context, id string, file *multipart.FileHeader) (*domain.User, error) {
 	return s.repo.UploadAvatar(ctx, id, file)
 }
+

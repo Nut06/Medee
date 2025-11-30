@@ -24,7 +24,7 @@ type User struct {
 	PhoneNumber *string
 	AvatarURL   *string `json:"avatar_url"`
 	Role        *string `gorm:"type:varchar(20);default:candidate"`
-
+	Skills      []Skill   `gorm:"foreignKey:UserID"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	RefreshToken []RefreshToken `gorm:"foreignKey:UserID"`

@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useUserStore } from "@/stores/userStore";
-import { updateUser, uploadAvatar } from "@/services/userService";
+import { deleteAvatar, updateUser, uploadAvatar } from "@/services/userService";
 import { toast } from "sonner";
 
 const profileSchema = z.object({

@@ -85,10 +85,27 @@ type service struct {
 func AutoMigrate(db *gorm.DB) {
 	db.AutoMigrate(
 		&domain.User{},
+		&domain.UserSkill{},
+		&domain.Company{},
 		&domain.RefreshToken{},
-		&domain.Project{},
-		&domain.Submission{},
+		&domain.ApplicantProfile{},
+		&domain.WorkExperience{},
+		&domain.Education{},
+		&domain.Institute{},
+		&domain.FieldOfStudy{},
 		&domain.PortfolioItem{},
+		&domain.CompanyMember{},
+		&domain.Skill{},
+		&domain.Notification{},
+		&domain.OAuthAccount{},
+		&domain.Project{},
+		&domain.Application{},
+		&domain.Conversation{},
+		&domain.ConversationParticipant{},
+		&domain.Message{},
+		&domain.ProjectTask{},	
+		&domain.ProjectSkill{},
+		&domain.Submission{},
 	)
 }
 
