@@ -25,7 +25,7 @@ export const useProfile = () => {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
       email: user?.email || "",
-      bio: user?.bio || "",
+    bio: user?.bio || "",
     },
   });
 

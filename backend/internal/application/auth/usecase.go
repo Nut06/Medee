@@ -29,19 +29,17 @@ func NewUsecase(
 }
 
 type RegisterCommand struct {
-	FirstName     string
-	LastName     string
-	Email    string
-	Password string
-	Role     string
+	FirstName string
+	LastName  string
+	Email     string
+	Password  string
 }
 
 type RegisterResult struct {
-	ID    string
+	ID        string
 	FirstName string
-	LastName string
-	Email string
-	Role  string
+	LastName  string
+	Email     string
 }
 
 type LoginCommand struct {
@@ -50,52 +48,66 @@ type LoginCommand struct {
 }
 
 type LoginResult struct {
-	ID    string
-	FirstName  string
-	LastName string
-	Email string
-	Role  string
+	ID        string
+	FirstName string
+	LastName  string
+	Email     string
+	Companies []auth.Company
 }
 
-func (uc *Usecase) Register(ctx context.Context, cmd RegisterCommand) (*RegisterResult, error) {
+func (uc *Usecase) Register(ctx context.Context, cmd RegisterCommand) (*RegisterResult, *auth.TokenPair, error) {
 	_, err := uc.users.FindByEmail(ctx, cmd.Email)
 	if err == nil {
-		return nil, auth.ErrEmailAlreadyUsed
+		return nil, nil, auth.ErrEmailAlreadyUsed
 	}
 	if !errors.Is(err, auth.ErrUserNotFound) {
-		return nil, err
+		return nil, nil, err
 	}
 
 	hash, err := uc.hasher.Hash(ctx, cmd.Password)
 	if err != nil {
-		return nil, err
-	}
-
-	role := cmd.Role
-	if role == "" {
-		role = "candidate"
+		return nil, nil, err
 	}
 
 	newUser := auth.User{
 		FirstName:    cmd.FirstName,
 		LastName:     cmd.LastName,
 		Email:        cmd.Email,
-		Role:         role,
 		PasswordHash: hash,
 	}
 
 	created, err := uc.users.Create(ctx, newUser)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+
+	// Generate Tokens
+	accessToken, accessExp, err := uc.tokens.GenerateAccess(ctx, created.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+	refreshToken, refreshExp, err := uc.tokens.GenerateRefresh(ctx, created.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if uc.refresh != nil {
+		if err := uc.refresh.Save(ctx, refreshToken, created.ID, refreshExp); err != nil {
+			return nil, nil, err
+		}
 	}
 
 	return &RegisterResult{
-		ID:    created.ID.String(),
-		FirstName:  created.FirstName,
-		LastName: created.LastName,
-		Email: created.Email,
-		Role:  created.Role,
-	}, nil
+			ID:        created.ID.String(),
+			FirstName: created.FirstName,
+			LastName:  created.LastName,
+			Email:     created.Email,
+		}, &auth.TokenPair{
+			AccessToken:      accessToken,
+			RefreshToken:     refreshToken,
+			AccessExpiresAt:  accessExp,
+			RefreshExpiresAt: refreshExp,
+		}, nil
 }
 
 func (uc *Usecase) Login(ctx context.Context, cmd LoginCommand) (*LoginResult, *auth.TokenPair, error) {
@@ -126,12 +138,20 @@ func (uc *Usecase) Login(ctx context.Context, cmd LoginCommand) (*LoginResult, *
 		}
 	}
 
+	companies, err := uc.users.GetUserCompanies(ctx, u.ID.String())
+	if err != nil {
+		// Log error but don't fail login? Or fail?
+		// For now, let's return empty list if error, or maybe fail.
+		// Failing is safer if we rely on this for permissions.
+		return nil, nil, err
+	}
+
 	return &LoginResult{
-			ID:    u.ID.String(),
-			FirstName:  u.FirstName,
-			LastName: u.LastName,
-			Email: u.Email,
-			Role:  u.Role,
+			ID:        u.ID.String(),
+			FirstName: u.FirstName,
+			LastName:  u.LastName,
+			Email:     u.Email,
+			Companies: companies,
 		}, &auth.TokenPair{
 			AccessToken:      accessToken,
 			RefreshToken:     refreshToken,

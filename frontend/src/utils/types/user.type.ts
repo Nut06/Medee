@@ -10,7 +10,7 @@ export interface User {
   bio?: string;
   phoneNumber?: string;
   AvatarURL?: string;
-  role?: Role;
+  company?: Company;  
   projects?: Project[];
   skills?: Skill[];
 }
@@ -31,7 +31,6 @@ export interface LoginResponse {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
 }
 
 export interface RegisterRequest {
@@ -39,7 +38,6 @@ export interface RegisterRequest {
   lastName: string;
   email: string;
   password: string;
-  role: string;
 }
 
 export interface RegisterResponse {
@@ -47,7 +45,6 @@ export interface RegisterResponse {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
 }
 
 export interface UpdateUserRequest {
@@ -56,7 +53,7 @@ export interface UpdateUserRequest {
   email?: string;
   phoneNumber?: string;
   AvatarURL?: string;
-  role?: Role;
+  company?: Company;
   skills?: Skill[];
 }
 
@@ -65,7 +62,6 @@ export interface UpdateUserResponse {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
 }
 
 export interface Skill {

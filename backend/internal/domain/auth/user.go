@@ -14,19 +14,23 @@ type User struct {
 }
 
 type RegisterRequest struct {
-	FirstName     string `json:"first_name"`
-	LastName     string `json:"last_name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Role     string `json:"role"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+}
+
+type Company struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Role string `json:"role"`
 }
 
 type RegisterResponse struct {
-	ID    string `json:"id"`
-	FirstName  string `json:"first_name"`
-	LastName string `json:"last_name"`
-	Email string `json:"email"`
-	Role  string `json:"role"`
+	ID        string    `json:"id"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
 }
 
 type LoginRequest struct {
@@ -34,11 +38,11 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-
 type LoginResponse struct {
-	ID    string `json:"id"`
-	FirstName  string `json:"first_name"`
-	LastName string `json:"last_name"`
-	Email string `json:"email"`
-	Role  string `json:"role"`
+	ID        string    `json:"id"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
+	Companies []Company `json:"companies"`
+	Role      string    `json:"role"`
 }

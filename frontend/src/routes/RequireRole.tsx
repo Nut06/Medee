@@ -10,11 +10,9 @@ export default function RequireRole({ role }: Props) {
   const { user } = useUserStore();
   const location = useLocation();
 
-  if (!user || !user.role) return <Navigate to="/login" replace />;
+  if (!user || !user.company) return <Navigate to="/login" replace />;
 
-  const userRole = user.role;
-
-  if (userRole !== role)
+  if ( user && !user.company)
     return <Navigate to="/user" replace state={{ from: location }} />;
 
   return <Outlet />;

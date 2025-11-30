@@ -6,6 +6,7 @@ import (
 	"context"
 	"mime/multipart"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -76,4 +77,115 @@ func (r *userRepository) DeleteAvatar(ctx context.Context, id string) (*domain.U
 	}
 
 	return &user, nil
+}
+
+func (r *userRepository) GetUserCompanies(ctx context.Context, userID string) ([]domain.Company, error) {
+	var members []domain.CompanyMember
+	if err := r.db.WithContext(ctx).Preload("Company").Where("user_id = ?", userID).Find(&members).Error; err != nil {
+		return nil, err
+	}
+
+	var companies []domain.Company
+	for _, m := range members {
+		companies = append(companies, m.Company)
+	}
+	return companies, nil
+}
+
+// Candidate Features
+
+func (r *userRepository) GetFullProfile(ctx context.Context, id string) (*domain.User, error) {
+	var user domain.User
+	err := r.db.WithContext(ctx).
+		Preload("ApplicantProfile").
+		Preload("WorkExperiences").
+		Preload("Educations").
+		Preload("UserSkills.Skill").
+		Preload("PortfolioItems").
+		Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *userRepository) AddExperience(ctx context.Context, experience *domain.WorkExperience) (*domain.WorkExperience, error) {
+	if err := r.db.WithContext(ctx).Create(experience).Error; err != nil {
+		return nil, err
+	}
+	return experience, nil
+}
+
+func (r *userRepository) UpdateExperience(ctx context.Context, experience *domain.WorkExperience) (*domain.WorkExperience, error) {
+	if err := r.db.WithContext(ctx).Save(experience).Error; err != nil {
+		return nil, err
+	}
+	return experience, nil
+}
+
+func (r *userRepository) DeleteExperience(ctx context.Context, id string) error {
+	return r.db.WithContext(ctx).Delete(&domain.WorkExperience{}, "id = ?", id).Error
+}
+
+func (r *userRepository) AddEducation(ctx context.Context, education *domain.Education) (*domain.Education, error) {
+	if err := r.db.WithContext(ctx).Create(education).Error; err != nil {
+		return nil, err
+	}
+	return education, nil
+}
+
+func (r *userRepository) UpdateEducation(ctx context.Context, education *domain.Education) (*domain.Education, error) {
+	if err := r.db.WithContext(ctx).Save(education).Error; err != nil {
+		return nil, err
+	}
+	return education, nil
+}
+
+func (r *userRepository) DeleteEducation(ctx context.Context, id string) error {
+	return r.db.WithContext(ctx).Delete(&domain.Education{}, "id = ?", id).Error
+}
+
+func (r *userRepository) UpdateSkills(ctx context.Context, userID string, skills []string) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		// 1. Clear existing skills
+		if err := tx.Where("user_id = ?", userID).Delete(&domain.UserSkill{}).Error; err != nil {
+			return err
+		}
+
+		// 2. Add new skills
+		for _, skillName := range skills {
+			// Find or Create Skill
+			var skill domain.Skill
+			if err := tx.Where("name = ?", skillName).FirstOrCreate(&skill, domain.Skill{Name: skillName}).Error; err != nil {
+				return err
+			}
+
+			// Link to User
+			if err := tx.Create(&domain.UserSkill{
+				UserID:  uuid.MustParse(userID),
+				SkillID: skill.ID,
+			}).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func (r *userRepository) AddProject(ctx context.Context, project *domain.PortfolioItem) (*domain.PortfolioItem, error) {
+	if err := r.db.WithContext(ctx).Create(project).Error; err != nil {
+		return nil, err
+	}
+	return project, nil
+}
+
+func (r *userRepository) UpdateProject(ctx context.Context, project *domain.PortfolioItem) (*domain.PortfolioItem, error) {
+	if err := r.db.WithContext(ctx).Save(project).Error; err != nil {
+		return nil, err
+	}
+	return project, nil
+}
+
+func (r *userRepository) DeleteProject(ctx context.Context, id string) error {
+	return r.db.WithContext(ctx).Delete(&domain.PortfolioItem{}, "id = ?", id).Error
 }

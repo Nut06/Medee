@@ -26,22 +26,7 @@ type HTTPHandler struct {
 	cfg *CookieConfig
 }
 
-// func BuildAuthHandler(db *gorm.DB) *HTTPHandler {
-// 	repo := NewGormRepository(db)
-// 	usecase := authapp.NewUsecase(
-// 		repo,
-// 		NewBcryptHasher(0),
-// 		NewJWTService(os.Getenv("JWT_SECRET"), 15*time.Minute, 7*24*time.Hour),
-// 		repo,
-// 	)
-
-// 	return NewHTTPHandler( &CookieConfig{
-// 		Secure:   os.Getenv("HTTPS") == "true",
-// 		SameSite: "Strict",
-// 	})
-// }
-
-func NewHTTPHandler( db *gorm.DB ) *HTTPHandler {
+func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
 	repo := NewGormRepository(db)
 	cfg := &CookieConfig{
 		Secure:   os.Getenv("HTTPS") == "true",
@@ -59,7 +44,6 @@ func NewHTTPHandler( db *gorm.DB ) *HTTPHandler {
 	return &HTTPHandler{uc: usecase, cfg: cfg}
 }
 
-
 func (h *HTTPHandler) Register(c *fiber.Ctx) error {
 
 	var req auth.RegisterRequest
@@ -67,18 +51,24 @@ func (h *HTTPHandler) Register(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
 	}
 
-	res, err := h.uc.Register(c.Context(), authapp.RegisterCommand{
+	res, tokens, err := h.uc.Register(c.Context(), authapp.RegisterCommand{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
-		Email:    req.Email,
-		Password: req.Password,
-		Role:     req.Role,
+		Email:     req.Email,
+		Password:  req.Password,
 	})
 	if err != nil {
 		return h.handleError(err)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(auth.RegisterResponse(*res))
+	h.setCookies(c, tokens)
+
+	return c.Status(fiber.StatusOK).JSON(auth.RegisterResponse{
+		ID:        res.ID,
+		FirstName: res.FirstName,
+		LastName:  res.LastName,
+		Email:     res.Email,
+	})
 }
 
 func (h *HTTPHandler) Login(c *fiber.Ctx) error {
@@ -98,7 +88,13 @@ func (h *HTTPHandler) Login(c *fiber.Ctx) error {
 	}
 
 	h.setCookies(c, tokens)
-	return c.Status(fiber.StatusOK).JSON(auth.LoginResponse(*res))
+	return c.Status(fiber.StatusOK).JSON(auth.LoginResponse{
+		ID:        res.ID,
+		FirstName: res.FirstName,
+		LastName:  res.LastName,
+		Email:     res.Email,
+		Companies: res.Companies,
+	})
 }
 
 func (h *HTTPHandler) Logout(c *fiber.Ctx) error {

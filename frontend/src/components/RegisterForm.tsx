@@ -42,7 +42,6 @@ export const RegisterForm = () => {
     values: RegisterFormValues
   ): Promise<void> => {
     const payload: RegisterRequest = {
-      role: "candidate",
       email: values.email,
       password: values.password,
       firstName: values.firstName,

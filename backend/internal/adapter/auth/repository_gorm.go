@@ -60,11 +60,25 @@ func (r *GormRepository) Delete(ctx context.Context, token string) error {
 	return r.db.WithContext(ctx).Where("token = ?", token).Delete(&domain.RefreshToken{}).Error
 }
 
-func mapToDomainUser(u *domain.User) auth.User {
-	role := ""
-	if u.Role != nil {
-		role = *u.Role
+func (r *GormRepository) GetUserCompanies(ctx context.Context, userID string) ([]auth.Company, error) {
+	var members []domain.CompanyMember
+	// Preload Company to get company details
+	if err := r.db.WithContext(ctx).Preload("Company").Where("user_id = ?", userID).Find(&members).Error; err != nil {
+		return nil, err
 	}
+
+	var companies []auth.Company
+	for _, m := range members {
+		companies = append(companies, auth.Company{
+			ID:   m.Company.ID.String(),
+			Name: m.Company.Name,
+			Role: string(m.Role),
+		})
+	}
+	return companies, nil
+}
+
+func mapToDomainUser(u *domain.User) auth.User {
 	pw := ""
 	if u.Password != nil {
 		pw = *u.Password
@@ -74,22 +88,19 @@ func mapToDomainUser(u *domain.User) auth.User {
 		FirstName:    u.FirstName,
 		LastName:     u.LastName,
 		Email:        u.Email,
-		Role:         role,
 		PasswordHash: pw,
 	}
 }
 
 func mapToEntityUser(u auth.User) *domain.User {
-	role := u.Role
 	pw := u.PasswordHash
-	
+
 	return &domain.User{
-		ID:       u.ID,
+		ID:        u.ID,
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
-		Email:    u.Email,
-		Role:     &role,
-		Password: &pw,
+		Email:     u.Email,
+		Password:  &pw,
 	}
 }
 
