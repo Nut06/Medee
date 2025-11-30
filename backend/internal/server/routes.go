@@ -23,6 +23,7 @@ func authRoute(router fiber.Router, db *gorm.DB) {
 	h := authadapter.NewHTTPHandler(db)
 	router.Post("/register", h.Register)
 	router.Post("/login", h.Login)
+	router.Post("/refresh", h.Refresh)
 	router.Post("/logout", h.Logout)
 }
 

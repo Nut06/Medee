@@ -28,10 +28,12 @@ export interface Company {
 }
 
 export interface LoginResponse {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
   companies?: Company[];
 }
 
@@ -43,10 +45,12 @@ export interface RegisterRequest {
 }
 
 export interface RegisterResponse {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
   companies?: Company[];
 }
 

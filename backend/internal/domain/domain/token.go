@@ -18,6 +18,8 @@ func GenerateAccessToken(ID uuid.UUID) (string, error){
 	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 }
 
+
+
 func GenerateRefreshToken() string {
 	return uuid.New().String()
 }

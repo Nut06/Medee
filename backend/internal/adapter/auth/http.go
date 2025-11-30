@@ -31,7 +31,6 @@ type HTTPHandler struct {
 	cfg *CookieConfig
 }
 
-
 func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
 	repo := NewGormRepository(db)
 	cfg := &CookieConfig{
@@ -48,6 +47,35 @@ func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
 	cfg.RefreshCookieName = "refresh_token"
 	cfg.SameSite = "Strict"
 	return &HTTPHandler{uc: usecase, cfg: cfg}
+}
+
+func (h *HTTPHandler) Refresh(c *fiber.Ctx) error {
+	ctx := h.context(c)
+
+	rt := c.Cookies(h.cfg.RefreshCookieName)
+	if rt == "" {
+		return auth.ErrInvalidRefreshToken
+	}
+
+	res, tokens, err := h.uc.Refresh(ctx, authapp.RefreshCommand{
+		RefreshToken: rt,
+	})
+
+	if err != nil {
+		return h.handleError(err)
+	}
+
+	h.setCookies(c, tokens)
+	return c.Status(fiber.StatusOK).JSON(auth.LoginResponse{
+		User: auth.UserResponse{
+			ID:        res.ID,
+			FirstName: res.FirstName,
+			LastName:  res.LastName,
+			Email:     res.Email,
+		},
+		Companies: res.Companies,
+	})
+
 }
 
 func (h *HTTPHandler) Register(c *fiber.Ctx) error {
@@ -71,10 +99,13 @@ func (h *HTTPHandler) Register(c *fiber.Ctx) error {
 	h.setCookies(c, tokens)
 
 	return c.Status(fiber.StatusOK).JSON(auth.RegisterResponse{
-		ID:        res.ID,
-		FirstName: res.FirstName,
-		LastName:  res.LastName,
-		Email:     res.Email,
+		User: auth.UserResponse{
+			ID:        res.ID,
+			FirstName: res.FirstName,
+			LastName:  res.LastName,
+			Email:     res.Email,
+		},
+		Companies: []auth.Company{}, // Empty for new user
 	})
 }
 
@@ -96,10 +127,12 @@ func (h *HTTPHandler) Login(c *fiber.Ctx) error {
 
 	h.setCookies(c, tokens)
 	return c.Status(fiber.StatusOK).JSON(auth.LoginResponse{
-		ID:        res.ID,
-		FirstName: res.FirstName,
-		LastName:  res.LastName,
-		Email:     res.Email,
+		User: auth.UserResponse{
+			ID:        res.ID,
+			FirstName: res.FirstName,
+			LastName:  res.LastName,
+			Email:     res.Email,
+		},
 		Companies: res.Companies,
 	})
 }

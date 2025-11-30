@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useAuthForm } from "@/hooks/userAuthForm";
 import type { LoginRequest } from "@/utils/types/user.type";
 import { loginLocal } from "@/services/authService";
+import { useUserStore } from "@/stores/userStore";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -48,10 +49,13 @@ export const LoginForm = () => {
 
     try {
       setField("loading", true);
-      const user = await loginLocal(payload);
+      const response = await loginLocal(payload);
+
+      // Update store
+      useUserStore.getState().setUser(response.user);
 
       // Redirect based on company membership
-      if (user.companies && user.companies.length > 0) {
+      if (response.companies && response.companies.length > 0) {
         navigate("/company");
       } else {
         navigate("/user");

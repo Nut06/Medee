@@ -62,6 +62,42 @@ func (s *JWTService) GenerateRefresh(ctx context.Context, userID uuid.UUID) (str
 	return signed, expiresAt, nil
 }
 
+func (s *JWTService) DecodeAccessToken(ctx context.Context, tokenString string) (uuid.UUID, error) {
+	return s.decodeToken(tokenString, "access")
+}
+
+func (s *JWTService) DecodeRefreshToken(ctx context.Context, tokenString string) (uuid.UUID, error) {
+	return s.decodeToken(tokenString, "refresh")
+}
+
+func (s *JWTService) decodeToken(tokenString, expectedType string) (uuid.UUID, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrSignatureInvalid
+		}
+		return s.secret, nil
+	})
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if typ, ok := claims["typ"].(string); !ok || typ != expectedType {
+			return uuid.Nil, jwt.ErrTokenInvalidClaims
+		}
+
+		sub, ok := claims["sub"].(string)
+		if !ok {
+			return uuid.Nil, jwt.ErrTokenInvalidClaims
+		}
+
+		return uuid.Parse(sub)
+	}
+
+	return uuid.Nil, jwt.ErrTokenInvalidId
+}
+
 var _ authport.TokenService = (*JWTService)(nil)
 
 // Helper for Middleware

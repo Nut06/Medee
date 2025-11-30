@@ -33,6 +33,17 @@ func (r *GormRepository) FindByEmail(ctx context.Context, email string) (auth.Us
 	return mapToDomainUser(&u), nil
 }
 
+func (r *GormRepository) FindByID(ctx context.Context, id string) (auth.User, error) {
+	var u domain.User
+	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&u).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return auth.User{}, auth.ErrUserNotFound
+		}
+		return auth.User{}, err
+	}
+	return mapToDomainUser(&u), nil
+}
+
 // Create inserts a user and returns the persisted domain model.
 func (r *GormRepository) Create(ctx context.Context, user auth.User) (auth.User, error) {
 	entity := mapToEntityUser(user)

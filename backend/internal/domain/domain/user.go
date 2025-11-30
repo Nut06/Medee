@@ -14,17 +14,17 @@ const (
 	RoleCompany   UserRole = "company"
 )
 
-type User struct {	
+type User struct {
 	// ID           uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
-	ID          uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	FirstName   string    `json:"first_name"`
-	LastName    string    `json:"last_name"`
-	Email       string    `json:"email" gorm:"unique"`
-	Password    *string   `gorm:"uniqueIndex"`
-	PhoneNumber *string
-	Bio         *string
-	AvatarURL   *string `json:"avatar_url"`
-	Skills      []Skill   `gorm:"foreignKey:UserID"`
+	ID           uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	FirstName    string    `json:"first_name"`
+	LastName     string    `json:"last_name"`
+	Email        string    `json:"email" gorm:"unique"`
+	Password     *string   `gorm:"uniqueIndex"`
+	PhoneNumber  *string
+	Bio          *string
+	AvatarURL    *string `json:"avatar_url"`
+	UserSkills   []UserSkill `gorm:"foreignKey:UserID"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	RefreshToken []RefreshToken `gorm:"foreignKey:UserID"`

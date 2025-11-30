@@ -27,10 +27,8 @@ type Company struct {
 }
 
 type RegisterResponse struct {
-	ID        string    `json:"id"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	Email     string    `json:"email"`
+	User      UserResponse `json:"user"`
+	Companies []Company    `json:"companies"`
 }
 
 type LoginRequest struct {
@@ -39,10 +37,13 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	ID        string    `json:"id"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	Email     string    `json:"email"`
-	Companies []Company `json:"companies"`
-	Role      string    `json:"role"`
+	User      UserResponse `json:"user"`
+	Companies []Company    `json:"companies"`
+}
+
+type UserResponse struct {
+	ID        string `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
 }

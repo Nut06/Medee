@@ -12,7 +12,7 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	if tokenString == "" {
 		return fiber.NewError(fiber.StatusUnauthorized, auth.ErrInvalidToken.Error())
 	}
-
+	
 	// Parse token
 	claims, err := authadapter.ParseToken(tokenString)
 	if err != nil {

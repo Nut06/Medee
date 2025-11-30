@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useAuthForm } from "@/hooks/userAuthForm";
 import { register } from "@/services/authService";
 import type { RegisterRequest } from "@/utils/types/user.type";
+import { useUserStore } from "@/stores/userStore";
 
 const registerSchema = z.object({
   firstName: z.string().min(1, "กรุณากรอกชื่อ"),
@@ -56,10 +57,13 @@ export const RegisterForm = () => {
 
     try {
       setField("loading", true);
-      const user = await register(payload);
+      const response = await register(payload);
+
+      // Update store
+      useUserStore.getState().setUser(response.user);
 
       // Redirect based on company membership
-      if (user.companies && user.companies.length > 0) {
+      if (response.companies && response.companies.length > 0) {
         navigate("/company");
       } else {
         navigate("/user");
