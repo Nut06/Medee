@@ -3,6 +3,7 @@ package authadapter
 import (
 	authapp "backend/internal/application/auth"
 	"backend/internal/domain/auth"
+	authport "backend/internal/port/auth"
 	"context"
 	"errors"
 	"os"
@@ -27,7 +28,7 @@ var (
 )
 
 type HTTPHandler struct {
-	uc  *authapp.Usecase
+	uc  authport.AuthService
 	cfg *CookieConfig
 }
 
@@ -57,7 +58,7 @@ func (h *HTTPHandler) Refresh(c *fiber.Ctx) error {
 		return auth.ErrInvalidRefreshToken
 	}
 
-	res, tokens, err := h.uc.Refresh(ctx, authapp.RefreshCommand{
+	res, tokens, err := h.uc.Refresh(ctx, authport.RefreshCommand{
 		RefreshToken: rt,
 	})
 
@@ -85,7 +86,7 @@ func (h *HTTPHandler) Register(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
 	}
 
-	res, tokens, err := h.uc.Register(c.Context(), authapp.RegisterCommand{
+	res, tokens, err := h.uc.Register(c.Context(), authport.RegisterCommand{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Email:     req.Email,
@@ -117,7 +118,7 @@ func (h *HTTPHandler) Login(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
 	}
 
-	res, tokens, err := h.uc.Login(ctx, authapp.LoginCommand{
+	res, tokens, err := h.uc.Login(ctx, authport.LoginCommand{
 		Email:    req.Email,
 		Password: req.Password,
 	})

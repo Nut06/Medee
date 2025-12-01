@@ -28,38 +28,7 @@ func NewUsecase(
 	}
 }
 
-type RegisterCommand struct {
-	FirstName string
-	LastName  string
-	Email     string
-	Password  string
-}
-
-type RegisterResult struct {
-	ID        string
-	FirstName string
-	LastName  string
-	Email     string
-}
-
-type LoginCommand struct {
-	Email    string
-	Password string
-}
-
-type LoginResult struct {
-	ID        string
-	FirstName string
-	LastName  string
-	Email     string
-	Companies []auth.Company
-}
-
-type RefreshCommand struct {
-	RefreshToken string
-}
-
-func (uc *Usecase) Register(ctx context.Context, cmd RegisterCommand) (*RegisterResult, *auth.TokenPair, error) {
+func (uc *Usecase) Register(ctx context.Context, cmd authport.RegisterCommand) (*authport.RegisterResult, *auth.TokenPair, error) {
 	_, err := uc.users.FindByEmail(ctx, cmd.Email)
 	if err == nil {
 		return nil, nil, auth.ErrEmailAlreadyUsed
@@ -102,7 +71,7 @@ func (uc *Usecase) Register(ctx context.Context, cmd RegisterCommand) (*Register
 		}
 	}
 
-	return &RegisterResult{
+	return &authport.RegisterResult{
 			ID:        created.ID.String(),
 			FirstName: created.FirstName,
 			LastName:  created.LastName,
@@ -115,7 +84,7 @@ func (uc *Usecase) Register(ctx context.Context, cmd RegisterCommand) (*Register
 		}, nil
 }
 
-func (uc *Usecase) Login(ctx context.Context, cmd LoginCommand) (*LoginResult, *auth.TokenPair, error) {
+func (uc *Usecase) Login(ctx context.Context, cmd authport.LoginCommand) (*authport.LoginResult, *auth.TokenPair, error) {
 	u, err := uc.users.FindByEmail(ctx, cmd.Email)
 	if err != nil {
 		if errors.Is(err, auth.ErrUserNotFound) {
@@ -151,7 +120,7 @@ func (uc *Usecase) Login(ctx context.Context, cmd LoginCommand) (*LoginResult, *
 		return nil, nil, err
 	}
 
-	return &LoginResult{
+	return &authport.LoginResult{
 			ID:        u.ID.String(),
 			FirstName: u.FirstName,
 			LastName:  u.LastName,
@@ -172,8 +141,8 @@ func (uc *Usecase) Logout(ctx context.Context, refreshToken string) error {
 	return uc.refresh.Delete(ctx, refreshToken)
 }
 
-func (uc *Usecase) Refresh(ctx context.Context, cmd RefreshCommand) (*LoginResult, *auth.TokenPair, error) {
-	
+func (uc *Usecase) Refresh(ctx context.Context, cmd authport.RefreshCommand) (*authport.LoginResult, *auth.TokenPair, error) {
+
 	userID, err := uc.tokens.DecodeRefreshToken(ctx, cmd.RefreshToken)
 	if err != nil {
 		return nil, nil, auth.ErrInvalidRefreshToken
@@ -204,7 +173,7 @@ func (uc *Usecase) Refresh(ctx context.Context, cmd RefreshCommand) (*LoginResul
 		return nil, nil, auth.ErrInvalidRefreshToken
 	}
 
-	return &LoginResult{
+	return &authport.LoginResult{
 			ID:        u.ID.String(),
 			FirstName: u.FirstName,
 			LastName:  u.LastName,
