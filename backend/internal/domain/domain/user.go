@@ -23,7 +23,10 @@ type User struct {
 	Password     *string   `gorm:"uniqueIndex"`
 	PhoneNumber  *string
 	Bio          *string
-	AvatarURL    *string `json:"avatar_url"`
+	AvatarURL    *string     `json:"avatar_url"`
+	LinkedInURL  *string     `json:"linkedin_url"`
+	GitHubURL    *string     `json:"github_url"`
+	WebsiteURL   *string     `json:"website_url"`
 	UserSkills   []UserSkill `gorm:"foreignKey:UserID"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time

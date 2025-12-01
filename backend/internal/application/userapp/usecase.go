@@ -10,9 +10,12 @@ import (
 )
 
 type UpdateProfileCommand struct {
-	FirstName string
-	LastName  string
-	Email     string
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
+	Email       string `json:"email"`
+	LinkedInURL string `json:"linkedInURL"`
+	GitHubURL   string `json:"githubURL"`
+	WebsiteURL  string `json:"websiteURL"`
 }
 
 type Usecase struct {

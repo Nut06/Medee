@@ -48,9 +48,12 @@ func (h *HTTPHandler) UpdateProfile(c *fiber.Ctx) error {
 		return err
 	}
 	user := &domain.User{
-		FirstName: req.FirstName,
-		LastName:  req.LastName,
-		Email:     req.Email,
+		FirstName:   req.FirstName,
+		LastName:    req.LastName,
+		Email:       req.Email,
+		LinkedInURL: &req.LinkedInURL,
+		GitHubURL:   &req.GitHubURL,
+		WebsiteURL:  &req.WebsiteURL,
 	}
 	res, err := h.usecase.UpdateProfile(c.Context(), userId, user)
 	if err != nil {

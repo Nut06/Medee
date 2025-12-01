@@ -23,9 +23,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 const profileSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
+  firstName: z
+    .string()
+    .min(2, "First name must be at least 2 characters")
+    .optional(),
+  lastName: z
+    .string()
+    .min(2, "Last name must be at least 2 characters")
+    .optional(),
+  email: z.string().email("Invalid email address").optional(),
   bio: z.string().optional(),
 });
 
@@ -204,6 +210,21 @@ export const useProfile = () => {
     updateProjectMutation.isPending ||
     deleteProjectMutation.isPending;
 
+  const isSaving =
+    updateProfileMutation.isPending ||
+    uploadAvatarMutation.isPending ||
+    deleteAvatarMutation.isPending ||
+    addExperienceMutation.isPending ||
+    updateExperienceMutation.isPending ||
+    deleteExperienceMutation.isPending ||
+    addEducationMutation.isPending ||
+    updateEducationMutation.isPending ||
+    deleteEducationMutation.isPending ||
+    updateSkillsMutation.isPending ||
+    addProjectMutation.isPending ||
+    updateProjectMutation.isPending ||
+    deleteProjectMutation.isPending;
+
   return {
     form,
     onSubmit,
@@ -219,7 +240,8 @@ export const useProfile = () => {
     onAddProject,
     onUpdateProject,
     onDeleteProject,
-    isLoading,
+    isLoading, // Kept for backward compatibility if needed elsewhere
+    isSaving, // New specific state for save buttons
     user,
   };
 };

@@ -10,6 +10,9 @@ export interface User {
   bio?: string;
   phoneNumber?: string;
   AvatarURL?: string;
+  linkedInURL?: string;
+  githubURL?: string;
+  websiteURL?: string;
   company?: Company;
   companies?: Company[]; // List of companies the user belongs to
   projects?: Project[]; // List of projects the user belongs to
@@ -60,6 +63,9 @@ export interface UpdateUserRequest {
   email?: string;
   phoneNumber?: string;
   AvatarURL?: string;
+  linkedInURL?: string;
+  githubURL?: string;
+  websiteURL?: string;
   company?: Company;
   skills?: Skill[];
 }
