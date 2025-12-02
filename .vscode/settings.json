@@ -1,4 +1,5 @@
 {
     "discord.removeRemoteRepository": true,
-    "discord.removeDetails": true
+    "discord.removeDetails": true,
+    "editor.defaultFormatter": null
 }

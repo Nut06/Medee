@@ -22,11 +22,28 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useProfile } from "@/hooks/useProfile";
 
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const aboutSchema = z.object({
+  bio: z.string().optional(),
+});
+
+type AboutFormValues = z.infer<typeof aboutSchema>;
+
 export default function AboutSection() {
-  const { user, form, onSubmit, isSaving } = useProfile();
+  const { user, onSubmit, isSaving } = useProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleSubmit = async (data: any) => {
+  const form = useForm<AboutFormValues>({
+    resolver: zodResolver(aboutSchema),
+    defaultValues: {
+      bio: user?.bio || "",
+    },
+  });
+
+  const handleSubmit = async (data: AboutFormValues) => {
     await onSubmit(data);
     setIsDialogOpen(false);
   };

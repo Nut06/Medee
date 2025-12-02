@@ -12,7 +12,7 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	if tokenString == "" {
 		return fiber.NewError(fiber.StatusUnauthorized, auth.ErrInvalidToken.Error())
 	}
-	
+
 	// Parse token
 	claims, err := authadapter.ParseToken(tokenString)
 	if err != nil {
@@ -20,7 +20,12 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	}
 
 	// Set user_id to context
-	c.Locals("user_id", claims.Subject)
+	claimsMap := *claims
+	if sub, ok := claimsMap["sub"].(string); ok {
+		c.Locals("user_id", sub)
+	} else {
+		return fiber.NewError(fiber.StatusUnauthorized, auth.ErrInvalidToken.Error())
+	}
 
 	return c.Next()
 }
