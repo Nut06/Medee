@@ -30,21 +30,6 @@ func NewJWTService(secret string, accessTTL, refreshTTL time.Duration) *JWTServi
 	}
 }
 
-func (s *JWTService) GenerateAccess(ctx context.Context, userID uuid.UUID) (string, time.Time, error) {
-	expiresAt := time.Now().Add(s.accessTTL)
-	claims := jwt.MapClaims{
-		"sub": userID.String(),
-		"exp": expiresAt.Unix(),
-		"iat": time.Now().Unix(),
-		"typ": "access",
-	}
-	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signed, err := tok.SignedString(s.secret)
-	if err != nil {
-		return "", time.Time{}, err
-	}
-	return signed, expiresAt, nil
-}
 
 func (s *JWTService) GenerateRefresh(ctx context.Context, userID uuid.UUID) (string, time.Time, error) {
 	expiresAt := time.Now().Add(s.refreshTTL)
@@ -99,6 +84,22 @@ func (s *JWTService) decodeToken(tokenString, expectedType string) (uuid.UUID, e
 }
 
 var _ authport.TokenService = (*JWTService)(nil)
+
+	func (s *JWTService) GenerateAccess(ctx context.Context, userID uuid.UUID) (string, time.Time, error) {
+	expiresAt := time.Now().Add(s.accessTTL)
+	claims := jwt.MapClaims{
+		"sub": userID.String(),
+		"exp": expiresAt.Unix(),
+		"iat": time.Now().Unix(),
+		"typ": "access",
+	}
+	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signed, err := tok.SignedString(s.secret)
+	if err != nil {
+		return "", time.Time{}, err
+	}
+	return signed, expiresAt, nil
+}
 
 // Helper for Middleware
 func ParseToken(tokenString string) (*jwt.MapClaims, error) {

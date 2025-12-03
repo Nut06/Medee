@@ -66,14 +66,13 @@ func (r *GormRepository) Save(ctx context.Context, token string, userID uuid.UUI
 	return r.db.WithContext(ctx).Create(&rt).Error
 }
 
-// Delete removes a refresh token by its value.
+// Delete removes a refresh token by its value.a
 func (r *GormRepository) Delete(ctx context.Context, token string) error {
 	return r.db.WithContext(ctx).Where("token = ?", token).Delete(&domain.RefreshToken{}).Error
 }
 
 func (r *GormRepository) GetUserCompanies(ctx context.Context, userID string) ([]auth.Company, error) {
 	var members []domain.CompanyMember
-	// Preload Company to get company details
 	if err := r.db.WithContext(ctx).Preload("Company").Where("user_id = ?", userID).Find(&members).Error; err != nil {
 		return nil, err
 	}

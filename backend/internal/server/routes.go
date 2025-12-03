@@ -4,6 +4,7 @@ package server
 import (
 	authadapter "backend/internal/adapter/auth"
 	useradapter "backend/internal/adapter/user"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -29,21 +30,27 @@ func authRoute(router fiber.Router, db *gorm.DB) {
 
 func userRoute(router fiber.Router, db *gorm.DB) {
 	h := useradapter.NewHTTPHandler(db)
-	router.Get("/user", h.GetUser)
-	router.Put("/user", h.UpdateProfile)
-	router.Put("/user/avatar", h.UploadAvatar)
-	router.Delete("/user/avatar", h.DeleteAvatar)
+	router.Use(func (c *fiber.Ctx) error  {
+		fmt.Println("from IP", c.IP())
+		fmt.Println("Method", c.Method())
+		fmt.Println("Path", c.Path())
+		return c.Next()
+	})
+	router.Get("/", h.GetUser)
+	router.Put("/", h.UpdateProfile)
+	router.Put("/avatar", h.UploadAvatar)
+	router.Delete("/avatar", h.DeleteAvatar)
 
 	// Candidate Features
-	router.Get("/user/profile", h.GetFullProfile)
-	router.Post("/user/experience", h.AddExperience)
-	router.Put("/user/experience/:experienceId", h.UpdateExperience)
-	router.Delete("/user/experience/:experienceId", h.DeleteExperience)
-	router.Post("/user/education", h.AddEducation)
-	router.Put("/user/education/:educationId", h.UpdateEducation)
-	router.Delete("/user/education/:educationId", h.DeleteEducation)
-	router.Put("/user/skills", h.UpdateSkills)
-	router.Post("/user/project", h.AddProject)
-	router.Put("/user/project/:projectId", h.UpdateProject)
-	router.Delete("/user/project/:projectId", h.DeleteProject)
+	router.Get("/profile", h.GetFullProfile)
+	router.Post("/experience", h.AddExperience)
+	router.Put("/experience/:experienceId", h.UpdateExperience)
+	router.Delete("/experience/:experienceId", h.DeleteExperience)
+	router.Post("/education", h.AddEducation)
+	router.Put("/education/:educationId", h.UpdateEducation)
+	router.Delete("/education/:educationId", h.DeleteEducation)
+	router.Put("/skills", h.UpdateSkills)
+	router.Post("/project", h.AddProject)
+	router.Put("/project/:projectId", h.UpdateProject)
+	router.Delete("/project/:projectId", h.DeleteProject)
 }

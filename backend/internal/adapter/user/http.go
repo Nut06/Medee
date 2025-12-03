@@ -3,6 +3,7 @@ package useradapter
 import (
 	userapp "backend/internal/application/userapp"
 	"backend/internal/domain/domain"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -75,6 +76,7 @@ func (h *HTTPHandler) DeleteAvatar(c *fiber.Ctx) error {
 
 func (h *HTTPHandler) GetFullProfile(c *fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
+	fmt.Printf("id: %v  from get full profile http handler", userId)
 	res, err := h.usecase.GetFullProfile(c.Context(), userId)
 	if err != nil {
 		return err

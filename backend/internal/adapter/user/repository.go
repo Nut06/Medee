@@ -4,6 +4,7 @@ import (
 	"backend/internal/domain/domain"
 	port "backend/internal/port/user"
 	"context"
+	"fmt"
 	"mime/multipart"
 
 	"github.com/google/uuid"
@@ -104,6 +105,7 @@ func (r *userRepository) GetFullProfile(ctx context.Context, id string) (*domain
 		Preload("PortfolioItems").
 		Where("id = ?", id).First(&user).Error
 	if err != nil {
+		fmt.Printf("err %v", err)
 		return nil, err
 	}
 	return &user, nil

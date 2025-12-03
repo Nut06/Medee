@@ -3,12 +3,14 @@ package server
 import (
 	authadapter "backend/internal/adapter/auth"
 	"backend/internal/domain/auth"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func AuthMiddleware(c *fiber.Ctx) error {
 	tokenString := c.Cookies("access_token")
+	fmt.Println("Form auth middleware")
 	if tokenString == "" {
 		return fiber.NewError(fiber.StatusUnauthorized, auth.ErrInvalidToken.Error())
 	}
@@ -16,6 +18,7 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	// Parse token
 	claims, err := authadapter.ParseToken(tokenString)
 	if err != nil {
+		fmt.Println("Error parsing token:", err)
 		return fiber.NewError(fiber.StatusUnauthorized, auth.ErrInvalidToken.Error())
 	}
 
@@ -24,6 +27,7 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	if sub, ok := claimsMap["sub"].(string); ok {
 		c.Locals("user_id", sub)
 	} else {
+		fmt.Println("[AuthMiddleware] Error: 'sub' claim not found")
 		return fiber.NewError(fiber.StatusUnauthorized, auth.ErrInvalidToken.Error())
 	}
 
