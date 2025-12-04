@@ -43,7 +43,11 @@ func (h *HTTPHandler) UploadAvatar(c *fiber.Ctx) error {
 }
 
 func (h *HTTPHandler) UpdateProfile(c *fiber.Ctx) error {
-	userId := c.Locals("user_id").(string)
+	val := c.Locals("user_id")
+	if val == nil {
+		return c.Status(500).JSON(fiber.Map{"error": "user_id missing from context"})
+	}
+	userId := val.(string)
 	var req userapp.UpdateProfileCommand
 	if err := c.BodyParser(&req); err != nil {
 		return err
@@ -56,6 +60,7 @@ func (h *HTTPHandler) UpdateProfile(c *fiber.Ctx) error {
 		GitHubURL:   &req.GitHubURL,
 		WebsiteURL:  &req.WebsiteURL,
 	}
+	fmt.Printf("user: %v from update profile http handler", user)
 	res, err := h.usecase.UpdateProfile(c.Context(), userId, user)
 	if err != nil {
 		return err

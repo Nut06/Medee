@@ -30,14 +30,15 @@ func authRoute(router fiber.Router, db *gorm.DB) {
 
 func userRoute(router fiber.Router, db *gorm.DB) {
 	h := useradapter.NewHTTPHandler(db)
-	router.Use(func (c *fiber.Ctx) error  {
+	router.Use(func(c *fiber.Ctx) error {
 		fmt.Println("from IP", c.IP())
 		fmt.Println("Method", c.Method())
 		fmt.Println("Path", c.Path())
 		return c.Next()
 	})
-	router.Get("/", h.GetUser)
-	router.Put("/", h.UpdateProfile)
+
+	router.Get("", h.GetUser)
+	router.Put("", h.UpdateProfile)
 	router.Put("/avatar", h.UploadAvatar)
 	router.Delete("/avatar", h.DeleteAvatar)
 

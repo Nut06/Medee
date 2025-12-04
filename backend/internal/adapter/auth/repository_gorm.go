@@ -61,7 +61,7 @@ func (r *GormRepository) Save(ctx context.Context, token string, userID uuid.UUI
 	rt := domain.RefreshToken{
 		Token:     token,
 		ExpiresAt: expiresAt,
-		UserID:    userID.String(),
+		UserID:    userID,
 	}
 	return r.db.WithContext(ctx).Create(&rt).Error
 }

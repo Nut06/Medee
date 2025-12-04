@@ -4,7 +4,6 @@ import (
 	"backend/internal/domain/domain"
 	port "backend/internal/port/user"
 	"context"
-	"fmt"
 	"mime/multipart"
 
 	"github.com/google/uuid"

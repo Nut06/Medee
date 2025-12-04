@@ -13,7 +13,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Print("No .env was found")
+		log.Printf("No .env was found %v", err)
 	}
 	
 	fmt.Printf("DB port is at: %s\n", os.Getenv("DB_PORT"))

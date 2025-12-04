@@ -11,30 +11,32 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
+func NewServer() *fiber.App {
 
-func NewServer() *fiber.App{
-	
 	app := fiber.New(
 		fiber.Config{
 			ErrorHandler: func(c *fiber.Ctx, err error) error {
 				log.Printf("Error occur %v", err)
-
-				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"message":"Something went wrong",
+				code := fiber.StatusInternalServerError
+				if e, ok := err.(*fiber.Error); ok {
+					code = e.Code
+				}
+				return c.Status(code).JSON(fiber.Map{
+					"message": err.Error(),
 				})
 			},
 			ReduceMemoryUsage: true,
-			StrictRouting: true,
-			CaseSensitive: true,
+			StrictRouting:     true,
+			CaseSensitive:     true,
 		},
 	)
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: os.Getenv("CORS"),
-		AllowHeaders: "Origin, Content-type, Accept, Authorization",
-		AllowMethods: "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+		AllowOrigins:     os.Getenv("CORS"),
+		AllowHeaders:     "Origin, Content-type, Accept, Authorization",
+		AllowMethods:     "GET, POST, PUT, PATCH, DELETE, OPTIONS",
 		AllowCredentials: true,
-		MaxAge: 3600,
+		MaxAge:           3600,
 	}))
 
 	app.Get("/", func(c *fiber.Ctx) error {
@@ -44,8 +46,8 @@ func NewServer() *fiber.App{
 	db := database.ConnectDB()
 	database.AutoMigrate(db)
 	Auth(app, db)
-	
-	return  app
+
+	return app
 }
 
 type FiberServer struct {

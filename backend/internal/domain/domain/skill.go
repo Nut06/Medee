@@ -2,6 +2,7 @@ package domain
 
 import (
 	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -14,6 +15,8 @@ type UserSkill struct {
 	ID      uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	UserID  uuid.UUID `gorm:"type:uuid;index"`
 	SkillID uuid.UUID `gorm:"type:uuid;index"`
+	User    *User     `gorm:"foreignKey:UserID"`
+	Skill   *Skill    `gorm:"foreignKey:SkillID"`
 	Level   *string   // optional: beginner/intermediate/advanced
 }
 

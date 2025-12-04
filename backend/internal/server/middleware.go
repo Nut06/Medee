@@ -27,7 +27,6 @@ func AuthMiddleware(c *fiber.Ctx) error {
 	if sub, ok := claimsMap["sub"].(string); ok {
 		c.Locals("user_id", sub)
 	} else {
-		fmt.Println("[AuthMiddleware] Error: 'sub' claim not found")
 		return fiber.NewError(fiber.StatusUnauthorized, auth.ErrInvalidToken.Error())
 	}
 
