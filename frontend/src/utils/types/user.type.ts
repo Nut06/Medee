@@ -8,8 +8,10 @@ export interface User {
   lastName?: string;
   email?: string;
   bio?: string;
+  tagline?: string; // Profile subtitle/tagline
   phoneNumber?: string;
   AvatarURL?: string;
+  resumeURL?: string; // URL to downloadable resume
   linkedInURL?: string;
   githubURL?: string;
   websiteURL?: string;
@@ -17,6 +19,7 @@ export interface User {
   companies?: Company[]; // List of companies the user belongs to
   projects?: Project[]; // List of projects the user belongs to
   skills?: Skill[];
+  experiences?: WorkExperience[]; // Work experience history
 }
 
 export interface LoginRequest {

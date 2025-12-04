@@ -3,12 +3,49 @@ import ExperienceSection from "@/components/profile/ExperienceSection";
 import AboutSection from "@/components/profile/AboutSection";
 import SkillsSection from "@/components/profile/SkillsSection";
 import ProjectsSection from "@/components/profile/ProjectsSection";
+import ProfileCompletenessCard from "@/components/profile/ProfileCompletenessCard";
+import AvatarUpload from "@/components/profile/AvatarUpload";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Linkedin, Github, Globe } from "lucide-react";
+import { Linkedin, Github, Globe, Download, Share2 } from "lucide-react";
 import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import {
+  downloadResume,
+  getShareableLink,
+  copyToClipboard,
+} from "@/utils/profileUtils";
 
 export default function ProfilePage() {
   const { user } = useUserStore();
+
+  const handleDownloadResume = async () => {
+    if (user?.resumeURL) {
+      try {
+        await downloadResume(
+          user.resumeURL,
+          `${user.firstName}_${user.lastName}_Resume.pdf`
+        );
+        toast.success("Resume downloaded successfully");
+      } catch (error) {
+        toast.error("Failed to download resume");
+      }
+    } else {
+      toast.error("No resume available");
+    }
+  };
+
+  const handleShareProfile = async () => {
+    if (user?.id) {
+      try {
+        const link = getShareableLink(user.id);
+        await copyToClipboard(link);
+        toast.success("Profile link copied to clipboard!");
+      } catch (error) {
+        toast.error("Failed to copy link");
+      }
+    }
+  };
 
   return (
     <div className="container mx-auto py-10 space-y-8">
@@ -24,33 +61,31 @@ export default function ProfilePage() {
         <div className="md:col-span-1 space-y-6">
           <div className="bg-card rounded-lg border p-6 shadow-sm sticky top-6">
             <div className="flex flex-col items-center space-y-4">
-              <div className="h-24 w-24 rounded-full bg-muted flex items-center justify-center text-2xl font-bold overflow-hidden">
-                {user?.AvatarURL ? (
-                  <img
-                    src={user.AvatarURL}
-                    alt="Avatar"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <>
-                    {user?.firstName?.[0]}
-                    {user?.lastName?.[0]}
-                  </>
-                )}
-              </div>
-              <div className="text-center">
+              <AvatarUpload
+                avatarURL={user?.AvatarURL}
+                firstName={user?.firstName}
+                lastName={user?.lastName}
+              />
+              <div className="text-center w-full">
                 <h2 className="text-xl font-semibold">
                   {user?.firstName} {user?.lastName}
                 </h2>
-                <p className="text-sm text-muted-foreground">{user?.email}</p>
+                {user?.tagline && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {user.tagline}
+                  </p>
+                )}
+                <p className="text-sm text-muted-foreground mt-1">
+                  {user?.email}
+                </p>
 
-                <div className="flex gap-3 justify-center mt-2">
+                <div className="flex gap-3 justify-center mt-3">
                   {user?.linkedInURL && (
                     <a
                       href={user.linkedInURL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary"
+                      className="text-muted-foreground hover:text-primary transition-colors"
                     >
                       <Linkedin className="h-5 w-5" />
                     </a>
@@ -60,7 +95,7 @@ export default function ProfilePage() {
                       href={user.githubURL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary"
+                      className="text-muted-foreground hover:text-primary transition-colors"
                     >
                       <Github className="h-5 w-5" />
                     </a>
@@ -70,19 +105,39 @@ export default function ProfilePage() {
                       href={user.websiteURL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary"
+                      className="text-muted-foreground hover:text-primary transition-colors"
                     >
                       <Globe className="h-5 w-5" />
                     </a>
                   )}
                 </div>
 
-                <div className="pt-4 w-full">
+                <div className="pt-4 w-full space-y-2">
+                  <Button
+                    variant="default"
+                    className="w-full"
+                    onClick={handleDownloadResume}
+                    disabled={!user?.resumeURL}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Resume
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleShareProfile}
+                  >
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share Profile
+                  </Button>
                   <EditProfileDialog />
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Profile Completeness Card */}
+          <ProfileCompletenessCard />
         </div>
 
         {/* Right Column: Details with Tabs */}

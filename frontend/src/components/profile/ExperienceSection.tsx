@@ -208,9 +208,25 @@ export default function ExperienceSection() {
       <CardContent className="space-y-6">
         {/* @ts-ignore */}
         {user?.experiences?.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground border-2 border-dashed rounded-lg">
-            <Briefcase className="mx-auto h-8 w-8 mb-2 opacity-50" />
-            <p>No experience added yet.</p>
+          <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
+            <div className="flex justify-center mb-4">
+              <div className="relative">
+                <Briefcase className="h-12 w-12 opacity-50" />
+                <div className="absolute -bottom-1 -right-1 bg-muted rounded-full p-1">
+                  <Plus className="h-4 w-4" />
+                </div>
+              </div>
+            </div>
+            <h3 className="font-semibold text-lg text-foreground mb-2">
+              No Experience Added
+            </h3>
+            <p className="text-sm mb-6 max-w-md mx-auto">
+              Showcase your internships and work history to stand out.
+            </p>
+            <Button onClick={handleAddNew} size="lg">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Experience
+            </Button>
           </div>
         ) : (
           /* @ts-ignore */

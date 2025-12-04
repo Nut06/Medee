@@ -2,7 +2,14 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Plus, Pencil, Trash2, Github, Globe } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Github,
+  Globe,
+  ExternalLink,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +32,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { useProfile } from "@/hooks/useProfile";
 
 const projectSchema = z.object({
@@ -33,6 +41,7 @@ const projectSchema = z.object({
   imageURL: z.string().url("Invalid URL").optional().or(z.literal("")),
   githubURL: z.string().url("Invalid URL").optional().or(z.literal("")),
   demoURL: z.string().url("Invalid URL").optional().or(z.literal("")),
+  skills: z.string().optional(), // Comma-separated skills
 });
 
 type ProjectFormValues = z.infer<typeof projectSchema>;
@@ -51,14 +60,26 @@ export default function ProjectsSection() {
       imageURL: "",
       githubURL: "",
       demoURL: "",
+      skills: "",
     },
   });
 
   const onSubmit = async (data: ProjectFormValues) => {
+    // Convert comma-separated skills to array
+    const projectData = {
+      ...data,
+      skills: data.skills
+        ? data.skills
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [],
+    };
+
     if (editingId) {
-      await onUpdateProject(editingId, data);
+      await onUpdateProject(editingId, projectData);
     } else {
-      await onAddProject(data);
+      await onAddProject(projectData);
     }
     setIsDialogOpen(false);
     form.reset();
@@ -68,11 +89,12 @@ export default function ProjectsSection() {
   const handleEdit = (project: any) => {
     setEditingId(project.id || null);
     form.reset({
-      title: project.title || project.name, // Handle potential type mismatch
+      title: project.title || project.name,
       description: project.description || project.detail,
       imageURL: project.imageURL || "",
       githubURL: project.githubURL || "",
       demoURL: project.demoURL || "",
+      skills: Array.isArray(project.skills) ? project.skills.join(", ") : "",
     });
     setIsDialogOpen(true);
   };
@@ -85,6 +107,7 @@ export default function ProjectsSection() {
       imageURL: "",
       githubURL: "",
       demoURL: "",
+      skills: "",
     });
     setIsDialogOpen(true);
   };
@@ -138,6 +161,22 @@ export default function ProjectsSection() {
                         <Textarea
                           placeholder="Describe the project..."
                           className="resize-none"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="skills"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Skills (comma-separated)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. React, Figma, Node.js"
                           {...field}
                         />
                       </FormControl>
@@ -208,12 +247,9 @@ export default function ProjectsSection() {
         ) : (
           /* @ts-ignore */
           user?.projects?.map((project: any) => (
-            <div
-              key={project.id}
-              className="flex flex-col md:flex-row gap-4 border rounded-lg p-4"
-            >
+            <Card key={project.id} className="overflow-hidden">
               {project.imageURL && (
-                <div className="w-full md:w-48 h-32 bg-muted rounded-md overflow-hidden flex-shrink-0">
+                <div className="w-full h-48 bg-muted overflow-hidden">
                   <img
                     src={project.imageURL}
                     alt={project.title || project.name}
@@ -221,9 +257,9 @@ export default function ProjectsSection() {
                   />
                 </div>
               )}
-              <div className="flex-1 space-y-2">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-semibold text-lg">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="font-semibold text-xl">
                     {project.title || project.name}
                   </h3>
                   <div className="flex gap-2">
@@ -244,18 +280,31 @@ export default function ProjectsSection() {
                     </Button>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground mb-4">
                   {project.description || project.detail}
                 </p>
-                <div className="flex gap-3 pt-2">
+
+                {/* Skills Tags */}
+                {project.skills && project.skills.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {project.skills.map((skill: string, index: number) => (
+                      <Badge key={index} variant="secondary">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                {/* Links */}
+                <div className="flex gap-4 pt-2 border-t">
                   {project.githubURL && (
                     <a
                       href={project.githubURL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center text-xs text-primary hover:underline"
+                      className="flex items-center text-sm text-primary hover:underline"
                     >
-                      <Github className="mr-1 h-3 w-3" />
+                      <Github className="mr-1.5 h-4 w-4" />
                       GitHub
                     </a>
                   )}
@@ -264,15 +313,26 @@ export default function ProjectsSection() {
                       href={project.demoURL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center text-xs text-primary hover:underline"
+                      className="flex items-center text-sm text-primary hover:underline"
                     >
-                      <Globe className="mr-1 h-3 w-3" />
+                      <Globe className="mr-1.5 h-4 w-4" />
                       Live Demo
                     </a>
                   )}
+                  {(project.demoURL || project.githubURL) && (
+                    <a
+                      href={project.demoURL || project.githubURL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center text-sm text-primary hover:underline ml-auto"
+                    >
+                      <ExternalLink className="mr-1.5 h-4 w-4" />
+                      View Project
+                    </a>
+                  )}
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))
         )}
       </CardContent>

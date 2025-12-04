@@ -29,6 +29,7 @@ const profileSchema = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
+  tagline: z.string().optional(),
   linkedInURL: z.string().optional(),
   githubURL: z.string().optional(),
   websiteURL: z.string().optional(),
@@ -46,6 +47,7 @@ export function EditProfileDialog() {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
       email: user?.email || "",
+      tagline: user?.tagline || "",
       linkedInURL: user?.linkedInURL || "",
       githubURL: user?.githubURL || "",
       websiteURL: user?.websiteURL || "",
@@ -113,6 +115,22 @@ export function EditProfileDialog() {
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="tagline"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tagline</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g. Aspiring UX Designer & Frontend Developer"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
