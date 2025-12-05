@@ -37,7 +37,13 @@ func (r *userRepository) Update(ctx context.Context, id string, req *domain.User
 	user.FirstName = req.FirstName
 	user.LastName = req.LastName
 	user.PhoneNumber = req.PhoneNumber
-	// user.Bio = req.Bio // Assuming Bio field exists or will be added
+	user.Bio = req.Bio
+	// user.Tagline = req.Tagline
+	user.LinkedInURL = req.LinkedInURL
+	user.GitHubURL = req.GitHubURL
+	// user.PortfolioURL = req.PortfolioURL
+	// user.ResumeURL = req.ResumeURL
+	user.AvatarURL = req.AvatarURL
 
 	if err := r.db.WithContext(ctx).Save(&user).Error; err != nil {
 		return nil, err

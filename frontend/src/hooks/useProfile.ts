@@ -31,7 +31,7 @@ const profileSchema = z.object({
     .string()
     .min(2, "Last name must be at least 2 characters")
     .optional(),
-  email: z.string().email("Invalid email address").optional(),
+  email: z.email("Invalid email address").optional(),
   bio: z.string().optional(),
 });
 
@@ -78,7 +78,7 @@ export const useProfile = () => {
     setUser(data);
     toast.success(message);
   };
-
+  
   const onError = (error: any, message: string) => {
     console.error(error);
     toast.error(message);

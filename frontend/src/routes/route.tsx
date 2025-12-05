@@ -1,7 +1,9 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import RegisterPage from "@/views/RegisterPage";
 import LoginPage from "@/views/LoginPage";
+import LandingPage from "@/views/LandingPage";
 import ProtectedRoute from "./ProtectedRoutes";
+import GuestRoute from "./GuestRoute";
 import RequireRole from "./RequireRole";
 import CompanyPage from "@/views/CompanyPage";
 import ProfilePage from "@/views/ProfilePage";
@@ -9,13 +11,14 @@ import ProfilePage from "@/views/ProfilePage";
 export const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/register" replace />}></Route>
-      {/* public route */}
-      <Route path="/register" element={<RegisterPage />}></Route>
-      <Route path="/login" element={<LoginPage />}></Route>
-      {/* <Route path="/auth/callback" element={<AuthCallback />}></Route> */}
+      <Route path="/" element={<LandingPage />} />
 
-      {/* protected route */}
+      <Route element={<GuestRoute />}>
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage />} />
+      </Route>
+
+      {/* Protected routes (require authentication) */}
       <Route element={<ProtectedRoute />}>
         <Route element={<RequireRole role="company" />}>
           <Route path="/company" element={<CompanyPage />} />
@@ -24,6 +27,9 @@ export const AppRoutes = () => {
           <Route path="/user" element={<ProfilePage />} />
         </Route>
       </Route>
+
+      {/* 404 - Redirect to login */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

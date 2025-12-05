@@ -31,8 +31,6 @@ export const useUserStore = create<UserState>((set) => ({
     }))
 },
 
-
-
     isAuth:false,
     setAuth: (b: boolean) => {
         set({

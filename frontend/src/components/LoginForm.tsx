@@ -20,7 +20,7 @@ import { loginLocal } from "@/services/authService";
 import { useUserStore } from "@/stores/userStore";
 
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address."),
+  email: z.email("Please enter a valid email  address."),
   password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
@@ -28,6 +28,8 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const LoginForm = () => {
   const { email, password, setField, loading, error } = useAuthForm();
+  const { setUser } = useUserStore();
+  
   const navigate = useNavigate();
 
   const form = useForm<LoginFormValues>({
@@ -52,7 +54,8 @@ export const LoginForm = () => {
       const response = await loginLocal(payload);
 
       // Update store
-      useUserStore.getState().setUser(response.user);
+      setUser(response.user);
+      setAuth(true);
 
       // Redirect based on company membership
       if (response.companies && response.companies.length > 0) {
@@ -171,3 +174,7 @@ export const LoginForm = () => {
     </div>
   );
 };
+function setAuth(arg0: boolean) {
+  throw new Error("Function not implemented.");
+}
+
