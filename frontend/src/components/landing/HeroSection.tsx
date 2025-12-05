@@ -10,39 +10,40 @@ export default function HeroSection() {
           <div className="flex flex-col justify-center space-y-8">
             <div className="space-y-4">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl xl:text-6xl">
-                Gain Real-World Experience,{" "}
-                <span className="text-primary">From Anywhere</span>
+                สร้างประสบการณ์จริง{" "}
+                <span className="text-primary">จากทุกที่ทุกเวลา</span>
               </h1>
               <p className="text-lg text-muted-foreground sm:text-xl max-w-2xl">
-                Connect with top companies and gain hands-on experience through
-                virtual internships. Build your portfolio and kickstart your
-                career.
+                เชื่อมต่อกับบริษัทชั้นนำและสร้างประสบการณ์การทำงานผ่านการฝึกงานออนไลน์
+                สร้างพอร์ตโฟลิโอและเริ่มต้นอาชีพของคุณ
               </p>
             </div>
 
             {/* CTA Buttons */}
             <div className="flex flex-col gap-4 sm:flex-row">
               <Button size="lg" asChild className="text-base">
-                <Link to="/register">Sign Up as an Applicant</Link>
+                <Link to="/register">สมัครสมาชิกสำหรับผู้สมัคร</Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="text-base">
-                <Link to="/register?type=company">Sign Up as a Company</Link>
+                <Link to="/register?type=company">สมัครสมาชิกสำหรับบริษัท</Link>
               </Button>
             </div>
 
-            {/* Stats or Trust Indicators (Optional) */}
+            {/* Stats or Trust Indicators */}
             <div className="flex flex-wrap gap-8 pt-4">
               <div>
                 <p className="text-3xl font-bold text-primary">500+</p>
-                <p className="text-sm text-muted-foreground">Active Projects</p>
+                <p className="text-sm text-muted-foreground">
+                  โปรเจกต์ที่เปิดรับ
+                </p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-primary">1,000+</p>
-                <p className="text-sm text-muted-foreground">Students</p>
+                <p className="text-sm text-muted-foreground">นักศึกษา</p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-primary">100+</p>
-                <p className="text-sm text-muted-foreground">Companies</p>
+                <p className="text-sm text-muted-foreground">บริษัทพันธมิตร</p>
               </div>
             </div>
           </div>
@@ -78,9 +79,11 @@ export default function HeroSection() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">Verified Companies</p>
+                  <p className="text-sm font-semibold">
+                    บริษัทที่ได้รับการยืนยัน
+                  </p>
                   <p className="text-xs text-muted-foreground">
-                    Trusted by industry leaders
+                    ได้รับความไว้วางใจจากผู้นำในอุตสาหกรรม
                   </p>
                 </div>
               </div>

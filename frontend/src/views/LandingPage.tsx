@@ -1,8 +1,9 @@
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import HeroSection from "@/components/landing/HeroSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
-import HowItWorkSection from "@/components/landing/HowItWorkSection";
-import TestimonialSection from "@/components/landing/TestimonialSection";
+import HowItWorksSection from "@/components/landing/HowItWorksSection";
+import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import CTASection from "@/components/landing/CTASection";
 
 export default function LandingPage() {
@@ -12,10 +13,11 @@ export default function LandingPage() {
       <main className="flex-1">
         <HeroSection />
         <FeaturesSection />
-        <HowItWorkSection />
-        <TestimonialSection />
+        <HowItWorksSection />
+        <TestimonialsSection />
         <CTASection />
       </main>
+      <Footer />
     </div>
   );
 }

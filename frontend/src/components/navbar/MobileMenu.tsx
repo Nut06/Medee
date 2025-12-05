@@ -46,15 +46,15 @@ export function MobileMenu() {
           <div className="flex flex-col gap-3 pt-4 border-t">
             {isAuth ? (
               <Button asChild onClick={closeMenu}>
-                <Link to="/user">Dashboard</Link>
+                <Link to="/user">แดชบอร์ด</Link>
               </Button>
             ) : (
               <>
                 <Button variant="outline" asChild onClick={closeMenu}>
-                  <Link to="/login">Log In</Link>
+                  <Link to="/login">เข้าสู่ระบบ</Link>
                 </Button>
                 <Button asChild onClick={closeMenu}>
-                  <Link to="/register">Sign Up</Link>
+                  <Link to="/register">สมัครสมาชิก</Link>
                 </Button>
               </>
             )}

@@ -9,15 +9,15 @@ export function NavbarActions() {
     <div className="hidden md:flex md:items-center md:gap-3">
       {isAuth ? (
         <Button asChild>
-          <Link to="/user">Dashboard</Link>
+          <Link to="/user">แดชบอร์ด</Link>
         </Button>
       ) : (
         <>
           <Button variant="ghost" asChild>
-            <Link to="/login">Log In</Link>
+            <Link to="/login">เข้าสู่ระบบ</Link>
           </Button>
           <Button asChild>
-            <Link to="/register">Sign Up</Link>
+            <Link to="/register">สมัครสมาชิก</Link>
           </Button>
         </>
       )}
