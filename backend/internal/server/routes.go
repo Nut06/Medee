@@ -18,7 +18,18 @@ func Auth(app *fiber.App, db *gorm.DB) {
 
 	userGroup := api.Group("/user", AuthMiddleware)
 	userRoute(userGroup, db)
+
+	// skillGroup := api.Group("/skill", AuthMiddleware)
+	// skillRoute(skillGroup, db)
 }
+
+// func skillRoute(router fiber.Router, db *gorm.DB) {
+// 	h := skilladapter.NewHTTPHandler(db)
+// 	router.Get("", h.GetSkills)
+// 	router.Post("", h.AddSkill)
+// 	router.Put("/:skillId", h.UpdateSkill)
+// 	router.Delete("/:skillId", h.DeleteSkill)
+// }
 
 func authRoute(router fiber.Router, db *gorm.DB) {
 	h := authadapter.NewHTTPHandler(db)

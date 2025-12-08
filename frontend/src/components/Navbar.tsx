@@ -2,8 +2,18 @@ import { NavbarBrand } from "./navbar/NavbarBrand";
 import { NavbarLinks } from "./navbar/NavbarLinks";
 import { NavbarActions } from "./navbar/NavbarActions";
 import { MobileMenu } from "./navbar/MobileMenu";
+import { AuthNavbar } from "./navbar/AuthNavbar";
+import { useUserStore } from "@/stores/userStore";
 
 export function Navbar() {
+  const { isAuth } = useUserStore();
+
+  // Show authenticated navbar for logged-in users
+  if (isAuth) {
+    return <AuthNavbar />;
+  }
+
+  // Show default navbar for unauthenticated users
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
