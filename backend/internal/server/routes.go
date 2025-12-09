@@ -3,6 +3,7 @@ package server
 
 import (
 	authadapter "backend/internal/adapter/auth"
+	skilladapter "backend/internal/adapter/skill"
 	useradapter "backend/internal/adapter/user"
 	"fmt"
 
@@ -19,17 +20,15 @@ func Auth(app *fiber.App, db *gorm.DB) {
 	userGroup := api.Group("/user", AuthMiddleware)
 	userRoute(userGroup, db)
 
-	// skillGroup := api.Group("/skill", AuthMiddleware)
-	// skillRoute(skillGroup, db)
+	skillGroup := api.Group("/skill", AuthMiddleware)
+	skillRoute(skillGroup, db)
 }
 
-// func skillRoute(router fiber.Router, db *gorm.DB) {
-// 	h := skilladapter.NewHTTPHandler(db)
-// 	router.Get("", h.GetSkills)
-// 	router.Post("", h.AddSkill)
-// 	router.Put("/:skillId", h.UpdateSkill)
-// 	router.Delete("/:skillId", h.DeleteSkill)
-// }
+func skillRoute(router fiber.Router, db *gorm.DB) {
+	h := skilladapter.NewHTTPHandler(db)
+	router.Get("", h.GetSkills)    // GET /skill?q=...
+	router.Post("", h.CreateSkill) // POST /skill (Create Master Skill - Optional)
+}
 
 func authRoute(router fiber.Router, db *gorm.DB) {
 	h := authadapter.NewHTTPHandler(db)
@@ -61,7 +60,12 @@ func userRoute(router fiber.Router, db *gorm.DB) {
 	router.Post("/education", h.AddEducation)
 	router.Put("/education/:educationId", h.UpdateEducation)
 	router.Delete("/education/:educationId", h.DeleteEducation)
-	router.Put("/skills", h.UpdateSkills)
+
+	// Skills (User)
+	router.Post("/skills", h.AddSkill)
+	router.Delete("/skills/:skillId", h.DeleteSkill)
+	// router.Put("/skills", h.UpdateSkills) // Deprecated in favor of Atomic Add/Delete
+
 	router.Post("/project", h.AddProject)
 	router.Put("/project/:projectId", h.UpdateProject)
 	router.Delete("/project/:projectId", h.DeleteProject)

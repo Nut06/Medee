@@ -8,14 +8,14 @@ import (
 )
 
 type Usecase struct {
-	users   authport.UserRepository
+	users   authport.AuthRepo
 	hasher  authport.PasswordHasher
 	tokens  authport.TokenService
 	refresh authport.RefreshTokenStore
 }
 
 func NewUsecase(
-	users authport.UserRepository,
+	users authport.AuthRepo,
 	hasher authport.PasswordHasher,
 	tokens authport.TokenService,
 	refresh authport.RefreshTokenStore,

@@ -124,6 +124,6 @@ func isDuplicateKey(err error) bool {
 
 // Interfaces satisfaction
 var (
-	_ authport.UserRepository    = (*GormRepository)(nil)
+	_ authport.AuthRepo          = (*GormRepository)(nil)
 	_ authport.RefreshTokenStore = (*GormRepository)(nil)
 )

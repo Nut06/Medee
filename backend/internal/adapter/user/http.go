@@ -3,6 +3,7 @@ package useradapter
 import (
 	userapp "backend/internal/application/userapp"
 	"backend/internal/domain/domain"
+	user "backend/internal/domain/user"
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
@@ -48,7 +49,7 @@ func (h *HTTPHandler) UpdateProfile(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "user_id missing from context"})
 	}
 	userId := val.(string)
-	var req userapp.UpdateProfileCommand
+	var req user.UpdateProfileCommand
 	if err := c.BodyParser(&req); err != nil {
 		return err
 	}
@@ -76,8 +77,6 @@ func (h *HTTPHandler) DeleteAvatar(c *fiber.Ctx) error {
 	}
 	return c.JSON(user)
 }
-
-// Candidate Features
 
 func (h *HTTPHandler) GetFullProfile(c *fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
@@ -203,6 +202,29 @@ func (h *HTTPHandler) UpdateProject(c *fiber.Ctx) error {
 func (h *HTTPHandler) DeleteProject(c *fiber.Ctx) error {
 	id := c.Params("projectId")
 	err := h.usecase.DeleteProject(c.Context(), id)
+	if err != nil {
+		return err
+	}
+	return c.SendStatus(fiber.StatusOK)
+}
+
+func (h *HTTPHandler) AddSkill(c *fiber.Ctx) error {
+	userId := c.Locals("user_id").(string)
+	var req user.AddUserSkillCommand
+	if err := c.BodyParser(&req); err != nil {
+		return err
+	}
+	err := h.usecase.AddSkill(c.Context(), userId, &req)
+	if err != nil {
+		return err
+	}
+	return c.SendStatus(fiber.StatusCreated)
+}
+
+func (h *HTTPHandler) DeleteSkill(c *fiber.Ctx) error {
+	userId := c.Locals("user_id").(string)
+	id := c.Params("skillId")
+	err := h.usecase.DeleteSkill(c.Context(), userId, id)
 	if err != nil {
 		return err
 	}

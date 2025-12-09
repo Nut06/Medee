@@ -2,6 +2,7 @@ package useradapter
 
 import (
 	"backend/internal/domain/domain"
+	dto "backend/internal/domain/user"
 	port "backend/internal/port/user"
 	"context"
 	"fmt"
@@ -196,4 +197,66 @@ func (r *userRepository) UpdateProject(ctx context.Context, project *domain.Port
 
 func (r *userRepository) DeleteProject(ctx context.Context, id string) error {
 	return r.db.WithContext(ctx).Delete(&domain.PortfolioItem{}, "id = ?", id).Error
+}
+
+func (r *userRepository) UpdateSkill(ctx context.Context, skill *domain.Skill) error {
+	return r.db.WithContext(ctx).Save(skill).Error
+}
+
+func (r *userRepository) AddSkill(ctx context.Context, userID string, req *dto.AddUserSkillCommand) error {
+	var skillID uuid.UUID
+
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		// 1. Determine Skill ID
+		if req.SkillID != nil && *req.SkillID != "" {
+			// User selected existing skill
+			skillID = uuid.MustParse(*req.SkillID)
+		} else if req.Name != nil && *req.Name != "" {
+			// User entered a new skill name
+			var skill domain.Skill
+			// Find or Create Master Skill
+			if err := tx.Where("name = ?", *req.Name).FirstOrCreate(&skill, domain.Skill{Name: *req.Name}).Error; err != nil {
+				return err
+			}
+			skillID = skill.ID
+		} else {
+			return dto.ErrSkillRequired
+		}
+
+		// 2. Create Relation (UserSkill)
+		// Check if already exists to avoid duplicate
+		var count int64
+		tx.Model(&domain.UserSkill{}).Where("user_id = ? AND skill_id = ?", userID, skillID).Count(&count)
+		if count > 0 {
+			return dto.ErrSkillAlreadyAdded
+		}
+
+		userSkill := domain.UserSkill{
+			UserID:  uuid.MustParse(userID),
+			SkillID: skillID,
+		}
+		if err := tx.Create(&userSkill).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+func (r *userRepository) DeleteSkill(ctx context.Context, userID string, skillID string) error {
+	result := r.db.WithContext(ctx).Delete(&domain.UserSkill{}, "user_id = ? AND skill_id = ?", userID, skillID)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return dto.ErrSkillNotFound
+	}
+	return nil
+}
+
+func (r *userRepository) GetSkills(ctx context.Context, userId string) ([]domain.Skill, error) {
+	var skills []domain.Skill
+	if err := r.db.WithContext(ctx).Where("user_id = ?", userId).Find(&skills).Error; err != nil {
+		return nil, err
+	}
+	return skills, nil
 }

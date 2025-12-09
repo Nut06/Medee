@@ -15,6 +15,7 @@ import {
   getShareableLink,
   copyToClipboard,
 } from "@/utils/profileUtils";
+import { AuthNavbar } from "@/components/navbar/AuthNavbar";
 
 export default function ProfilePage() {
   const { user } = useUserStore();
@@ -49,6 +50,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto py-10 space-y-8">
+      <AuthNavbar />
       <div>
         <h1 className="text-3xl font-bold">Profile</h1>
         <p className="text-muted-foreground">

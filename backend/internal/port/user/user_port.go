@@ -2,6 +2,7 @@ package userport
 
 import (
 	"backend/internal/domain/domain"
+	dto "backend/internal/domain/user"
 	"context"
 	"mime/multipart"
 )
@@ -24,6 +25,8 @@ type UserService interface {
 	AddProject(ctx context.Context, userID string, req *domain.PortfolioItem) (*domain.PortfolioItem, error)
 	UpdateProject(ctx context.Context, id string, req *domain.PortfolioItem) (*domain.PortfolioItem, error)
 	DeleteProject(ctx context.Context, id string) error
+	AddSkill(ctx context.Context, userID string, req *dto.AddUserSkillCommand) error
+	DeleteSkill(ctx context.Context, userID string, skillID string) error
 }
 
 type UserRepository interface {
@@ -45,4 +48,6 @@ type UserRepository interface {
 	AddProject(ctx context.Context, project *domain.PortfolioItem) (*domain.PortfolioItem, error)
 	UpdateProject(ctx context.Context, project *domain.PortfolioItem) (*domain.PortfolioItem, error)
 	DeleteProject(ctx context.Context, id string) error
+	AddSkill(ctx context.Context, userID string, req *dto.AddUserSkillCommand) error
+	DeleteSkill(ctx context.Context, userID string, skillID string) error
 }

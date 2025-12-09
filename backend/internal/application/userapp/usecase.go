@@ -2,21 +2,13 @@ package userapp
 
 import (
 	"backend/internal/domain/domain"
+	"backend/internal/domain/user"
 	port "backend/internal/port/user"
 	"context"
 	"mime/multipart"
 
 	"github.com/google/uuid"
 )
-
-type UpdateProfileCommand struct {
-	FirstName   string `json:"firstName"`
-	LastName    string `json:"lastName"`
-	Email       string `json:"email"`
-	LinkedInURL string `json:"linkedInURL"`
-	GitHubURL   string `json:"githubURL"`
-	WebsiteURL  string `json:"websiteURL"`
-}
 
 type Usecase struct {
 	repo port.UserRepository
@@ -94,4 +86,12 @@ func (s *Usecase) UpdateProject(ctx context.Context, id string, req *domain.Port
 
 func (s *Usecase) DeleteProject(ctx context.Context, id string) error {
 	return s.repo.DeleteProject(ctx, id)
+}
+
+func (s *Usecase) AddSkill(ctx context.Context, userID string, req *user.AddUserSkillCommand) error {
+	return s.repo.AddSkill(ctx, userID, req)
+}
+
+func (s *Usecase) DeleteSkill(ctx context.Context, userID string, skillId string) error {
+	return s.repo.DeleteSkill(ctx, userID, skillId)
 }
