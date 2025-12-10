@@ -1,5 +1,7 @@
 import type { Project } from "./project.type";
 
+export type Role = "user" | "company";
+
 export interface User {
   id?: string;
   firstName?: string;

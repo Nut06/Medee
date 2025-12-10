@@ -17,14 +17,14 @@ type CookieConfig struct {
 	AccessCookieName  string
 	RefreshCookieName string
 	Secure            bool
-	SameSite          string
+	SameSite          string // Fiber accepts string: "Lax", "Strict", "None"
 	AccessMaxAge      int
 	RefreshMaxAge     int
 }
 
 var (
-	fifteenMinutes = 15 * time.Minute
-	sevenDays      = 7 * 24 * time.Hour
+	thirtyMin = 30 * time.Minute
+	sevenDays = 7 * 24 * time.Hour
 )
 
 type HTTPHandler struct {
@@ -41,12 +41,11 @@ func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
 	usecase := authapp.NewUsecase(
 		repo,
 		NewBcryptHasher(0),
-		NewJWTService(os.Getenv("JWT_SECRET"), fifteenMinutes, sevenDays),
+		NewJWTService(os.Getenv("JWT_SECRET"), thirtyMin, sevenDays),
 		repo,
 	)
 	cfg.AccessCookieName = "access_token"
 	cfg.RefreshCookieName = "refresh_token"
-	cfg.SameSite = "Strict"
 	return &HTTPHandler{uc: usecase, cfg: cfg}
 }
 
@@ -55,7 +54,7 @@ func (h *HTTPHandler) Refresh(c *fiber.Ctx) error {
 
 	rt := c.Cookies(h.cfg.RefreshCookieName)
 	if rt == "" {
-		return auth.ErrInvalidRefreshToken
+		return h.handleError(auth.ErrInvalidRefreshToken)
 	}
 
 	res, tokens, err := h.uc.Refresh(ctx, authport.RefreshCommand{
@@ -83,7 +82,7 @@ func (h *HTTPHandler) Register(c *fiber.Ctx) error {
 
 	var req auth.RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+		return h.handleError(auth.ErrInvalidRequestBody)
 	}
 
 	res, tokens, err := h.uc.Register(c.Context(), authport.RegisterCommand{
@@ -115,7 +114,7 @@ func (h *HTTPHandler) Login(c *fiber.Ctx) error {
 
 	var req auth.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+		return h.handleError(auth.ErrInvalidRequestBody)
 	}
 
 	res, tokens, err := h.uc.Login(ctx, authport.LoginCommand{
@@ -142,13 +141,12 @@ func (h *HTTPHandler) Logout(c *fiber.Ctx) error {
 	ctx := h.context(c)
 	rt := c.Cookies(h.cfg.RefreshCookieName)
 	if rt == "" {
-		return fiber.NewError(fiber.StatusBadRequest, "no refresh token")
+		return h.handleError(auth.ErrInvalidRefreshToken)
 	}
 	if err := h.uc.Logout(ctx, rt); err != nil {
 		return h.handleError(err)
 	}
-	c.ClearCookie(h.cfg.AccessCookieName)
-	c.ClearCookie(h.cfg.RefreshCookieName)
+	h.clearCookies(c)
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "logout success"})
 }
 
@@ -156,15 +154,49 @@ func (h *HTTPHandler) handleError(err error) *fiber.Error {
 	switch {
 	case err == nil:
 		return nil
+	case errors.Is(err, auth.ErrInvalidRequestBody):
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	case errors.Is(err, auth.ErrEmailAlreadyUsed):
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	case errors.Is(err, auth.ErrInvalidCredential):
 		return fiber.NewError(fiber.StatusUnauthorized, err.Error())
+	case errors.Is(err, auth.ErrInvalidToken):
+		return fiber.NewError(fiber.StatusUnauthorized, err.Error())
+	case errors.Is(err, auth.ErrInvalidRefreshToken):
+		return fiber.NewError(fiber.StatusUnauthorized, err.Error())
+	case errors.Is(err, auth.ErrInvalidAccessToken):
+		return fiber.NewError(fiber.StatusUnauthorized, err.Error())
 	case errors.Is(err, auth.ErrUserNotFound):
 		return fiber.NewError(fiber.StatusNotFound, err.Error())
+	case errors.Is(err, auth.ErrInvalidUser):
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	default:
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
+}
+
+func (h *HTTPHandler) clearCookies(c *fiber.Ctx) {
+	c.Cookie(&fiber.Cookie{
+		Name:     h.cfg.AccessCookieName,
+		Value:    "",
+		Path:     "/",
+		Domain:   "", // empty means current domain
+		HTTPOnly: true,
+		Secure:   h.cfg.Secure,
+		SameSite: h.cfg.SameSite,
+		MaxAge:   -1,
+	})
+
+	c.Cookie(&fiber.Cookie{
+		Name:     h.cfg.RefreshCookieName,
+		Value:    "",
+		Path:     "/",
+		Domain:   "", // empty means current domain
+		HTTPOnly: true,
+		Secure:   h.cfg.Secure,
+		SameSite: h.cfg.SameSite,
+		MaxAge:   -1,
+	})
 }
 
 func (h *HTTPHandler) setCookies(c *fiber.Ctx, tokens *auth.TokenPair) {
@@ -180,15 +212,19 @@ func (h *HTTPHandler) setCookies(c *fiber.Ctx, tokens *auth.TokenPair) {
 	c.Cookie(&fiber.Cookie{
 		Name:     h.cfg.AccessCookieName,
 		Value:    tokens.AccessToken,
+		Path:     "/",
+		Domain:   "", // empty means current domain
 		HTTPOnly: true,
 		Secure:   h.cfg.Secure,
-		SameSite: h.cfg.SameSite,
+		SameSite: "Lax",
 		MaxAge:   accessMaxAge,
 	})
 
 	c.Cookie(&fiber.Cookie{
 		Name:     h.cfg.RefreshCookieName,
 		Value:    tokens.RefreshToken,
+		Path:     "/",
+		Domain:   "", // empty means current domain
 		HTTPOnly: true,
 		Secure:   h.cfg.Secure,
 		SameSite: h.cfg.SameSite,

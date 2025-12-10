@@ -56,8 +56,7 @@ func (r *GormRepository) Create(ctx context.Context, user auth.User) (auth.User,
 	return mapToDomainUser(entity), nil
 }
 
-// Save persists a refresh token (implements RefreshTokenStore).
-func (r *GormRepository) Save(ctx context.Context, token string, userID uuid.UUID, expiresAt time.Time) error {
+func (r *GormRepository) SaveRefreshToken(ctx context.Context, token string, userID uuid.UUID, expiresAt time.Time) error {
 	rt := domain.RefreshToken{
 		Token:     token,
 		ExpiresAt: expiresAt,
@@ -66,10 +65,10 @@ func (r *GormRepository) Save(ctx context.Context, token string, userID uuid.UUI
 	return r.db.WithContext(ctx).Create(&rt).Error
 }
 
-// Delete removes a refresh token by its value.a
-func (r *GormRepository) Delete(ctx context.Context, token string) error {
+func (r *GormRepository) DeleteRefreshToken(ctx context.Context, token string) error {
 	return r.db.WithContext(ctx).Where("token = ?", token).Delete(&domain.RefreshToken{}).Error
 }
+
 
 func (r *GormRepository) GetUserCompanies(ctx context.Context, userID string) ([]auth.Company, error) {
 	var members []domain.CompanyMember

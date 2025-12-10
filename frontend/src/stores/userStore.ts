@@ -1,3 +1,4 @@
+import { logout } from '@/services/authService';
 import type { User } from '@/utils/types/user.type';
 import {create} from 'zustand';
 
@@ -6,7 +7,7 @@ interface UserState {
     setUser:(user:User | Partial<User> | null, key?: keyof User, value?:unknown) => void;
     isAuth: boolean;
     setAuth: (b:boolean) => void;
-    // clearAuth: () => Promise<void>;
+    clearAuth: () => Promise<void>;
 }
 
 export const useUserStore = create<UserState>((set) => ({
@@ -30,15 +31,18 @@ export const useUserStore = create<UserState>((set) => ({
         isAuth: true,
     }))
 },
-
     isAuth:false,
     setAuth: (b: boolean) => {
         set({
             isAuth: b
         })
     },
-    // clearAuth: async () => {
-        
-    // },
+    clearAuth: async () => {
+        await logout();
+        set({
+            user: null,
+            isAuth: false
+        })
+    },
 
 }))

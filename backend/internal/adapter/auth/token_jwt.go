@@ -101,13 +101,8 @@ var _ authport.TokenService = (*JWTService)(nil)
 	return signed, expiresAt, nil
 }
 
-// Helper for Middleware
 func ParseToken(tokenString string) (*jwt.MapClaims, error) {
-	// Note: In a real app, you should inject the secret or use the service instance.
-	// For simplicity here, we might need to read env again or make this a method of JWTService if we can access the instance.
-	// Since Middleware is static, let's read env for now or better, make a global/singleton verifier.
-
-	// Better approach: Let's assume we use the same secret from env
+	
 	secret := []byte(os.Getenv("JWT_SECRET"))
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -116,7 +111,7 @@ func ParseToken(tokenString string) (*jwt.MapClaims, error) {
 		}
 		return secret, nil
 	})
-
+	
 	if err != nil {
 		return nil, err
 	}

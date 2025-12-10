@@ -66,7 +66,7 @@ func (uc *Usecase) Register(ctx context.Context, cmd authport.RegisterCommand) (
 	}
 
 	if uc.refresh != nil {
-		if err := uc.refresh.Save(ctx, refreshToken, created.ID, refreshExp); err != nil {
+		if err := uc.refresh.SaveRefreshToken(ctx, refreshToken, created.ID, refreshExp); err != nil {
 			return nil, nil, err
 		}
 	}
@@ -107,7 +107,7 @@ func (uc *Usecase) Login(ctx context.Context, cmd authport.LoginCommand) (*authp
 	}
 
 	if uc.refresh != nil {
-		if err := uc.refresh.Save(ctx, refreshToken, u.ID, refreshExp); err != nil {
+		if err := uc.refresh.SaveRefreshToken(ctx, refreshToken, u.ID, refreshExp); err != nil {
 			return nil, nil, err
 		}
 	}
@@ -138,7 +138,7 @@ func (uc *Usecase) Logout(ctx context.Context, refreshToken string) error {
 	if uc.refresh == nil {
 		return nil
 	}
-	return uc.refresh.Delete(ctx, refreshToken)
+	return uc.refresh.DeleteRefreshToken(ctx, refreshToken)
 }
 
 func (uc *Usecase) Refresh(ctx context.Context, cmd authport.RefreshCommand) (*authport.LoginResult, *auth.TokenPair, error) {
@@ -163,7 +163,7 @@ func (uc *Usecase) Refresh(ctx context.Context, cmd authport.RefreshCommand) (*a
 	}
 
 	if uc.refresh != nil {
-		if err := uc.refresh.Save(ctx, refreshToken, u.ID, refreshExp); err != nil {
+		if err := uc.refresh.SaveRefreshToken(ctx, refreshToken, u.ID, refreshExp); err != nil {
 			return nil, nil, auth.ErrInvalidRefreshToken
 		}
 	}

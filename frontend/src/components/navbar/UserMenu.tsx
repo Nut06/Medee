@@ -11,15 +11,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUserStore } from "@/stores/userStore";
+import { logout } from "@/services/authService";
 
 export function UserMenu() {
-  const { user, setUser, setAuth } = useUserStore();
+  const { user, clearAuth } = useUserStore();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    setUser(null);
-    setAuth(false);
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await clearAuth();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      navigate("/");
+    }
   };
 
   const getInitials = () => {
