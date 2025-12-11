@@ -1,9 +1,11 @@
 package authadapter
 
 import (
+	useradapter "backend/internal/adapter/user"
 	authapp "backend/internal/application/auth"
 	"backend/internal/domain/auth"
 	authport "backend/internal/port/auth"
+	userport "backend/internal/port/user"
 	"context"
 	"errors"
 	"os"
@@ -28,8 +30,9 @@ var (
 )
 
 type HTTPHandler struct {
-	uc  authport.AuthService
-	cfg *CookieConfig
+	uc       authport.AuthService
+	userRepo userport.UserRepository
+	cfg      *CookieConfig
 }
 
 func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
@@ -46,7 +49,8 @@ func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
 	)
 	cfg.AccessCookieName = "access_token"
 	cfg.RefreshCookieName = "refresh_token"
-	return &HTTPHandler{uc: usecase, cfg: cfg}
+	userRepo := useradapter.NewRepository(db)
+	return &HTTPHandler{uc: usecase, userRepo: userRepo, cfg: cfg}
 }
 
 func (h *HTTPHandler) Refresh(c *fiber.Ctx) error {
@@ -66,13 +70,15 @@ func (h *HTTPHandler) Refresh(c *fiber.Ctx) error {
 	}
 
 	h.setCookies(c, tokens)
+
+	// Fetch full user from database
+	fullUser, err := h.userRepo.FindById(ctx, res.ID)
+	if err != nil {
+		return h.handleError(err)
+	}
+
 	return c.Status(fiber.StatusOK).JSON(auth.LoginResponse{
-		User: auth.UserResponse{
-			ID:        res.ID,
-			FirstName: res.FirstName,
-			LastName:  res.LastName,
-			Email:     res.Email,
-		},
+		User:      *auth.ToUserResponse(fullUser),
 		Companies: res.Companies,
 	})
 
@@ -98,13 +104,15 @@ func (h *HTTPHandler) Register(c *fiber.Ctx) error {
 
 	h.setCookies(c, tokens)
 
+	// Fetch full user from database
+	ctx := h.context(c)
+	fullUser, err := h.userRepo.FindById(ctx, res.ID)
+	if err != nil {
+		return h.handleError(err)
+	}
+
 	return c.Status(fiber.StatusOK).JSON(auth.RegisterResponse{
-		User: auth.UserResponse{
-			ID:        res.ID,
-			FirstName: res.FirstName,
-			LastName:  res.LastName,
-			Email:     res.Email,
-		},
+		User:      *auth.ToUserResponse(fullUser),
 		Companies: []auth.Company{}, // Empty for new user
 	})
 }
@@ -126,13 +134,15 @@ func (h *HTTPHandler) Login(c *fiber.Ctx) error {
 	}
 
 	h.setCookies(c, tokens)
+
+	// Fetch full user from database
+	fullUser, err := h.userRepo.FindById(ctx, res.ID)
+	if err != nil {
+		return h.handleError(err)
+	}
+
 	return c.Status(fiber.StatusOK).JSON(auth.LoginResponse{
-		User: auth.UserResponse{
-			ID:        res.ID,
-			FirstName: res.FirstName,
-			LastName:  res.LastName,
-			Email:     res.Email,
-		},
+		User:      *auth.ToUserResponse(fullUser),
 		Companies: res.Companies,
 	})
 }

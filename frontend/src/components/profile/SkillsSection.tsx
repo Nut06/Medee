@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Pencil, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,9 +22,9 @@ export function SkillsSection() {
   const [tempSkills, setTempSkills] = useState<Skill[]>([]);
   const [newSkill, setNewSkill] = useState("");
 
-  useState(() => {
+  useEffect(() => {
     setTempSkills(user?.skills || []);
-  });
+  }, [user?.skills]);
 
   const handleAddSkill = () => {
     if (newSkill.trim()) {
@@ -81,6 +81,13 @@ export function SkillsSection() {
       <p className="text-sm text-muted-foreground">
         Add up to 15 skills. Press Enter or click + to add.
       </p>
+
+      {/* Save Button */}
+      <div className="flex justify-end pt-4">
+        <Button onClick={() => onUpdateSkills(tempSkills)} disabled={isSaving}>
+          {isSaving ? "Saving..." : "Save"}
+        </Button>
+      </div>
     </div>
   );
 }

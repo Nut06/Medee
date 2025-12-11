@@ -42,8 +42,19 @@ type LoginResponse struct {
 }
 
 type UserResponse struct {
+	// Basic Info
 	ID        string `json:"id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
+
+	// Profile Info
+	AvatarURL   *string `json:"avatar_url,omitempty"`
+	Bio         *string `json:"bio,omitempty"`
+	PhoneNumber *string `json:"phone_number,omitempty"`
+
+	// Social Links
+	LinkedInURL *string `json:"linkedin_url,omitempty"`
+	GitHubURL   *string `json:"github_url,omitempty"`
+	WebsiteURL  *string `json:"website_url,omitempty"`
 }

@@ -36,10 +36,21 @@ export interface Company {
 
 export interface LoginResponse {
   user: {
+    // Basic Info
     id: string;
     firstName: string;
     lastName: string;
     email: string;
+
+    // Profile Info
+    avatarURL?: string;
+    bio?: string;
+    phoneNumber?: string;
+
+    // Social Links
+    linkedInURL?: string;
+    githubURL?: string;
+    websiteURL?: string;
   };
   companies?: Company[];
 }

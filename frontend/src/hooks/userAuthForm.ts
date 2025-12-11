@@ -2,6 +2,7 @@ import { loginLocal, register } from "@/services/authService";
 import { useUserStore } from "@/stores/userStore";
 import type {
   LoginRequest,
+  LoginResponse,
   RegisterRequest,
   User,
 } from "@/utils/types/user.type";
@@ -53,7 +54,7 @@ export function useAuthForm() {
   const registerUser = async (input: RegisterRequest): Promise<void> => {
     try {
       setField("loading", true);
-      const data = (await register(input)) as Partial<User>;
+      const data = (await register(input)) as User;
       setUser(data);
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -70,8 +71,15 @@ export function useAuthForm() {
   const loginUser = async (input: LoginRequest): Promise<void> => {
     try {
       setField("loading", true);
-      const data = (await loginLocal(input)) as Partial<User>;
-      setUser(data);
+      const loginRes: LoginResponse = await loginLocal(input);
+      let { user, companies = [] } = loginRes;
+      user as User;
+      if (companies != null) {
+        
+      }
+
+      setUser(user);
+      setAuth(true);
     } catch (error: unknown) {
       if (error instanceof Error) {
         setField("error", error.message);
@@ -83,6 +91,7 @@ export function useAuthForm() {
       resetForm();
     }
   };
+
   return {
     ...state,
     setField,

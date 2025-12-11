@@ -27,8 +27,8 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const LoginForm = () => {
-  const { email, password, setField, loading, error } = useAuthForm();
-  const { setUser } = useUserStore();
+  const { email, password, setField, loading, error, loginUser } = useAuthForm();
+  const { setUser, user } = useUserStore();
   
   const navigate = useNavigate();
 
@@ -51,14 +51,10 @@ export const LoginForm = () => {
 
     try {
       setField("loading", true);
-      const response = await loginLocal(payload);
-
-      // Update store
-      setUser(response.user);
-      setAuth(true);
-
+      // const response = await loginLocal(payload);
+      await loginUser(payload);
       // Redirect based on company membership
-      if (response.companies && response.companies.length > 0) {
+      if (user?.companies && user.companies.length > 0) {
         navigate("/company");
       } else {
         navigate("/user");

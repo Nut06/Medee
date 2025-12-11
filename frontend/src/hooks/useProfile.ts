@@ -36,8 +36,6 @@ const profileSchema = z.object({
   bio: z.string().optional(),
 });
 
-
-
 export type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export const useProfile = () => {
@@ -176,9 +174,9 @@ export const useProfile = () => {
   // Handlers (Wrappers to match previous API)
   const onSubmit = (data: ProfileFormValues) => {
     updateProfileMutation.mutate(data);
-    
     setUser(data);
   }
+
   const onUploadAvatar = (file: File) => uploadAvatarMutation.mutate(file);
   const onDeleteAvatar = () => deleteAvatarMutation.mutate();
 

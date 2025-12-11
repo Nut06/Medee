@@ -1,4 +1,5 @@
 import { useUserStore } from "@/stores/userStore";
+import { useProfile } from "@/hooks/useProfile";
 import ExperienceSection from "@/components/profile/ExperienceSection";
 import AboutSection from "@/components/profile/AboutSection";
 import SkillsSection from "@/components/profile/SkillsSection";
@@ -18,7 +19,7 @@ import {
 import { AuthNavbar } from "@/components/navbar/AuthNavbar";
 
 export default function ProfilePage() {
-  const { user } = useUserStore();
+  const { user, isLoading } = useProfile(); // Fetch full profile with skills, experiences, etc.
 
   const handleDownloadResume = async () => {
     if (user?.resumeURL) {
@@ -58,118 +59,127 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left Column: User Info */}
-        <div className="md:col-span-1 space-y-6">
-          <div className="bg-card rounded-lg border p-6 shadow-sm sticky top-6">
-            <div className="flex flex-col items-center space-y-4">
-              <AvatarUpload
-                avatarURL={user?.AvatarURL}
-                firstName={user?.firstName}
-                lastName={user?.lastName}
-              />
-              <div className="text-center w-full">
-                <h2 className="text-xl font-semibold">
-                  {user?.firstName} {user?.lastName}
-                </h2>
-                {user?.tagline && (
+      {isLoading ? (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading profile...</p>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Left Column: User Info */}
+          <div className="md:col-span-1 space-y-6">
+            <div className="bg-card rounded-lg border p-6 shadow-sm sticky top-6">
+              <div className="flex flex-col items-center space-y-4">
+                <AvatarUpload
+                  avatarURL={user?.AvatarURL}
+                  firstName={user?.firstName}
+                  lastName={user?.lastName}
+                />
+                <div className="text-center w-full">
+                  <h2 className="text-xl font-semibold">
+                    {user?.firstName} {user?.lastName}
+                  </h2>
+                  {user?.tagline && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {user.tagline}
+                    </p>
+                  )}
                   <p className="text-sm text-muted-foreground mt-1">
-                    {user.tagline}
+                    {user?.email}
                   </p>
-                )}
-                <p className="text-sm text-muted-foreground mt-1">
-                  {user?.email}
-                </p>
 
-                <div className="flex gap-3 justify-center mt-3">
-                  {user?.linkedInURL && (
-                    <a
-                      href={user.linkedInURL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <Linkedin className="h-5 w-5" />
-                    </a>
-                  )}
-                  {user?.githubURL && (
-                    <a
-                      href={user.githubURL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <Github className="h-5 w-5" />
-                    </a>
-                  )}
-                  {user?.websiteURL && (
-                    <a
-                      href={user.websiteURL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <Globe className="h-5 w-5" />
-                    </a>
-                  )}
-                </div>
+                  <div className="flex gap-3 justify-center mt-3">
+                    {user?.linkedInURL && (
+                      <a
+                        href={user.linkedInURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        <Linkedin className="h-5 w-5" />
+                      </a>
+                    )}
+                    {user?.githubURL && (
+                      <a
+                        href={user.githubURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        <Github className="h-5 w-5" />
+                      </a>
+                    )}
+                    {user?.websiteURL && (
+                      <a
+                        href={user.websiteURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        <Globe className="h-5 w-5" />
+                      </a>
+                    )}
+                  </div>
 
-                <div className="pt-4 w-full space-y-2">
-                  <Button
-                    variant="default"
-                    className="w-full"
-                    onClick={handleDownloadResume}
-                    disabled={!user?.resumeURL}
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    Download Resume
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleShareProfile}
-                  >
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Share Profile
-                  </Button>
-                  <EditProfileDialog />
+                  <div className="pt-4 w-full space-y-2">
+                    <Button
+                      variant="default"
+                      className="w-full"
+                      onClick={handleDownloadResume}
+                      disabled={!user?.resumeURL}
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Resume
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleShareProfile}
+                    >
+                      <Share2 className="mr-2 h-4 w-4" />
+                      Share Profile
+                    </Button>
+                    <EditProfileDialog />
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Profile Completeness Card */}
+            <ProfileCompletenessCard />
           </div>
 
-          {/* Profile Completeness Card */}
-          <ProfileCompletenessCard />
+          {/* Right Column: Details with Tabs */}
+          <div className="md:col-span-2">
+            <Tabs defaultValue="about" className="w-full">
+              <TabsList className="grid w-full grid-cols-4 mb-6">
+                <TabsTrigger value="about">About</TabsTrigger>
+                <TabsTrigger value="experience">Experience</TabsTrigger>
+                <TabsTrigger value="skills">Skills</TabsTrigger>
+                <TabsTrigger value="projects">Projects</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="about" className="space-y-6">
+                <AboutSection />
+              </TabsContent>
+
+              <TabsContent value="experience" className="space-y-6">
+                <ExperienceSection />
+              </TabsContent>
+
+              <TabsContent value="skills" className="space-y-6">
+                <SkillsSection />
+              </TabsContent>
+
+              <TabsContent value="projects" className="space-y-6">
+                <ProjectsSection />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
-
-        {/* Right Column: Details with Tabs */}
-        <div className="md:col-span-2">
-          <Tabs defaultValue="about" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-6">
-              <TabsTrigger value="about">About</TabsTrigger>
-              <TabsTrigger value="experience">Experience</TabsTrigger>
-              <TabsTrigger value="skills">Skills</TabsTrigger>
-              <TabsTrigger value="projects">Projects</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="about" className="space-y-6">
-              <AboutSection />
-            </TabsContent>
-
-            <TabsContent value="experience" className="space-y-6">
-              <ExperienceSection />
-            </TabsContent>
-
-            <TabsContent value="skills" className="space-y-6">
-              <SkillsSection />
-            </TabsContent>
-
-            <TabsContent value="projects" className="space-y-6">
-              <ProjectsSection />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
