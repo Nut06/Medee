@@ -87,6 +87,37 @@ func (r *userRepository) DeleteAvatar(ctx context.Context, id string) (*domain.U
 	return &user, nil
 }
 
+func (r *userRepository) UploadResume(ctx context.Context, id string, file *multipart.FileHeader) (*domain.User, error) {
+	// In a real implementation, upload to S3/GCS. Simulating here.
+	resumeURL := "https://example.com/uploads/resumes/" + file.Filename
+
+	var user domain.User
+	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	user.ResumeURL = &resumeURL
+	if err := r.db.WithContext(ctx).Save(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *userRepository) DeleteResume(ctx context.Context, id string) (*domain.User, error) {
+	var user domain.User
+	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	user.ResumeURL = nil
+	if err := r.db.WithContext(ctx).Save(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func (r *userRepository) GetUserCompanies(ctx context.Context, userID string) ([]domain.Company, error) {
 	var members []domain.CompanyMember
 	if err := r.db.WithContext(ctx).Preload("Company").Where("user_id = ?", userID).Find(&members).Error; err != nil {

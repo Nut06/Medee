@@ -1,10 +1,10 @@
 package useradapter
 
 import (
+	skilladapter "backend/internal/adapter/skill"
 	userapp "backend/internal/application/userapp"
 	"backend/internal/domain/domain"
 	user "backend/internal/domain/user"
-	skilladapter "backend/internal/adapter/skill"
 	"errors"
 	"fmt"
 
@@ -67,6 +67,29 @@ func (h *HTTPHandler) DeleteAvatar(c *fiber.Ctx) error {
 		return h.handleError(err)
 	}
 	return c.JSON(user)
+}
+
+func (h *HTTPHandler) UploadResume(c *fiber.Ctx) error {
+	userId := c.Locals("user_id").(string)
+	file, err := c.FormFile("resume")
+	if err != nil {
+		return h.handleError(user.ErrInvalidRequestBody)
+	}
+
+	res, err := h.usecase.UploadResume(c.Context(), userId, file)
+	if err != nil {
+		return h.handleError(err)
+	}
+	return c.JSON(res)
+}
+
+func (h *HTTPHandler) DeleteResume(c *fiber.Ctx) error {
+	userId := c.Locals("user_id").(string)
+	res, err := h.usecase.DeleteResume(c.Context(), userId)
+	if err != nil {
+		return h.handleError(err)
+	}
+	return c.JSON(res)
 }
 
 func (h *HTTPHandler) GetFullProfile(c *fiber.Ctx) error {

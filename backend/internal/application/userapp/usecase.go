@@ -89,6 +89,24 @@ func (s *Usecase) DeleteAvatar(ctx context.Context, id string) (*user.UserProfil
 	return user.ToUserProfileResponse(domainUser), nil
 }
 
+
+func (s *Usecase) UploadResume(ctx context.Context, id string, file *multipart.FileHeader) (*user.UserProfileResponse, error) {
+	domainUser, err := s.userRepo.UploadResume(ctx, id, file)
+	if err != nil {
+		return nil, err
+	}
+	return user.ToUserProfileResponse(domainUser), nil
+}
+
+// DeleteResume deletes resume and returns updated profile
+func (s *Usecase) DeleteResume(ctx context.Context, id string) (*user.UserProfileResponse, error) {
+	domainUser, err := s.userRepo.DeleteResume(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return user.ToUserProfileResponse(domainUser), nil
+}
+
 // GetFullProfile returns complete user profile with all related data
 func (s *Usecase) GetFullProfile(ctx context.Context, id string) (*user.FullProfileResponse, error) {
 	domainUser, err := s.userRepo.GetFullProfile(ctx, id)

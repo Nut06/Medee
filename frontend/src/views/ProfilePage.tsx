@@ -38,7 +38,7 @@ export default function ProfilePage() {
   };
 
   const handleShareProfile = async () => {
-    if (user?.id) {
+    if (user.id) {
       try {
         const link = getShareableLink(user.id);
         await copyToClipboard(link);
@@ -73,25 +73,25 @@ export default function ProfilePage() {
             <div className="bg-card rounded-lg border p-6 shadow-sm sticky top-6">
               <div className="flex flex-col items-center space-y-4">
                 <AvatarUpload
-                  avatarURL={user?.AvatarURL}
-                  firstName={user?.firstName}
-                  lastName={user?.lastName}
+                  avatarURL={user.AvatarURL}
+                  firstName={user.firstName}
+                  lastName={user.lastName}
                 />
                 <div className="text-center w-full">
                   <h2 className="text-xl font-semibold">
-                    {user?.firstName} {user?.lastName}
+                    {user.firstName} {user.lastName}
                   </h2>
-                  {user?.tagline && (
+                  {user.tagline && (
                     <p className="text-sm text-muted-foreground mt-1">
                       {user.tagline}
                     </p>
                   )}
                   <p className="text-sm text-muted-foreground mt-1">
-                    {user?.email}
+                    {user.email}
                   </p>
 
                   <div className="flex gap-3 justify-center mt-3">
-                    {user?.linkedInURL && (
+                    {user.linkedInURL && (
                       <a
                         href={user.linkedInURL}
                         target="_blank"
@@ -101,7 +101,7 @@ export default function ProfilePage() {
                         <Linkedin className="h-5 w-5" />
                       </a>
                     )}
-                    {user?.githubURL && (
+                    {user.githubURL && (
                       <a
                         href={user.githubURL}
                         target="_blank"
@@ -111,7 +111,7 @@ export default function ProfilePage() {
                         <Github className="h-5 w-5" />
                       </a>
                     )}
-                    {user?.websiteURL && (
+                    {user.websiteURL && (
                       <a
                         href={user.websiteURL}
                         target="_blank"
@@ -128,7 +128,7 @@ export default function ProfilePage() {
                       variant="default"
                       className="w-full"
                       onClick={handleDownloadResume}
-                      disabled={!user?.resumeURL}
+                      disabled={!user.resumeURL}
                     >
                       <Download className="mr-2 h-4 w-4" />
                       Download Resume

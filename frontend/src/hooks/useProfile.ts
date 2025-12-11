@@ -6,6 +6,8 @@ import {
   deleteAvatar,
   updateUser,
   uploadAvatar,
+  uploadResume,
+  deleteResume,
   addExperience,
   updateExperience,
   deleteExperience,
@@ -78,7 +80,7 @@ export const useProfile = () => {
     setUser(data);
     toast.success(message);
   };
-  
+
   const onError = (error: any, message: string) => {
     console.error(error);
     toast.error(message);
@@ -101,6 +103,18 @@ export const useProfile = () => {
     mutationFn: deleteAvatar,
     onSuccess: (data) => onSuccess(data, "Avatar deleted successfully"),
     onError: (error) => onError(error, "Failed to delete avatar"),
+  });
+
+  const uploadResumeMutation = useMutation({
+    mutationFn: uploadResume,
+    onSuccess: (data) => onSuccess(data, "Resume uploaded successfully"),
+    onError: (error) => onError(error, "Failed to upload resume"),
+  });
+
+  const deleteResumeMutation = useMutation({
+    mutationFn: deleteResume,
+    onSuccess: (data) => onSuccess(data, "Resume deleted successfully"),
+    onError: (error) => onError(error, "Failed to delete resume"),
   });
 
   // Experience Mutations
@@ -174,10 +188,13 @@ export const useProfile = () => {
   const onSubmit = (data: ProfileFormValues) => {
     updateProfileMutation.mutate(data);
     setUser(data);
-  }
+  };
 
   const onUploadAvatar = (file: File) => uploadAvatarMutation.mutate(file);
   const onDeleteAvatar = () => deleteAvatarMutation.mutate();
+
+  const onUploadResume = (file: File) => uploadResumeMutation.mutate(file);
+  const onDeleteResume = () => deleteResumeMutation.mutate();
 
   const onAddExperience = (data: any) => addExperienceMutation.mutate(data);
   const onUpdateExperience = (id: string, data: any) =>
@@ -226,7 +243,10 @@ export const useProfile = () => {
     updateSkillsMutation.isPending ||
     addProjectMutation.isPending ||
     updateProjectMutation.isPending ||
-    deleteProjectMutation.isPending;
+    updateProjectMutation.isPending ||
+    deleteProjectMutation.isPending ||
+    uploadResumeMutation.isPending ||
+    deleteResumeMutation.isPending;
 
   return {
     form,
@@ -243,6 +263,8 @@ export const useProfile = () => {
     onAddProject,
     onUpdateProject,
     onDeleteProject,
+    onUploadResume,
+    onDeleteResume,
     isLoading, // Kept for backward compatibility if needed elsewhere
     isSaving, // New specific state for save buttons
     user,

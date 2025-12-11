@@ -84,6 +84,7 @@ type UserProfileResponse struct {
 	LastName    string    `json:"lastName"`
 	Email       string    `json:"email"`
 	AvatarURL   *string   `json:"AvatarURL,omitempty"`
+	ResumeURL   *string   `json:"resumeURL,omitempty"`
 	Skill       *SkillDTO `json:"skill,omitempty"`
 	Bio         *string   `json:"bio,omitempty"`
 	LinkedInURL *string   `json:"linkedInURL,omitempty"`
@@ -97,6 +98,7 @@ type FullProfileResponse struct {
 	LastName    string                   `json:"lastName"`
 	Email       string                   `json:"email"`
 	AvatarURL   *string                  `json:"AvatarURL,omitempty"`
+	ResumeURL   *string                  `json:"resumeURL,omitempty"`
 	Bio         *string                  `json:"bio,omitempty"`
 	LinkedInURL *string                  `json:"linkedInURL,omitempty"`
 	GitHubURL   *string                  `json:"githubURL,omitempty"`

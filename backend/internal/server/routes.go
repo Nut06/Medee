@@ -35,7 +35,7 @@ func authRoute(router fiber.Router, db *gorm.DB) {
 	router.Post("/register", h.Register)
 	router.Post("/login", h.Login)
 	router.Post("/refresh", h.Refresh)
-	router.Post("/logout",h.Logout)
+	router.Post("/logout", h.Logout)
 	// router.Post("/logout", AuthMiddleware, h.LogoutWithUserId)
 }
 
@@ -52,6 +52,8 @@ func userRoute(router fiber.Router, db *gorm.DB) {
 	router.Put("", h.UpdateProfile)
 	router.Put("/avatar", h.UploadAvatar)
 	router.Delete("/avatar", h.DeleteAvatar)
+	router.Put("/resume", h.UploadResume)
+	router.Delete("/resume", h.DeleteResume)
 
 	// Candidate Features
 	router.Get("/profile", h.GetFullProfile)

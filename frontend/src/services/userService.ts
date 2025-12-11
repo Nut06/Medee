@@ -38,6 +38,24 @@ export const deleteAvatar = async (): Promise<User> => {
   return data;
 };
 
+export const uploadResume = async (file: File): Promise<User> => {
+  const formData = new FormData();
+  formData.append("resume", file);
+  const res = await api.put<User>(`/user/resume`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  const data = (await res.data) as User;
+  return data;
+};
+
+export const deleteResume = async (): Promise<User> => {
+  const res = await api.delete<User>(`/user/resume`);
+  const data = (await res.data) as User;
+  return data;
+};
+
 // Candidate Features
 
 export const getFullProfile = async (): Promise<User> => {

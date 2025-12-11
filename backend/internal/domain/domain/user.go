@@ -2,6 +2,7 @@ package domain
 
 import (
 	"time"
+
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -23,6 +24,7 @@ type User struct {
 	PhoneNumber      *string
 	Bio              *string
 	AvatarURL        *string           `json:"avatar_url"`
+	ResumeURL        *string           `json:"resume_url"`
 	LinkedInURL      *string           `json:"linkedin_url"`
 	GitHubURL        *string           `json:"github_url"`
 	WebsiteURL       *string           `json:"website_url"`

@@ -1,9 +1,11 @@
-import { Upload, FileText, X } from "lucide-react";
+import { Upload, FileText, X, Download, Trash2 } from "lucide-react";
 import { useState, useRef, type ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useProfile } from "@/hooks/useProfile";
 
 export function ResumeSection() {
+  const { user, onUploadResume, onDeleteResume, isSaving } = useProfile();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -49,9 +51,46 @@ export function ResumeSection() {
     }
   };
 
+  const handleUpload = () => {
+    if (selectedFile) {
+      onUploadResume(selectedFile);
+      setSelectedFile(null); // Clear selection after upload start
+    }
+  };
+
+  const handleDelete = () => {
+    if (confirm("Are you sure you want to delete your resume?")) {
+      onDeleteResume();
+    }
+  };
+
+  const hasResume = !!user?.resumeURL;
+
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">Upload your Resume</p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Upload your Resume (PDF, DOCX)
+        </p>
+        {hasResume && (
+          <div className="flex gap-2">
+            <a href={user.resumeURL} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="sm">
+                <Download className="mr-2 h-4 w-4" />
+                Download Current Resume
+              </Button>
+            </a>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDelete}
+              disabled={isSaving}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
 
       {!selectedFile ? (
         <Card
@@ -88,9 +127,19 @@ export function ResumeSection() {
                 </p>
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={removeFile}>
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={handleUpload} disabled={isSaving}>
+                {isSaving ? "Uploading..." : "Upload"}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={removeFile}
+                disabled={isSaving}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </Card>
       )}

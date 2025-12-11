@@ -34,6 +34,8 @@ type UserRepository interface {
 	Update(ctx context.Context, id string, req *domain.User) (*domain.User, error)
 	UploadAvatar(ctx context.Context, id string, file *multipart.FileHeader) (*domain.User, error)
 	DeleteAvatar(ctx context.Context, id string) (*domain.User, error)
+	UploadResume(ctx context.Context, id string, file *multipart.FileHeader) (*domain.User, error)
+	DeleteResume(ctx context.Context, id string) (*domain.User, error)
 	GetUserCompanies(ctx context.Context, userID string) ([]domain.Company, error)
 
 	// Candidate Features
