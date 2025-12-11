@@ -43,7 +43,7 @@ function reducer(state: AuthFormState, action: Action): AuthFormState {
 
 export function useAuthForm() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { setUser } = useUserStore();
+  const { setUser, setAuth } = useUserStore();
 
   const setField = (key: keyof AuthFormState, val: string | boolean) => {
     dispatch({ type: "SET_FIELD", key, val });
@@ -72,12 +72,12 @@ export function useAuthForm() {
     try {
       setField("loading", true);
       const loginRes: LoginResponse = await loginLocal(input);
-      let { user, companies = [] } = loginRes;
-      user as User;
+      const { user: rawUser, companies = [] } = loginRes;
+      const user = rawUser as User;
       if (companies != null) {
-        
+        user.companies = companies;
       }
-
+      
       setUser(user);
       setAuth(true);
     } catch (error: unknown) {

@@ -85,7 +85,7 @@ func (s *JWTService) decodeToken(tokenString, expectedType string) (uuid.UUID, e
 
 var _ authport.TokenService = (*JWTService)(nil)
 
-	func (s *JWTService) GenerateAccess(ctx context.Context, userID uuid.UUID) (string, time.Time, error) {
+func (s *JWTService) GenerateAccess(ctx context.Context, userID uuid.UUID) (string, time.Time, error) {
 	expiresAt := time.Now().Add(s.accessTTL)
 	claims := jwt.MapClaims{
 		"sub": userID.String(),

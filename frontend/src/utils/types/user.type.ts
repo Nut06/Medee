@@ -35,23 +35,9 @@ export interface Company {
 }
 
 export interface LoginResponse {
-  user: {
-    // Basic Info
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-
-    // Profile Info
-    avatarURL?: string;
-    bio?: string;
-    phoneNumber?: string;
-
-    // Social Links
-    linkedInURL?: string;
-    githubURL?: string;
-    websiteURL?: string;
-  };
+  user: Pick<User, "id" | "firstName" | "lastName" | "email" 
+      | "AvatarURL" | "bio" | "phoneNumber" | "linkedInURL" 
+      | "githubURL" | "websiteURL">;
   companies?: Company[];
 }
 
@@ -63,12 +49,9 @@ export interface RegisterRequest {
 }
 
 export interface RegisterResponse {
-  user: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
+  user: Pick<User, "id" | "firstName" | "lastName" | "email" 
+      | "AvatarURL" | "bio" | "phoneNumber" | "linkedInURL" 
+      | "githubURL" | "websiteURL">;
   companies?: Company[];
 }
 

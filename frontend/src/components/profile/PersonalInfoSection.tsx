@@ -35,16 +35,16 @@ export function PersonalInfoSection() {
   const form = useForm<PersonalInfoValues>({
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
-      email: user?.email || "",
-      bio: user?.bio || "",
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      email: user.email || "",
+      bio: user.bio || "",
     },
     values: {
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
-      email: user?.email || "",
-      bio: user?.bio || "",
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      email: user.email || "",
+      bio: user.bio || "",
     },
   });
 
@@ -64,7 +64,7 @@ export function PersonalInfoSection() {
               <FormItem>
                 <FormLabel>First Name</FormLabel>
                 <FormControl>
-                  <Input placeholder={user?.firstName || ""} {...field} />
+                  <Input placeholder={user.firstName || ""} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -77,7 +77,7 @@ export function PersonalInfoSection() {
               <FormItem>
                 <FormLabel>Last Name</FormLabel>
                 <FormControl>
-                  <Input placeholder={user?.lastName || ""} {...field} />
+                  <Input placeholder={user.lastName || ""} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -95,7 +95,7 @@ export function PersonalInfoSection() {
               <FormControl>
                 <Input
                   type="email"
-                  placeholder={user?.email || "email@example.com"}
+                  placeholder={user.email || "email@example.com"}
                   {...field}
                 />
               </FormControl>
@@ -113,7 +113,7 @@ export function PersonalInfoSection() {
               <FormLabel>About Me</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder={user?.bio || "Tell us about yourself..."}
+                  placeholder={user.bio || "Tell us about yourself..."}
                   rows={5}
                   {...field}
                 />

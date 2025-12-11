@@ -3,7 +3,7 @@ import type { User } from '@/utils/types/user.type';
 import {create} from 'zustand';
 
 interface UserState {
-    user: User | null;
+    user: User;
     setUser:(user:User | Partial<User> | null, key?: keyof User, value?:unknown) => void;
     isAuth: boolean;
     setAuth: (b:boolean) => void;
@@ -11,7 +11,7 @@ interface UserState {
 }
 
 export const useUserStore = create<UserState>((set) => ({
-    user: null,
+    user: {},
     
     setUser: (payload, key, value) => {
     if (key) {
@@ -22,7 +22,7 @@ export const useUserStore = create<UserState>((set) => ({
     }
 
     if (!payload) {
-        set({ user: null, isAuth: false })
+        set({ user: {}, isAuth: false })
         return
     }
 
@@ -40,7 +40,7 @@ export const useUserStore = create<UserState>((set) => ({
     clearAuth: async () => {
         await logout();
         set({
-            user: null,
+            user: {},
             isAuth: false
         })
     },

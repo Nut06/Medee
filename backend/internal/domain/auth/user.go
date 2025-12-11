@@ -14,8 +14,8 @@ type User struct {
 }
 
 type RegisterRequest struct {
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
 }
@@ -44,17 +44,17 @@ type LoginResponse struct {
 type UserResponse struct {
 	// Basic Info
 	ID        string `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 	Email     string `json:"email"`
 
 	// Profile Info
-	AvatarURL   *string `json:"avatar_url,omitempty"`
+	AvatarURL   *string `json:"AvatarURL,omitempty"`
 	Bio         *string `json:"bio,omitempty"`
-	PhoneNumber *string `json:"phone_number,omitempty"`
+	PhoneNumber *string `json:"phoneNumber,omitempty"`
 
 	// Social Links
-	LinkedInURL *string `json:"linkedin_url,omitempty"`
-	GitHubURL   *string `json:"github_url,omitempty"`
-	WebsiteURL  *string `json:"website_url,omitempty"`
+	LinkedInURL *string `json:"linkedInURL,omitempty"`
+	GitHubURL   *string `json:"githubURL,omitempty"`
+	WebsiteURL  *string `json:"websiteURL,omitempty"`
 }

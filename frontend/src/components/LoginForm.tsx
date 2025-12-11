@@ -16,7 +16,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuthForm } from "@/hooks/userAuthForm";
 import type { LoginRequest } from "@/utils/types/user.type";
-import { loginLocal } from "@/services/authService";
 import { useUserStore } from "@/stores/userStore";
 
 const loginSchema = z.object({
@@ -28,7 +27,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const LoginForm = () => {
   const { email, password, setField, loading, error, loginUser } = useAuthForm();
-  const { setUser, user } = useUserStore();
+  const { user } = useUserStore();
   
   const navigate = useNavigate();
 
@@ -51,16 +50,13 @@ export const LoginForm = () => {
 
     try {
       setField("loading", true);
-      // const response = await loginLocal(payload);
       await loginUser(payload);
-      // Redirect based on company membership
-      if (user?.companies && user.companies.length > 0) {
+      if (user.companies && user.companies.length > 0) {
         navigate("/company");
       } else {
         navigate("/user");
       }
     } catch (error) {
-      // Error handling is done in useAuthForm, but we need to catch here to stop navigation
       console.error("Login failed:", error);
     } finally {
       setField("loading", false);
@@ -170,7 +166,4 @@ export const LoginForm = () => {
     </div>
   );
 };
-function setAuth(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}
 

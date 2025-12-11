@@ -21,7 +21,6 @@ import {
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import type { Skill } from "@/utils/types/user.type";
 
 const profileSchema = z.object({
   firstName: z
@@ -59,17 +58,17 @@ export const useProfile = () => {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
-      email: user?.email || "",
-      bio: user?.bio || "",
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      email: user.email || "",
+      bio: user.bio || "",
     },
     values: {
       // Update form when user data changes
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
-      email: user?.email || "",
-      bio: user?.bio || "",
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      email: user.email || "",
+      bio: user.bio || "",
     },
   });
 

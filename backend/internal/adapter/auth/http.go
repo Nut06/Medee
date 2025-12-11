@@ -26,7 +26,7 @@ type CookieConfig struct {
 
 var (
 	thirtyMin = 30 * time.Minute
-	sevenDays = 7 * 24 * time.Hour
+	sevenDays = 30 * 24 * time.Hour // Increased to 30 days
 )
 
 type HTTPHandler struct {
