@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+import type { Skill } from "@/utils/types/user.type";
 
 const profileSchema = z.object({
   firstName: z
@@ -34,6 +35,8 @@ const profileSchema = z.object({
   email: z.email("Invalid email address").optional(),
   bio: z.string().optional(),
 });
+
+
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;
 
@@ -171,8 +174,11 @@ export const useProfile = () => {
   });
 
   // Handlers (Wrappers to match previous API)
-  const onSubmit = (data: ProfileFormValues) =>
+  const onSubmit = (data: ProfileFormValues) => {
     updateProfileMutation.mutate(data);
+    
+    setUser(data);
+  }
   const onUploadAvatar = (file: File) => uploadAvatarMutation.mutate(file);
   const onDeleteAvatar = () => deleteAvatarMutation.mutate();
 

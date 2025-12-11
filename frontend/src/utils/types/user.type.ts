@@ -15,6 +15,7 @@ export interface User {
   linkedInURL?: string;
   githubURL?: string;
   websiteURL?: string;
+  educations?: Education[];
   company?: Company;
   companies?: Company[]; // List of companies the user belongs to
   projects?: Project[]; // List of projects the user belongs to

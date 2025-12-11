@@ -7,6 +7,7 @@ import GuestRoute from "./GuestRoute";
 import RequireRole from "./RequireRole";
 import CompanyPage from "@/views/CompanyPage";
 import ProfilePage from "@/views/ProfilePage";
+import EditProfilePage from "@/views/EditProfilePage";
 
 export const AppRoutes = () => {
   return (
@@ -25,6 +26,7 @@ export const AppRoutes = () => {
         </Route>
         <Route element={<RequireRole role="user" />}>
           <Route path="/user" element={<ProfilePage />} />
+          <Route path="/user/edit-profile" element={<EditProfilePage />} />
         </Route>
       </Route>
 

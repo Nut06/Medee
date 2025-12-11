@@ -16,7 +16,77 @@ import { Input } from "@/components/ui/input";
 import { useProfile } from "@/hooks/useProfile";
 import type { Skill } from "@/utils/types/user.type";
 
-export default function SkillsSection() {
+// Standalone Skills Section for Edit Profile Page
+export function SkillsSection() {
+  const { user, onUpdateSkills, isSaving } = useProfile();
+  const [tempSkills, setTempSkills] = useState<Skill[]>([]);
+  const [newSkill, setNewSkill] = useState("");
+
+  useState(() => {
+    setTempSkills(user?.skills || []);
+  });
+
+  const handleAddSkill = () => {
+    if (newSkill.trim()) {
+      if (!tempSkills.some((s) => s.name === newSkill.trim())) {
+        setTempSkills([...tempSkills, { name: newSkill.trim() }]);
+      }
+      setNewSkill("");
+    }
+  };
+
+  const handleRemoveSkill = (skillName: string) => {
+    setTempSkills(tempSkills.filter((s) => s.name !== skillName));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddSkill();
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <Input
+          placeholder="Type a skill and press Enter"
+          value={newSkill}
+          onChange={(e) => setNewSkill(e.target.value)}
+          onKeyDown={handleKeyDown}
+        />
+        <Button onClick={handleAddSkill} size="icon">
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+      <div className="flex flex-wrap gap-2 min-h-[100px] p-4 border rounded-md bg-muted/50">
+        {tempSkills.length === 0 ? (
+          <p className="text-sm text-muted-foreground w-full text-center self-center">
+            No skills added yet.
+          </p>
+        ) : (
+          tempSkills.map((skill, index) => (
+            <Badge key={index} variant="secondary" className="gap-1">
+              {skill.name}
+              <button
+                onClick={() => handleRemoveSkill(skill.name || "")}
+                className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+              </button>
+            </Badge>
+          ))
+        )}
+      </div>
+      <p className="text-sm text-muted-foreground">
+        Add up to 15 skills. Press Enter or click + to add.
+      </p>
+    </div>
+  );
+}
+
+// Card version for Profile Page
+export default function SkillsSectionCard() {
   const { user, onUpdateSkills, isSaving } = useProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [tempSkills, setTempSkills] = useState<Skill[]>([]);

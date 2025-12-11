@@ -36,6 +36,10 @@ type Education struct {
 	UserID         uuid.UUID `gorm:"type:uuid;index"`
 	InstituteID    uuid.UUID `gorm:"type:uuid;index"`
 	FieldOfStudyID uuid.UUID `gorm:"type:uuid;index"`
+	StartDate      *time.Time
+	EndDate        *time.Time
+	GPA            *float64
+	Description    *string `gorm:"type:text"`
 	Degree         string
 	GraduationYear *int
 }
