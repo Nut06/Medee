@@ -4,12 +4,15 @@ import (
 	authadapter "backend/internal/adapter/auth"
 	"backend/internal/domain/auth"
 	"fmt"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func AuthMiddleware(c *fiber.Ctx) error {
-	tokenString := c.Cookies("access_token")
+	tokenString := c.Get("Authorization")
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
 	fmt.Println("Form auth middleware")
 	if tokenString == "" {
 		return fiber.NewError(fiber.StatusUnauthorized, auth.ErrInvalidToken.Error())

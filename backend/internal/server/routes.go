@@ -6,7 +6,6 @@ import (
 	skilladapter "backend/internal/adapter/skill"
 	useradapter "backend/internal/adapter/user"
 	"fmt"
-
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )

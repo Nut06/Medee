@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
 
 export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -8,12 +8,24 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+api.interceptors.request.use(
+  (request) => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken) {
+      request.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return request;
+  },
+  (error) => Promise.reject(error)
+);
+
 axios.interceptors.response.use(
-  (response) => response,
+  (response) => response as AxiosResponse,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401) {
+    if (error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
       try {
         await api.post("/auth/refresh");
         return api(originalRequest);

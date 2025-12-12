@@ -39,6 +39,7 @@ type LoginRequest struct {
 type LoginResponse struct {
 	User      UserResponse `json:"user"`
 	Companies []Company    `json:"companies"`
+	Token     string       `json:"accessToken"`
 }
 
 type UserResponse struct {

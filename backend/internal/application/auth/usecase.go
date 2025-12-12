@@ -55,7 +55,7 @@ func (uc *Usecase) Register(ctx context.Context, cmd authport.RegisterCommand) (
 	}
 
 	// Generate Tokens
-	accessToken, accessExp, err := uc.tokens.GenerateAccess(ctx, created.ID)
+	accessToken, err := uc.tokens.GenerateAccess(ctx, created.ID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -79,7 +79,6 @@ func (uc *Usecase) Register(ctx context.Context, cmd authport.RegisterCommand) (
 		}, &auth.TokenPair{
 			AccessToken:      accessToken,
 			RefreshToken:     refreshToken,
-			AccessExpiresAt:  accessExp,
 			RefreshExpiresAt: refreshExp,
 		}, nil
 }
@@ -97,10 +96,11 @@ func (uc *Usecase) Login(ctx context.Context, cmd authport.LoginCommand) (*authp
 		return nil, nil, auth.ErrInvalidCredential
 	}
 
-	accessToken, accessExp, err := uc.tokens.GenerateAccess(ctx, u.ID)
+	accessToken, err := uc.tokens.GenerateAccess(ctx, u.ID)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	refreshToken, refreshExp, err := uc.tokens.GenerateRefresh(ctx, u.ID)
 	if err != nil {
 		return nil, nil, err
@@ -129,7 +129,6 @@ func (uc *Usecase) Login(ctx context.Context, cmd authport.LoginCommand) (*authp
 		}, &auth.TokenPair{
 			AccessToken:      accessToken,
 			RefreshToken:     refreshToken,
-			AccessExpiresAt:  accessExp,
 			RefreshExpiresAt: refreshExp,
 		}, nil
 }
@@ -153,7 +152,7 @@ func (uc *Usecase) Refresh(ctx context.Context, cmd authport.RefreshCommand) (*a
 		return nil, nil, auth.ErrInvalidRefreshToken
 	}
 
-	accessToken, accessExp, err := uc.tokens.GenerateAccess(ctx, u.ID)
+	accessToken, err := uc.tokens.GenerateAccess(ctx, u.ID)
 	if err != nil {
 		return nil, nil, auth.ErrInvalidRefreshToken
 	}
@@ -182,7 +181,6 @@ func (uc *Usecase) Refresh(ctx context.Context, cmd authport.RefreshCommand) (*a
 		}, &auth.TokenPair{
 			AccessToken:      accessToken,
 			RefreshToken:     refreshToken,
-			AccessExpiresAt:  accessExp,
 			RefreshExpiresAt: refreshExp,
 		}, nil
 }

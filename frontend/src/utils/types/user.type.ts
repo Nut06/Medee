@@ -39,6 +39,7 @@ export interface LoginResponse {
       | "AvatarURL" | "bio" | "phoneNumber" | "linkedInURL" 
       | "githubURL" | "websiteURL">;
   companies?: Company[];
+  accessToken:string
 }
 
 export interface RegisterRequest {

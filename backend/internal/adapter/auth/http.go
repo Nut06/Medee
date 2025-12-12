@@ -72,7 +72,7 @@ func (h *HTTPHandler) Refresh(c *fiber.Ctx) error {
 		return h.handleError(err)
 	}
 
-	h.setCookies(c, tokens)
+	h.setRefreshCookie(c, tokens)
 
 	// Fetch full user from database
 	fullUser, err := h.userRepo.FindById(ctx, res.ID)
@@ -108,7 +108,7 @@ func (h *HTTPHandler) Register(c *fiber.Ctx) error {
 		return h.handleError(err)
 	}
 
-	h.setCookies(c, tokens)
+	h.setRefreshCookie(c, tokens)
 
 	// Fetch full user from database
 	ctx := h.context(c)
@@ -139,11 +139,12 @@ func (h *HTTPHandler) Login(c *fiber.Ctx) error {
 		Email:    req.Email,
 		Password: req.Password,
 	})
+
 	if err != nil {
 		return h.handleError(err)
 	}
 
-	h.setCookies(c, tokens)
+	h.setRefreshCookie(c, tokens)
 
 	// Fetch full user from database
 	fullUser, err := h.userRepo.FindById(ctx, res.ID)
@@ -154,6 +155,7 @@ func (h *HTTPHandler) Login(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(auth.LoginResponse{
 		User:      *auth.ToUserResponse(fullUser),
 		Companies: res.Companies,
+		Token:     tokens.AccessToken,
 	})
 }
 
@@ -219,26 +221,8 @@ func (h *HTTPHandler) clearCookies(c *fiber.Ctx) {
 	})
 }
 
-func (h *HTTPHandler) setCookies(c *fiber.Ctx, tokens *auth.TokenPair) {
-	accessMaxAge := h.cfg.AccessMaxAge
-	if accessMaxAge == 0 && !tokens.AccessExpiresAt.IsZero() {
-		accessMaxAge = int(time.Until(tokens.AccessExpiresAt).Seconds())
-	}
+func (h *HTTPHandler) setRefreshCookie(c *fiber.Ctx, tokens *auth.TokenPair) {
 	refreshMaxAge := h.cfg.RefreshMaxAge
-	if refreshMaxAge == 0 && !tokens.RefreshExpiresAt.IsZero() {
-		refreshMaxAge = int(time.Until(tokens.RefreshExpiresAt).Seconds())
-	}
-
-	c.Cookie(&fiber.Cookie{
-		Name:     h.cfg.AccessCookieName,
-		Value:    tokens.AccessToken,
-		Path:     "/",
-		Domain:   "", // empty means current domain
-		HTTPOnly: true,
-		Secure:   h.cfg.Secure,
-		SameSite: "Lax",
-		MaxAge:   accessMaxAge,
-	})
 
 	c.Cookie(&fiber.Cookie{
 		Name:     h.cfg.RefreshCookieName,

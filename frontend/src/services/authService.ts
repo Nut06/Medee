@@ -19,6 +19,7 @@ export const loginLocal = async (
 ): Promise<LoginResponse> => {
   const res = await api.post<LoginResponse>("/auth/login", input);
   const data = (await res.data) as LoginResponse;
+  localStorage.setItem("accessToken", data.accessToken);
   return data;
 };
 

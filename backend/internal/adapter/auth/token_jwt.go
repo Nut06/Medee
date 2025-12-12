@@ -85,7 +85,7 @@ func (s *JWTService) decodeToken(tokenString, expectedType string) (uuid.UUID, e
 
 var _ authport.TokenService = (*JWTService)(nil)
 
-func (s *JWTService) GenerateAccess(ctx context.Context, userID uuid.UUID) (string, time.Time, error) {
+func (s *JWTService) GenerateAccess(ctx context.Context, userID uuid.UUID) (string, error) {
 	expiresAt := time.Now().Add(s.accessTTL)
 	claims := jwt.MapClaims{
 		"sub": userID.String(),
@@ -96,9 +96,9 @@ func (s *JWTService) GenerateAccess(ctx context.Context, userID uuid.UUID) (stri
 	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signed, err := tok.SignedString(s.secret)
 	if err != nil {
-		return "", time.Time{}, err
+		return "", err
 	}
-	return signed, expiresAt, nil
+	return signed, nil
 }
 
 func ParseToken(tokenString string) (*jwt.MapClaims, error) {
