@@ -23,8 +23,8 @@ export function SkillsSection() {
   const [newSkill, setNewSkill] = useState("");
 
   useEffect(() => {
-    setTempSkills(user?.skills || []);
-  }, [user?.skills]);
+    setTempSkills(user.skills || []);
+  }, [user.skills]);
 
   const handleAddSkill = () => {
     if (newSkill.trim()) {
@@ -100,7 +100,7 @@ export default function SkillsSectionCard() {
   const [newSkill, setNewSkill] = useState("");
 
   const handleOpen = () => {
-    setTempSkills(user?.skills || []);
+    setTempSkills(user.skills || []);
     setIsDialogOpen(true);
   };
 
@@ -189,7 +189,7 @@ export default function SkillsSectionCard() {
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-2">
-          {user?.skills && user.skills.length > 0 ? (
+          {user.skills && user.skills.length > 0 ? (
             user.skills.map((skill, index) => (
               <Badge key={index} variant="secondary">
                 {skill.name}

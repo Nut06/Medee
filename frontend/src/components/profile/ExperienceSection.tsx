@@ -207,7 +207,7 @@ export default function ExperienceSection() {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* @ts-ignore */}
-        {user?.experiences?.length === 0 ? (
+        {user.experiences && user.experiences.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
             <div className="flex justify-center mb-4">
               <div className="relative">
@@ -230,7 +230,7 @@ export default function ExperienceSection() {
           </div>
         ) : (
           /* @ts-ignore */
-          user?.experiences?.map((exp: WorkExperience) => (
+          user.experiences.map((exp: WorkExperience) => (
             <div
               key={exp.id}
               className="relative pl-6 border-l-2 border-muted last:border-l-0 pb-6 last:pb-0"

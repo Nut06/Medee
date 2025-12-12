@@ -11,6 +11,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
@@ -28,6 +29,8 @@ var (
 	thirtyMin = 30 * time.Minute
 	sevenDays = 30 * 24 * time.Hour // Increased to 30 days
 )
+
+var validate = validator.New()
 
 type HTTPHandler struct {
 	uc       authport.AuthService
@@ -85,9 +88,12 @@ func (h *HTTPHandler) Refresh(c *fiber.Ctx) error {
 }
 
 func (h *HTTPHandler) Register(c *fiber.Ctx) error {
-
 	var req auth.RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
+		return h.handleError(auth.ErrInvalidRequestBody)
+	}
+
+	if err := validate.Struct(&req); err != nil {
 		return h.handleError(auth.ErrInvalidRequestBody)
 	}
 
@@ -122,6 +128,10 @@ func (h *HTTPHandler) Login(c *fiber.Ctx) error {
 
 	var req auth.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
+		return h.handleError(auth.ErrInvalidRequestBody)
+	}
+
+	if err := validate.Struct(&req); err != nil {
 		return h.handleError(auth.ErrInvalidRequestBody)
 	}
 

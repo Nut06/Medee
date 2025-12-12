@@ -1,4 +1,3 @@
-import { useUserStore } from "@/stores/userStore";
 import { useProfile } from "@/hooks/useProfile";
 import ExperienceSection from "@/components/profile/ExperienceSection";
 import AboutSection from "@/components/profile/AboutSection";
@@ -22,7 +21,7 @@ export default function ProfilePage() {
   const { user, isLoading } = useProfile(); // Fetch full profile with skills, experiences, etc.
 
   const handleDownloadResume = async () => {
-    if (user?.resumeURL) {
+    if (user.resumeURL) {
       try {
         await downloadResume(
           user.resumeURL,

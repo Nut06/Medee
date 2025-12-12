@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUserStore } from "@/stores/userStore";
-import { logout } from "@/services/authService";
 
 export function UserMenu() {
   const { user, clearAuth } = useUserStore();
@@ -28,7 +27,7 @@ export function UserMenu() {
   };
 
   const getInitials = () => {
-    if (!user?.firstName || !user?.lastName) return "U";
+    if (!user.firstName || !user.lastName) return "U";
     return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
   };
 
@@ -37,7 +36,7 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={user?.AvatarURL} alt={user?.firstName} />
+            <AvatarImage src={user.AvatarURL} alt={user.firstName} />
             <AvatarFallback>{getInitials()}</AvatarFallback>
           </Avatar>
         </Button>
@@ -46,10 +45,10 @@ export function UserMenu() {
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {user?.firstName} {user?.lastName}
+              {user.firstName} {user.lastName}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user?.email}
+              {user.email}
             </p>
           </div>
         </DropdownMenuLabel>

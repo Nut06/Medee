@@ -38,7 +38,6 @@ export function ResumeSection() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
       fileInputRef.current!.files = e.dataTransfer.files;
       handleFileChange({ target: { files: e.dataTransfer.files } } as any);
     }
@@ -64,7 +63,7 @@ export function ResumeSection() {
     }
   };
 
-  const hasResume = !!user?.resumeURL;
+  const hasResume = !!user.resumeURL;
 
   return (
     <div className="space-y-6">

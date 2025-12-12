@@ -240,13 +240,13 @@ export default function ProjectsSection() {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* @ts-ignore */}
-        {user?.projects?.length === 0 ? (
+        {user.projects && user.projects.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground border-2 border-dashed rounded-lg">
             <p>No projects added yet.</p>
           </div>
         ) : (
           /* @ts-ignore */
-          user?.projects?.map((project: any) => (
+          user.projects.map((project: any) => (
             <Card key={project.id} className="overflow-hidden">
               {project.imageURL && (
                 <div className="w-full h-48 bg-muted overflow-hidden">

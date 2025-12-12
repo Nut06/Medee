@@ -19,7 +19,7 @@ export function WorkExperienceSection() {
       </div>
 
       <div className="space-y-3">
-        {user?.experiences && user.experiences.length > 0 ? (
+        {user.experiences && user.experiences.length > 0 ? (
           user.experiences.map((exp: any) => (
             <Card key={exp.id} className="p-4">
               <div className="flex items-start justify-between">

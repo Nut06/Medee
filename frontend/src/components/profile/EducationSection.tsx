@@ -19,7 +19,7 @@ export function EducationSection() {
       </div>
 
       <div className="space-y-3">
-        {user?.educations && user.educations.length > 0 ? (
+        {user.educations && user.educations.length > 0 ? (
           user.educations.map((edu: any) => (
             <Card key={edu.id} className="p-4">
               <div className="flex items-start justify-between">

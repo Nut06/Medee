@@ -39,7 +39,7 @@ export default function AboutSection() {
   const form = useForm<AboutFormValues>({
     resolver: zodResolver(aboutSchema),
     defaultValues: {
-      bio: user?.bio || "",
+      bio: user.bio || "",
     },
   });
 
@@ -99,7 +99,7 @@ export default function AboutSection() {
         </Dialog>
       </CardHeader>
       <CardContent>
-        {user?.bio ? (
+        {user.bio ? (
           <p className="text-muted-foreground whitespace-pre-line">
             {user.bio}
           </p>
