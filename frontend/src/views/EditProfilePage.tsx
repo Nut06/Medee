@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/accordion";
 import { PersonalInfoSection } from "@/components/profile/PersonalInfoSection";
 import { SkillsSection } from "@/components/profile/SkillsSection";
-import { WorkExperienceSection } from "@/components/profile/WorkExperienceSection";
+import ExperienceSection from "@/components/profile/ExperienceSection";
 import { EducationSection } from "@/components/profile/EducationSection";
 import { PortfolioSection } from "@/components/profile/PortfolioSection";
 import { ResumeSection } from "@/components/profile/ResumeSection";
+import { WorkExperienceSection } from "@/components/profile/WorkExperienceSection";
 
 export default function EditProfilePage() {
   return (

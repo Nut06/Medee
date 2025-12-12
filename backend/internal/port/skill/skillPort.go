@@ -1,4 +1,4 @@
-package skill_port
+package skillPort
 
 import (
 	"backend/internal/domain/domain"

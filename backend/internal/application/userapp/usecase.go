@@ -3,7 +3,7 @@ package userapp
 import (
 	"backend/internal/domain/domain"
 	"backend/internal/domain/user"
-	skillport "backend/internal/port/skill"
+	skillport "backend/internal/port/skillPort"
 	userport "backend/internal/port/user"
 	"context"
 	"mime/multipart"
@@ -88,7 +88,6 @@ func (s *Usecase) DeleteAvatar(ctx context.Context, id string) (*user.UserProfil
 	}
 	return user.ToUserProfileResponse(domainUser), nil
 }
-
 
 func (s *Usecase) UploadResume(ctx context.Context, id string, file *multipart.FileHeader) (*user.UserProfileResponse, error) {
 	domainUser, err := s.userRepo.UploadResume(ctx, id, file)

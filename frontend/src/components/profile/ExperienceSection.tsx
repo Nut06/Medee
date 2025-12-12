@@ -42,7 +42,7 @@ type ExperienceFormValues = z.infer<typeof experienceSchema>;
 export default function ExperienceSection() {
   const { user, onAddExperience, onUpdateExperience, onDeleteExperience } =
     useProfile();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const form = useForm<ExperienceFormValues>({
@@ -92,7 +92,14 @@ export default function ExperienceSection() {
       endDate: "",
       description: "",
     });
-    setIsDialogOpen(true);
+  };
+
+  const handleDialogChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (open && !editingId) {
+      // Reset form when opening dialog for adding new experience
+      handleAddNew();
+    }
   };
 
   return (
@@ -102,9 +109,9 @@ export default function ExperienceSection() {
           <Briefcase className="h-5 w-5 text-primary" />
           <CardTitle>Experience</CardTitle>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" onClick={handleAddNew}>
+            <Button variant="outline" size="sm">
               <Plus className="mr-2 h-4 w-4" />
               Add Experience
             </Button>
@@ -223,7 +230,13 @@ export default function ExperienceSection() {
             <p className="text-sm mb-6 max-w-md mx-auto">
               Showcase your internships and work history to stand out.
             </p>
-            <Button onClick={handleAddNew} size="lg">
+            <Button
+              onClick={() => {
+                handleAddNew();
+                setIsDialogOpen(true);
+              }}
+              size="lg"
+            >
               <Plus className="mr-2 h-4 w-4" />
               Add Experience
             </Button>

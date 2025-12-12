@@ -45,15 +45,15 @@ type Education struct {
 }
 
 type Institute struct {
-	ID          uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	Name        string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Name      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type FieldOfStudy struct {
-	ID          uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	Name        string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Name      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

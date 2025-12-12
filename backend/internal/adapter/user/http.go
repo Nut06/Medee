@@ -1,26 +1,46 @@
 package useradapter
 
 import (
+	field_of_study_adapter "backend/internal/adapter/field_of_study"
+	institute_adapter "backend/internal/adapter/institute"
 	skilladapter "backend/internal/adapter/skill"
+	"backend/internal/application/fieldapp"
+	"backend/internal/application/instituteapp"
 	userapp "backend/internal/application/userapp"
 	"backend/internal/domain/domain"
 	user "backend/internal/domain/user"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type HTTPHandler struct {
-	usecase *userapp.Usecase
+	usecase          *userapp.Usecase
+	instituteUsecase *instituteapp.Usecase
+	fieldUsecase     *fieldapp.Usecase
 }
 
 func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
 	userRepo := NewRepository(db)
 	skillRepo := skilladapter.NewRepository(db)
 	usecase := userapp.NewUsecase(userRepo, skillRepo)
-	return &HTTPHandler{usecase: usecase}
+
+	// Institute and FieldOfStudy usecases
+	instituteRepo := institute_adapter.NewInstituteRepository(db)
+	instituteUsecase := instituteapp.NewUsecase(instituteRepo)
+
+	fieldRepo := field_of_study_adapter.NewFieldOfStudyRepository(db)
+	fieldUsecase := fieldapp.NewUsecase(fieldRepo)
+
+	return &HTTPHandler{
+		usecase:          usecase,
+		instituteUsecase: instituteUsecase,
+		fieldUsecase:     fieldUsecase,
+	}
 }
 
 func (h *HTTPHandler) GetUser(c *fiber.Ctx) error {
@@ -104,11 +124,37 @@ func (h *HTTPHandler) GetFullProfile(c *fiber.Ctx) error {
 
 func (h *HTTPHandler) AddExperience(c *fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
-	var req domain.WorkExperience
+	var req user.AddExperienceCommand
 	if err := c.BodyParser(&req); err != nil {
-		return h.handleError(err)
+		return h.handleError(user.ErrInvalidRequestBody)
 	}
-	res, err := h.usecase.AddExperience(c.Context(), userId, &req)
+
+	// Convert string dates to *time.Time
+	var startDate, endDate *time.Time
+	if req.StartDate != nil && *req.StartDate != "" {
+		t, err := time.Parse("2006-01-02", *req.StartDate)
+		if err != nil {
+			return h.handleError(user.ErrInvalidRequestBody)
+		}
+		startDate = &t
+	}
+	if req.EndDate != nil && *req.EndDate != "" {
+		t, err := time.Parse("2006-01-02", *req.EndDate)
+		if err != nil {
+			return h.handleError(user.ErrInvalidRequestBody)
+		}
+		endDate = &t
+	}
+
+	exp := &domain.WorkExperience{
+		Position:    req.Position,
+		CompanyName: req.CompanyName,
+		StartDate:   startDate,
+		EndDate:     endDate,
+		Description: req.Description,
+	}
+
+	res, err := h.usecase.AddExperience(c.Context(), userId, exp)
 	if err != nil {
 		return h.handleError(err)
 	}
@@ -117,11 +163,37 @@ func (h *HTTPHandler) AddExperience(c *fiber.Ctx) error {
 
 func (h *HTTPHandler) UpdateExperience(c *fiber.Ctx) error {
 	id := c.Params("experienceId")
-	var req domain.WorkExperience
+	var req user.UpdateExperienceCommand
 	if err := c.BodyParser(&req); err != nil {
-		return h.handleError(err)
+		return h.handleError(user.ErrInvalidRequestBody)
 	}
-	res, err := h.usecase.UpdateExperience(c.Context(), id, &req)
+
+	// Convert string dates to *time.Time
+	var startDate, endDate *time.Time
+	if req.StartDate != nil && *req.StartDate != "" {
+		t, err := time.Parse("2006-01-02", *req.StartDate)
+		if err != nil {
+			return h.handleError(user.ErrInvalidRequestBody)
+		}
+		startDate = &t
+	}
+	if req.EndDate != nil && *req.EndDate != "" {
+		t, err := time.Parse("2006-01-02", *req.EndDate)
+		if err != nil {
+			return h.handleError(user.ErrInvalidRequestBody)
+		}
+		endDate = &t
+	}
+
+	exp := &domain.WorkExperience{
+		Position:    req.Position,
+		CompanyName: req.CompanyName,
+		StartDate:   startDate,
+		EndDate:     endDate,
+		Description: req.Description,
+	}
+
+	res, err := h.usecase.UpdateExperience(c.Context(), id, exp)
 	if err != nil {
 		return h.handleError(err)
 	}
@@ -139,11 +211,33 @@ func (h *HTTPHandler) DeleteExperience(c *fiber.Ctx) error {
 
 func (h *HTTPHandler) AddEducation(c *fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
-	var req domain.Education
+	var req user.AddEducationCommand
 	if err := c.BodyParser(&req); err != nil {
+		return h.handleError(user.ErrInvalidRequestBody)
+	}
+
+	// Find or create Institute
+	institute, err := h.instituteUsecase.FindOrCreateInstitute(c.Context(), req.InstituteName)
+	if err != nil {
 		return h.handleError(err)
 	}
-	res, err := h.usecase.AddEducation(c.Context(), userId, &req)
+
+	// Find or create FieldOfStudy
+	field, err := h.fieldUsecase.FindOrCreateFieldOfStudy(c.Context(), req.FieldOfStudy)
+	if err != nil {
+		return h.handleError(err)
+	}
+
+	// Create Education entity
+	edu := &domain.Education{
+		UserID:         uuid.MustParse(userId),
+		InstituteID:    institute.ID,
+		FieldOfStudyID: field.ID,
+		Degree:         req.Degree,
+		GraduationYear: &req.GraduationYear,
+	}
+
+	res, err := h.usecase.AddEducation(c.Context(), userId, edu)
 	if err != nil {
 		return h.handleError(err)
 	}
@@ -152,11 +246,32 @@ func (h *HTTPHandler) AddEducation(c *fiber.Ctx) error {
 
 func (h *HTTPHandler) UpdateEducation(c *fiber.Ctx) error {
 	id := c.Params("educationId")
-	var req domain.Education
+	var req user.UpdateEducationCommand
 	if err := c.BodyParser(&req); err != nil {
+		return h.handleError(user.ErrInvalidRequestBody)
+	}
+
+	// Find or create Institute
+	institute, err := h.instituteUsecase.FindOrCreateInstitute(c.Context(), req.InstituteName)
+	if err != nil {
 		return h.handleError(err)
 	}
-	res, err := h.usecase.UpdateEducation(c.Context(), id, &req)
+
+	// Find or create FieldOfStudy
+	field, err := h.fieldUsecase.FindOrCreateFieldOfStudy(c.Context(), req.FieldOfStudy)
+	if err != nil {
+		return h.handleError(err)
+	}
+
+	// Create Education entity
+	edu := &domain.Education{
+		InstituteID:    institute.ID,
+		FieldOfStudyID: field.ID,
+		Degree:         req.Degree,
+		GraduationYear: &req.GraduationYear,
+	}
+
+	res, err := h.usecase.UpdateEducation(c.Context(), id, edu)
 	if err != nil {
 		return h.handleError(err)
 	}

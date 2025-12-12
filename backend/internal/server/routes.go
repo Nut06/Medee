@@ -3,9 +3,14 @@ package server
 
 import (
 	authadapter "backend/internal/adapter/auth"
+	field_of_study_adapter "backend/internal/adapter/field_of_study"
+	institute_adapter "backend/internal/adapter/institute"
 	skilladapter "backend/internal/adapter/skill"
 	useradapter "backend/internal/adapter/user"
+	"backend/internal/application/fieldapp"
+	"backend/internal/application/instituteapp"
 	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
@@ -21,6 +26,32 @@ func Auth(app *fiber.App, db *gorm.DB) {
 
 	skillGroup := api.Group("/skill", AuthMiddleware)
 	skillRoute(skillGroup, db)
+
+	// Institute routes (public for autocomplete)
+	instituteGroup := api.Group("/institutes")
+	instituteRoute(instituteGroup, db)
+
+	// FieldOfStudy routes (public for autocomplete)
+	fieldGroup := api.Group("/field-of-studies")
+	fieldOfStudyRoute(fieldGroup, db)
+}
+
+func instituteRoute(router fiber.Router, db *gorm.DB) {
+	repo := institute_adapter.NewInstituteRepository(db)
+	usecase := instituteapp.NewUsecase(repo)
+	h := institute_adapter.NewHTTPHandler(usecase)
+
+	router.Get("/search", h.SearchInstitutes) // GET /institutes/search?q=...
+	router.Get("/:id", h.GetInstitute)        // GET /institutes/:id
+}
+
+func fieldOfStudyRoute(router fiber.Router, db *gorm.DB) {
+	repo := field_of_study_adapter.NewFieldOfStudyRepository(db)
+	usecase := fieldapp.NewUsecase(repo)
+	h := field_of_study_adapter.NewHTTPHandler(usecase)
+
+	router.Get("/search", h.SearchFieldOfStudies) // GET /field-of-studies/search?q=...
+	router.Get("/:id", h.GetFieldOfStudy)         // GET /field-of-studies/:id
 }
 
 func skillRoute(router fiber.Router, db *gorm.DB) {

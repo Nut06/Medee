@@ -1,7 +1,5 @@
 package user
 
-import "time"
-
 // Profile Commands
 type SkillDTO struct {
 	ID   string `json:"id,omitempty"`
@@ -20,19 +18,19 @@ type UpdateProfileCommand struct {
 
 // Experience Commands
 type AddExperienceCommand struct {
-	Position    string    `json:"position"`
-	CompanyName string    `json:"companyName"`
-	StartDate   time.Time `json:"startDate"`
-	EndDate     time.Time `json:"endDate"`
-	Description string    `json:"description"`
+	Position    string  `json:"position"`
+	CompanyName string  `json:"companyName"`
+	StartDate   *string `json:"startDate,omitempty"`
+	EndDate     *string `json:"endDate,omitempty"`
+	Description *string `json:"description,omitempty"`
 }
 
 type UpdateExperienceCommand struct {
-	Position    string    `json:"position"`
-	CompanyName string    `json:"companyName"`
-	StartDate   time.Time `json:"startDate"`
-	EndDate     time.Time `json:"endDate"`
-	Description string    `json:"description"`
+	Position    string  `json:"position"`
+	CompanyName string  `json:"companyName"`
+	StartDate   *string `json:"startDate,omitempty"`
+	EndDate     *string `json:"endDate,omitempty"`
+	Description *string `json:"description,omitempty"`
 }
 
 // Education Commands

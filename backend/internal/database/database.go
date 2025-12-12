@@ -28,19 +28,19 @@ var (
 
 func ConnectDB() *gorm.DB {
 	// define db config
-	host     := os.Getenv("DB_HOST")
-	port     := os.Getenv("DB_PORT")
-	username     := os.Getenv("DB_USER")
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	username := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
-	database   := os.Getenv("DB_NAME")
-	sslmode  := "disable"
+	database := os.Getenv("DB_NAME")
+	sslmode := "disable"
 	fmt.Printf("DB port is at: %s from DB\n", os.Getenv("DB_PORT"))
 
 	fmt.Printf("value of host is : %s \n", host)
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		host, username, password, database, port, sslmode)
 
-	fmt.Printf("Valus of dsn is %s: \n",dsn)
+	fmt.Printf("Valus of dsn is %s: \n", dsn)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect to DB: %v", err)
@@ -62,7 +62,6 @@ type Service interface {
 type service struct {
 	db *gorm.DB
 }
-
 
 // func New() Service {
 // 	if dbInstance != nil {
@@ -103,23 +102,23 @@ func AutoMigrate(db *gorm.DB) {
 		&domain.Conversation{},
 		&domain.ConversationParticipant{},
 		&domain.Message{},
-		&domain.ProjectTask{},	
+		&domain.ProjectTask{},
 		&domain.ProjectSkill{},
 		&domain.Submission{},
 	)
 }
 
-func (s *service) Health() map[string]string{
-	
+func (s *service) Health() map[string]string {
+
 	stats := make(map[string]string)
-	
+
 	db, err := s.db.DB()
 	if err != nil {
 		stats["status"] = "down"
-		stats["error"] = fmt.Sprintf("db down %v", err)	
+		stats["error"] = fmt.Sprintf("db down %v", err)
 		return stats
 	}
-	
+
 	ctx, cancle := context.WithTimeout(context.Background(), 1*time.Second)
 	// make cancle() working after this function finished before return or end process
 	defer cancle()
