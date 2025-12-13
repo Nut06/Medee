@@ -8,6 +8,7 @@ lerna-debug.log*
 
 docs/
 
+backend/secret.txt
 cmd/seed/
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -154,3 +155,4 @@ tmp/
 .cache/
 go.sum
 vendor/
+backend/secret.txt

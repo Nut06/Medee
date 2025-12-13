@@ -24,13 +24,18 @@ func (r *instituteRepository) CreateInstitute(ctx context.Context, institute *do
 }
 
 // SearchInstitutes searches institutes by name (for autocomplete)
+// Uses flexible matching to handle apostrophes and special characters
 func (r *instituteRepository) SearchInstitutes(ctx context.Context, query string) ([]domain.Institute, error) {
 	var institutes []domain.Institute
+
+	// Normalize the search by removing apostrophes and special chars
+	// This allows "Mongkuts" to match "Mongkut's"
 	err := r.db.WithContext(ctx).
-		Where("name ILIKE ?", "%"+query+"%").
+		Where("REGEXP_REPLACE(name, '[^a-zA-Z0-9 ]', '', 'g') ILIKE ?", "%"+query+"%").
 		Limit(10).
 		Order("name ASC").
 		Find(&institutes).Error
+
 	return institutes, err
 }
 

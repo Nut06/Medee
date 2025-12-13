@@ -3,7 +3,7 @@ package userapp
 import (
 	"backend/internal/domain/domain"
 	"backend/internal/domain/user"
-	skillport "backend/internal/port/skillPort"
+	skillport "backend/internal/port/skill"
 	userport "backend/internal/port/user"
 	"context"
 	"mime/multipart"

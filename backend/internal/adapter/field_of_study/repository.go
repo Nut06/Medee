@@ -24,11 +24,14 @@ func (r *fieldOfStudyRepository) CreateFieldOfStudy(ctx context.Context, field *
 
 func (r *fieldOfStudyRepository) SearchFieldOfStudies(ctx context.Context, query string) ([]domain.FieldOfStudy, error) {
 	var fields []domain.FieldOfStudy
+
+	// Normalize search to handle special characters
 	err := r.db.WithContext(ctx).
-		Where("name ILIKE ?", "%"+query+"%").
+		Where("REGEXP_REPLACE(name, '[^a-zA-Z0-9 ]', '', 'g') ILIKE ?", "%"+query+"%").
 		Limit(10).
 		Order("name ASC").
 		Find(&fields).Error
+
 	return fields, err
 }
 

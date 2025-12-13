@@ -5,6 +5,11 @@ import * as z from "zod";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Autocomplete } from "@/components/ui/autocomplete";
+import {
+  instituteService,
+  fieldOfStudyService,
+} from "@/services/masterDataService";
 import {
   Dialog,
   DialogContent,
@@ -143,9 +148,12 @@ export function EducationSection() {
                     <FormItem>
                       <FormLabel>Institute Name</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="e.g. Stanford University"
-                          {...field}
+                        <Autocomplete
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          searchFn={instituteService.search}
+                          placeholder="Search institute..."
+                          emptyMessage="No institutes found."
                         />
                       </FormControl>
                       <FormMessage />
@@ -175,7 +183,13 @@ export function EducationSection() {
                     <FormItem>
                       <FormLabel>Field of Study</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Computer Science" {...field} />
+                        <Autocomplete
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          searchFn={fieldOfStudyService.search}
+                          placeholder="Search field of study..."
+                          emptyMessage="No fields found."
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

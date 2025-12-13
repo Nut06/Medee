@@ -6,10 +6,16 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/joho/godotenv"
 	"gorm.io/gorm"
 )
 
 func main() {
+	// Load .env file from backend root
+	if err := godotenv.Load(); err != nil {
+		log.Printf("⚠️ Warning: .env file not found, using system env vars")
+	}
+
 	db := database.ConnectDB()
 
 	fmt.Println("🌱 Starting database seeding...")
