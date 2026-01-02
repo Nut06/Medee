@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuthForm } from "@/hooks/userAuthForm";
-import { register } from "@/services/authService";
+import { register } from "@/services/auth.service";
 import type { RegisterRequest } from "@/utils/types/user.type";
 import { useUserStore } from "@/stores/userStore";
 

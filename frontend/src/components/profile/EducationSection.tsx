@@ -9,7 +9,7 @@ import { Autocomplete } from "@/components/ui/autocomplete";
 import {
   instituteService,
   fieldOfStudyService,
-} from "@/services/masterDataService";
+} from "@/services/master.data.service";
 import {
   Dialog,
   DialogContent,

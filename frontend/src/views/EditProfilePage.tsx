@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/accordion";
 import { PersonalInfoSection } from "@/components/profile/PersonalInfoSection";
 import { SkillsSection } from "@/components/profile/SkillsSection";
-import ExperienceSection from "@/components/profile/ExperienceSection";
 import { EducationSection } from "@/components/profile/EducationSection";
 import { PortfolioSection } from "@/components/profile/PortfolioSection";
 import { ResumeSection } from "@/components/profile/ResumeSection";
@@ -35,7 +34,7 @@ export default function EditProfilePage() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-ce nter gap-2">
             <Link to="/user">
               <Button variant="outline" size="sm">
                 <Eye className="mr-2 h-4 w-4" />

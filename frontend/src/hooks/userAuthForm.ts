@@ -1,4 +1,4 @@
-import { loginLocal, register } from "@/services/authService";
+import { loginLocal, register } from "@/services/auth.service";
 import { useUserStore } from "@/stores/userStore";
 import type {
   LoginRequest,
@@ -77,7 +77,7 @@ export function useAuthForm() {
       if (companies != null) {
         user.companies = companies;
       }
-      
+
       setUser(user);
       setAuth(true);
     } catch (error: unknown) {

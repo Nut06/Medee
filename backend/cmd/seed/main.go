@@ -12,6 +12,7 @@ import (
 
 func main() {
 	// Load .env file from backend root
+	// TODO Call API to get university
 	if err := godotenv.Load(); err != nil {
 		log.Printf("⚠️ Warning: .env file not found, using system env vars")
 	}

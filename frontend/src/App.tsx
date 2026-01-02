@@ -2,7 +2,7 @@ import "./App.css";
 import { AppRoutes } from "./routes/route";
 import { useEffect } from "react";
 import { useUserStore } from "./stores/userStore";
-import { getUser } from "./services/userService";
+import { getUser } from "./services/user.service";
 
 function App() {
   const { setUser, setAuth } = useUserStore();

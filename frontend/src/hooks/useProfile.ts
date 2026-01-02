@@ -19,7 +19,7 @@ import {
   updateProject,
   deleteProject,
   getFullProfile,
-} from "@/services/userService";
+} from "@/services/user.service";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
