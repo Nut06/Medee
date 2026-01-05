@@ -3,16 +3,24 @@ package institute_adapter
 import (
 	"backend/internal/domain/domain"
 	"context"
+	"encoding/json"
+	"fmt"
+	"time"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 type instituteRepository struct {
-	db *gorm.DB
+	db    *gorm.DB
+	redis *redis.Client
 }
 
-func NewInstituteRepository(db *gorm.DB) *instituteRepository {
-	return &instituteRepository{db: db}
+func NewInstituteRepository(db *gorm.DB, redisClient *redis.Client) *instituteRepository {
+	return &instituteRepository{
+		db:    db,
+		redis: redisClient,
+	}
 }
 
 // CreateInstitute creates a new institute
@@ -64,4 +72,56 @@ func (r *instituteRepository) FindOrCreateInstitute(ctx context.Context, name st
 	// Not found, create new
 	institute = &domain.Institute{Name: name}
 	return r.CreateInstitute(ctx, institute)
+}
+
+// NEW: Cache methods for external API integration
+func (r *instituteRepository) SearchInstitutesFromCache(ctx context.Context, query string, country string) ([]domain.Institute, bool, error) {
+	if r.redis == nil {
+		return nil, false, nil
+	}
+
+	cacheKey := fmt.Sprintf("universities:search:%s:%s", query, country)
+
+	val, err := r.redis.Get(ctx, cacheKey).Result()
+	if err == redis.Nil {
+		return nil, false, nil // Cache miss
+	}
+	if err != nil {
+		return nil, false, err // Redis error
+	}
+
+	var institutes []domain.Institute
+	if err := json.Unmarshal([]byte(val), &institutes); err != nil {
+		return nil, false, err
+	}
+
+	return institutes, true, nil
+}
+
+func (r *instituteRepository) CacheInstitutes(ctx context.Context, key string, institutes []domain.Institute, ttl time.Duration) error {
+	if r.redis == nil {
+		return nil
+	}
+
+	data, err := json.Marshal(institutes)
+	if err != nil {
+		return err
+	}
+
+	return r.redis.Set(ctx, key, data, ttl).Err()
+}
+
+func (r *instituteRepository) SearchInstitutesWithCountry(ctx context.Context, query string, country string) ([]domain.Institute, error) {
+	var institutes []domain.Institute
+
+	db := r.db.WithContext(ctx).Where("name ILIKE ?", "%"+query+"%")
+	if country != "" {
+		db = db.Where("country = ?", country)
+	}
+
+	if err := db.Limit(50).Find(&institutes).Error; err != nil {
+		return nil, err
+	}
+
+	return institutes, nil
 }

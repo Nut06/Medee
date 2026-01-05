@@ -14,8 +14,8 @@ func NewUsecase(repo port.FieldOfStudyRepository) *Usecase {
 	return &Usecase{repo: repo}
 }
 
-func (u *Usecase) SearchFieldOfStudies(ctx context.Context, query string) ([]domain.FieldOfStudy, error) {
-	return u.repo.SearchFieldOfStudies(ctx, query)
+func (u *Usecase) SearchFieldOfStudies(ctx context.Context, query string, level string) ([]domain.FieldOfStudy, error) {
+	return u.repo.SearchFieldOfStudies(ctx, query, level)
 }
 
 func (u *Usecase) GetFieldOfStudyById(ctx context.Context, id string) (*domain.FieldOfStudy, error) {
@@ -24,4 +24,8 @@ func (u *Usecase) GetFieldOfStudyById(ctx context.Context, id string) (*domain.F
 
 func (u *Usecase) FindOrCreateFieldOfStudy(ctx context.Context, name string) (*domain.FieldOfStudy, error) {
 	return u.repo.FindOrCreateFieldOfStudy(ctx, name)
+}
+
+func (u *Usecase) LoadCIPCodes(ctx context.Context) error {
+	return u.repo.LoadCIPCodes(ctx)
 }

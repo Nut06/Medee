@@ -22,17 +22,30 @@ func (r *fieldOfStudyRepository) CreateFieldOfStudy(ctx context.Context, field *
 	return field, nil
 }
 
-func (r *fieldOfStudyRepository) SearchFieldOfStudies(ctx context.Context, query string) ([]domain.FieldOfStudy, error) {
+func (r *fieldOfStudyRepository) SearchFieldOfStudies(ctx context.Context, query string, level string) ([]domain.FieldOfStudy, error) {
 	var fields []domain.FieldOfStudy
 
-	// Normalize search to handle special characters
-	err := r.db.WithContext(ctx).
-		Where("REGEXP_REPLACE(name, '[^a-zA-Z0-9 ]', '', 'g') ILIKE ?", "%"+query+"%").
-		Limit(10).
-		Order("name ASC").
-		Find(&fields).Error
+	// Build query with level filter
+	db := r.db.WithContext(ctx).Where(
+		"name ILIKE ? OR code ILIKE ? OR title ILIKE ? OR category ILIKE ?",
+		"%"+query+"%", "%"+query+"%", "%"+query+"%", "%"+query+"%",
+	)
 
+	// Filter by level if specified
+	if level != "all" && level != "" {
+		db = db.Where("level = ?", level)
+	}
+
+	err := db.Limit(50).Order("name ASC").Find(&fields).Error
 	return fields, err
+}
+
+// LoadCIPCodes - Placeholder for loading CIP codes from static file
+// For now, this is a no-op as CIP codes would be loaded separately
+func (r *fieldOfStudyRepository) LoadCIPCodes(ctx context.Context) error {
+	// TODO: In production, load CIP codes from embedded JSON file
+	// and bulk insert into database if not already present
+	return nil
 }
 
 func (r *fieldOfStudyRepository) FindFieldOfStudyById(ctx context.Context, id string) (*domain.FieldOfStudy, error) {
