@@ -46,7 +46,11 @@ type Education struct {
 
 type Institute struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	Name      string
+	Name      string    `gorm:"not null;index:idx_institute_name"`
+	Country   string    `gorm:"index:idx_institute_country"`
+	Domain    *string   `gorm:"uniqueIndex"`
+	WebPages  []string  `gorm:"type:jsonb"`
+	Source    string    `gorm:"default:'manual'"` // "manual", "hipo_api", "cache"
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -54,6 +58,11 @@ type Institute struct {
 type FieldOfStudy struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	Name      string
+	Code      string `gorm:"uniqueIndex"` // CIP code
+	Title     string
+	Category  string // Broad category
+	Level     string // "broad", "intermediate", "detailed"
+	IsStem    bool   `gorm:"default:false"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
