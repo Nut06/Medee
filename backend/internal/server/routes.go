@@ -9,14 +9,19 @@ import (
 	useradapter "backend/internal/adapter/user"
 	"backend/internal/application/fieldapp"
 	"backend/internal/application/instituteapp"
+	"backend/internal/database"
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 func Auth(app *fiber.App, db *gorm.DB) {
 	api := app.Group("/")
+
+	// Initialize Redis
+	redisClient := database.NewRedisClient()
 
 	authGroup := api.Group("/auth")
 	authRoute(authGroup, db)
@@ -29,19 +34,20 @@ func Auth(app *fiber.App, db *gorm.DB) {
 
 	// Institute routes (public for autocomplete)
 	instituteGroup := api.Group("/institutes")
-	instituteRoute(instituteGroup, db)
+	instituteRoute(instituteGroup, db, redisClient)
 
 	// FieldOfStudy routes (public for autocomplete)
 	fieldGroup := api.Group("/field-of-studies")
 	fieldOfStudyRoute(fieldGroup, db)
 }
 
-func instituteRoute(router fiber.Router, db *gorm.DB) {
-	repo := institute_adapter.NewInstituteRepository(db)
-	usecase := instituteapp.NewUsecase(repo)
+func instituteRoute(router fiber.Router, db *gorm.DB, redisClient *redis.Client) {
+	repo := institute_adapter.NewInstituteRepository(db, redisClient)
+	hipoClient := institute_adapter.NewHipoAPIClient()
+	usecase := instituteapp.NewUsecase(repo, hipoClient)
 	h := institute_adapter.NewHTTPHandler(usecase)
 
-	router.Get("/search", h.SearchInstitutes) // GET /institutes/search?q=...
+	router.Get("/search", h.SearchInstitutes) // GET /institutes/search?q=...&country=...
 	router.Get("/:id", h.GetInstitute)        // GET /institutes/:id
 }
 

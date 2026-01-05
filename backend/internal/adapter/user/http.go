@@ -7,6 +7,7 @@ import (
 	"backend/internal/application/fieldapp"
 	"backend/internal/application/instituteapp"
 	userapp "backend/internal/application/userapp"
+	"backend/internal/database"
 	"backend/internal/domain/domain"
 	user "backend/internal/domain/user"
 	"errors"
@@ -30,8 +31,10 @@ func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
 	usecase := userapp.NewUsecase(userRepo, skillRepo)
 
 	// Institute and FieldOfStudy usecases
-	instituteRepo := institute_adapter.NewInstituteRepository(db)
-	instituteUsecase := instituteapp.NewUsecase(instituteRepo)
+	redisClient := database.NewRedisClient()
+	hipoClient := institute_adapter.NewHipoAPIClient()
+	instituteRepo := institute_adapter.NewInstituteRepository(db, redisClient)
+	instituteUsecase := instituteapp.NewUsecase(instituteRepo, hipoClient)
 
 	fieldRepo := field_of_study_adapter.NewFieldOfStudyRepository(db)
 	fieldUsecase := fieldapp.NewUsecase(fieldRepo)

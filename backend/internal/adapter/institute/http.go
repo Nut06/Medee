@@ -17,21 +17,24 @@ func NewHTTPHandler(usecase *instituteapp.Usecase) *HTTPHandler {
 // SearchInstitutes handles GET /institutes/search?q={query}
 func (h *HTTPHandler) SearchInstitutes(c *fiber.Ctx) error {
 	query := c.Query("q")
-	if query == "" {
-		return c.Status(400).JSON(fiber.Map{
-			"error": "Query parameter 'q' is required",
+	if len(query) < 2 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Query must be at least 2 characters",
 		})
 	}
 
-	institutes, err := h.usecase.SearchInstitutes(c.Context(), query)
+	country := c.Query("country", "")
+
+	institutes, err := h.usecase.SearchInstitutes(c.Context(), query, country)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
 	return c.JSON(fiber.Map{
 		"results": institutes,
+		"count":   len(institutes),
 	})
 }
 
@@ -41,7 +44,7 @@ func (h *HTTPHandler) GetInstitute(c *fiber.Ctx) error {
 
 	institute, err := h.usecase.GetInstituteById(c.Context(), id)
 	if err != nil {
-		return c.Status(404).JSON(fiber.Map{
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "Institute not found",
 		})
 	}

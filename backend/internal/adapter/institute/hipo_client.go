@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"time"
+	"backend/internal/utils"
 )
 
 type HipoAPIClient struct {
@@ -19,7 +19,7 @@ func NewHipoAPIClient() *HipoAPIClient {
 	return &HipoAPIClient{
 		baseURL: "http://universities.hipolabs.com",
 		httpClient: &http.Client{
-			Timeout: 5 * time.Second,
+			Timeout: utils.FiveSec,
 		},
 	}
 }
