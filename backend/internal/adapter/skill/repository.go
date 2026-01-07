@@ -42,7 +42,7 @@ func (r *skillRepository) CreateSkill(ctx context.Context, skill *domain.Skill) 
 
 func (r *skillRepository) SearchSkills(ctx context.Context, query string) ([]domain.Skill, error) {
 	var skills []domain.Skill
-	if err := r.db.WithContext(ctx).Where("name LIKE ?", "%"+query+"%").Find(&skills).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("name ILIKE ?", "%"+query+"%").Find(&skills).Error; err != nil {
 		return nil, err
 	}
 	return skills, nil

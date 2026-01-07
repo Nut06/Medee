@@ -233,26 +233,28 @@ func (r *userRepository) DeleteEducation(ctx context.Context, id string) error {
 	return r.db.WithContext(ctx).Delete(&domain.Education{}, "id = ?", id).Error
 }
 
-func (r *userRepository) UpdateSkills(ctx context.Context, userID string, skills []string) error {
+// UpdateSkills replaces all user skills (bulk update)
+func (r *userRepository) UpdateSkills(ctx context.Context, userID string, req *dto.UpdateSkillsCommand) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		// 1. Clear existing skills
+		// 1. Delete all existing user_skills for this user
 		if err := tx.Where("user_id = ?", userID).Delete(&domain.UserSkill{}).Error; err != nil {
 			return err
 		}
 
-		// 2. Add new skills
-		for _, skillName := range skills {
-			// Find or Create Skill
+		// 2. Insert new skills
+		for _, skillDTO := range req.Skills {
+			// Find or create skill in master skills table
 			var skill domain.Skill
-			if err := tx.Where("name = ?", skillName).FirstOrCreate(&skill, domain.Skill{Name: skillName}).Error; err != nil {
+			if err := tx.Where("name = ?", skillDTO.Name).FirstOrCreate(&skill, domain.Skill{Name: skillDTO.Name}).Error; err != nil {
 				return err
 			}
 
-			// Link to User
-			if err := tx.Create(&domain.UserSkill{
+			// Create user_skill junction
+			userSkill := domain.UserSkill{
 				UserID:  uuid.MustParse(userID),
 				SkillID: skill.ID,
-			}).Error; err != nil {
+			}
+			if err := tx.Create(&userSkill).Error; err != nil {
 				return err
 			}
 		}
