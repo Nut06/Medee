@@ -10,17 +10,20 @@ export const api = axios.create({
 
 api.interceptors.request.use(
   (request) => {
-    
     const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
       request.headers.Authorization = `Bearer ${accessToken}`;
     }
     return request;
+
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    console.error('Request interceptor error:', error);
+    Promise.reject(error)
+  }
 );
 
-axios.interceptors.response.use(
+api.interceptors.response.use(
   (response) => response as AxiosResponse,
   async (error) => {
     const originalRequest = error.config;
@@ -28,7 +31,10 @@ axios.interceptors.response.use(
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        await api.post("/auth/refresh");
+        const response = await api.post("/auth/refresh");
+        const accessToken = response.data.accessToken;
+        localStorage.setItem("accessToken", accessToken);
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         console.error("Token refresh failed:", refreshError);

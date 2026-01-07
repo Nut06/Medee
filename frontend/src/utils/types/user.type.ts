@@ -38,6 +38,7 @@ export interface LoginResponse {
   user: Pick<User, "id" | "firstName" | "lastName" | "email" 
       | "AvatarURL" | "bio" | "phoneNumber" | "linkedInURL" 
       | "githubURL" | "websiteURL">;
+
   companies?: Company[];
   accessToken:string
 }

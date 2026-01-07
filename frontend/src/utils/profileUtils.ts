@@ -148,3 +148,6 @@ export const downloadResume = async (
     throw error;
   }
 };
+
+export const oneHour = 1000 * 60 * 60;
+export const oneDay = 1000 * 60 * 60 * 24;
