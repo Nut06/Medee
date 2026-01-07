@@ -10,7 +10,9 @@ import (
 	"backend/internal/application/fieldapp"
 	"backend/internal/application/instituteapp"
 	"backend/internal/database"
+	"backend/internal/utils"
 	"fmt"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
@@ -22,14 +24,16 @@ func Auth(app *fiber.App, db *gorm.DB) {
 
 	// Initialize Redis
 	redisClient := database.NewRedisClient()
+	jwtService := authadapter.NewJWTService(os.Getenv("JWT_SECRET"), utils.FifteenMin, utils.SevenDays)
 
 	authGroup := api.Group("/auth")
-	authRoute(authGroup, db)
+	authRoute(authGroup, db, jwtService)
 
-	userGroup := api.Group("/user", AuthMiddleware)
+	
+	userGroup := api.Group("/user", AuthMiddleware(jwtService))
 	userRoute(userGroup, db)
 
-	skillGroup := api.Group("/skill", AuthMiddleware)
+	skillGroup := api.Group("/skill", AuthMiddleware(jwtService))
 	skillRoute(skillGroup, db)
 
 	// Institute routes (public for autocomplete)
@@ -66,8 +70,8 @@ func skillRoute(router fiber.Router, db *gorm.DB) {
 	router.Post("", h.CreateSkill) // POST /skill (Create Master Skill - Optional)
 }
 
-func authRoute(router fiber.Router, db *gorm.DB) {
-	h := authadapter.NewHTTPHandler(db)
+func authRoute(router fiber.Router, db *gorm.DB, jwtService *authadapter.JWTService) {
+	h := authadapter.NewHTTPHandler(db, jwtService)
 	router.Post("/register", h.Register)
 	router.Post("/login", h.Login)
 	router.Post("/refresh", h.Refresh)
@@ -75,37 +79,37 @@ func authRoute(router fiber.Router, db *gorm.DB) {
 	// router.Post("/logout", AuthMiddleware, h.LogoutWithUserId)
 }
 
-func userRoute(router fiber.Router, db *gorm.DB) {
+func userRoute(user fiber.Router, db *gorm.DB) {
 	h := useradapter.NewHTTPHandler(db)
-	router.Use(func(c *fiber.Ctx) error {
+	user.Use(func(c *fiber.Ctx) error {
 		fmt.Println("from IP", c.IP())
 		fmt.Println("Method", c.Method())
 		fmt.Println("Path", c.Path())
 		return c.Next()
 	})
 
-	router.Get("", h.GetUser)
-	router.Put("", h.UpdateProfile)
-	router.Put("/avatar", h.UploadAvatar)
-	router.Delete("/avatar", h.DeleteAvatar)
-	router.Put("/resume", h.UploadResume)
-	router.Delete("/resume", h.DeleteResume)
+	user.Get("", h.GetUser)
+	user.Put("", h.UpdateProfile)
+	user.Put("/avatar", h.UploadAvatar)
+	user.Delete("/avatar", h.DeleteAvatar)
+	user.Put("/resume", h.UploadResume)
+	user.Delete("/resume", h.DeleteResume)
 
 	// Candidate Features
-	router.Get("/profile", h.GetFullProfile)
-	router.Post("/experience", h.AddExperience)
-	router.Put("/experience/:experienceId", h.UpdateExperience)
-	router.Delete("/experience/:experienceId", h.DeleteExperience)
-	router.Post("/education", h.AddEducation)
-	router.Put("/education/:educationId", h.UpdateEducation)
-	router.Delete("/education/:educationId", h.DeleteEducation)
+	user.Get("/profile", h.GetFullProfile)
+	user.Post("/experience", h.AddExperience)
+	user.Put("/experience/:experienceId", h.UpdateExperience)
+	user.Delete("/experience/:experienceId", h.DeleteExperience)
+	user.Post("/education", h.AddEducation)
+	user.Put("/education/:educationId", h.UpdateEducation)
+	user.Delete("/education/:educationId", h.DeleteEducation)
 
 	// Skills (User)
-	router.Post("/skills", h.AddSkill)
-	router.Delete("/skills/:skillId", h.DeleteSkill)
+	user.Post("/skills", h.AddSkill)
+	user.Delete("/skills/:skillId", h.DeleteSkill)
 	// router.Put("/skills", h.UpdateSkills) // Deprecated in favor of Atomic Add/Delete
 
-	router.Post("/project", h.AddProject)
-	router.Put("/project/:projectId", h.UpdateProject)
-	router.Delete("/project/:projectId", h.DeleteProject)
+	user.Post("/project", h.AddProject)
+	user.Put("/project/:projectId", h.UpdateProject)
+	user.Delete("/project/:projectId", h.DeleteProject)
 }

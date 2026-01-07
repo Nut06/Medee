@@ -87,10 +87,6 @@ func ToFullProfileResponse(u *domain.User) *FullProfileResponse {
 			resp.Projects[i] = *ToProjectResponse(&proj)
 		}
 	}
-	fmt.Println("FullProfileResponse: ")
-	for i, edu := range resp.Educations {
-		fmt.Println(i, edu)
-	}
 
 	return resp
 }
@@ -127,9 +123,7 @@ func ToEducationResponse(edu *domain.Education) *EducationResponse {
 	}
 
 	instituteName := edu.InstituteName
-	fmt.Printf("Institute name is : %s\n", instituteName)
 	if instituteName == "" {
-		// Fallback: ถ้า repository ไม่ populate ให้ใช้ ID
 		instituteName = edu.InstituteID.String()
 	}
 

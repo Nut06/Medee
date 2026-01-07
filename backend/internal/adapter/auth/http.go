@@ -8,6 +8,7 @@ import (
 	userport "backend/internal/port/user"
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"time"
 
@@ -38,19 +39,19 @@ type HTTPHandler struct {
 	cfg      *CookieConfig
 }
 
-func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
+func NewHTTPHandler(db *gorm.DB, jwtService *JWTService) *HTTPHandler {
 	repo := NewGormRepository(db)
 	cfg := &CookieConfig{
 		Secure:   os.Getenv("HTTPS") == "true",
 		SameSite: "Strict",
 	}
+	
 	usecase := authapp.NewUsecase(
 		repo,
 		NewBcryptHasher(0),
-		NewJWTService(os.Getenv("JWT_SECRET"), thirtyMin, sevenDays),
+		jwtService,
 		repo,
 	)
-	cfg.AccessCookieName = "access_token"
 	cfg.RefreshCookieName = "refresh_token"
 	userRepo := useradapter.NewRepository(db)
 	return &HTTPHandler{uc: usecase, userRepo: userRepo, cfg: cfg}
@@ -61,6 +62,7 @@ func (h *HTTPHandler) Refresh(c *fiber.Ctx) error {
 
 	rt := c.Cookies(h.cfg.RefreshCookieName)
 	if rt == "" {
+		fmt.Println("Refresh token not found")
 		return h.handleError(auth.ErrInvalidRefreshToken)
 	}
 
@@ -80,9 +82,10 @@ func (h *HTTPHandler) Refresh(c *fiber.Ctx) error {
 		return h.handleError(err)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(auth.LoginResponse{
+	return c.Status(fiber.StatusOK).JSON(auth.RefreshResponse{
 		User:      *auth.ToUserResponse(fullUser),
 		Companies: res.Companies,
+		Token:     tokens.AccessToken, // ✅ เพิ่ม: return accessToken ใหม่
 	})
 
 }

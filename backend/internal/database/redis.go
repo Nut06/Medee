@@ -14,9 +14,11 @@ func NewRedisClient() *redis.Client {
 		redisURL = "localhost:6379"
 	}
 
+	password := os.Getenv("REDIS_PASSWORD")
+	
 	client := redis.NewClient(&redis.Options{
 		Addr:         redisURL,
-		Password:     os.Getenv("REDIS_PASSWORD"),
+		Password:     password,
 		DB:           0,
 		PoolSize:     10,
 		MinIdleConns: 5,

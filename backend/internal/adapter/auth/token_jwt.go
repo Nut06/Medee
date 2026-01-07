@@ -2,10 +2,9 @@ package authadapter
 
 import (
 	authport "backend/internal/port/auth"
+	utils "backend/internal/utils"
 	"context"
-	"os"
 	"time"
-
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
@@ -18,10 +17,10 @@ type JWTService struct {
 
 func NewJWTService(secret string, accessTTL, refreshTTL time.Duration) *JWTService {
 	if accessTTL == 0 {
-		accessTTL = 15 * time.Minute
+		accessTTL = utils.FifteenMin
 	}
 	if refreshTTL == 0 {
-		refreshTTL = 7 * 24 * time.Hour
+		refreshTTL = utils.SevenDays
 	}
 	return &JWTService{
 		secret:     []byte(secret),
@@ -30,6 +29,22 @@ func NewJWTService(secret string, accessTTL, refreshTTL time.Duration) *JWTServi
 	}
 }
 
+func (s *JWTService) GenerateAccess(ctx context.Context, userID uuid.UUID) (string, error) {
+	expiresAt := time.Now().Add(s.accessTTL).Unix()
+	
+	claims := jwt.MapClaims{
+		"sub": userID.String(),
+		"exp": expiresAt,
+		"iat": time.Now().Unix(),
+		"typ": "access",
+	}
+	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signed, err := tok.SignedString(s.secret)
+	if err != nil {
+		return "", err
+	}
+	return signed, nil
+}
 
 func (s *JWTService) GenerateRefresh(ctx context.Context, userID uuid.UUID) (string, time.Time, error) {
 	expiresAt := time.Now().Add(s.refreshTTL)
@@ -85,33 +100,17 @@ func (s *JWTService) decodeToken(tokenString, expectedType string) (uuid.UUID, e
 
 var _ authport.TokenService = (*JWTService)(nil)
 
-func (s *JWTService) GenerateAccess(ctx context.Context, userID uuid.UUID) (string, error) {
-	expiresAt := time.Now().Add(s.accessTTL)
-	claims := jwt.MapClaims{
-		"sub": userID.String(),
-		"exp": expiresAt.Unix(),
-		"iat": time.Now().Unix(),
-		"typ": "access",
-	}
-	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signed, err := tok.SignedString(s.secret)
-	if err != nil {
-		return "", err
-	}
-	return signed, nil
-}
 
-func ParseToken(tokenString string) (*jwt.MapClaims, error) {
-	
-	secret := []byte(os.Getenv("JWT_SECRET"))
+func (s *JWTService) ParseToken(tokenString string) (*jwt.MapClaims, error) {
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, jwt.ErrSignatureInvalid
-		}
-		return secret, nil
-	})
-	
+	token, err := jwt.Parse(tokenString,
+		func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, jwt.ErrSignatureInvalid
+			}
+			return s.secret, nil
+		})
+
 	if err != nil {
 		return nil, err
 	}
