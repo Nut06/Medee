@@ -29,7 +29,6 @@ func Auth(app *fiber.App, db *gorm.DB) {
 	authGroup := api.Group("/auth")
 	authRoute(authGroup, db, jwtService)
 
-	
 	userGroup := api.Group("/user", AuthMiddleware(jwtService))
 	userRoute(userGroup, db)
 
@@ -105,9 +104,9 @@ func userRoute(user fiber.Router, db *gorm.DB) {
 	user.Delete("/education/:educationId", h.DeleteEducation)
 
 	// Skills (User)
-	user.Post("/skills", h.AddSkill)
+	user.Put("/skills", h.UpdateSkills) // PUT /user/skills (bulk replace)
+	user.Post("/skills", h.AddSkill)    // POST /user/skills (add single)
 	user.Delete("/skills/:skillId", h.DeleteSkill)
-	// router.Put("/skills", h.UpdateSkills) // Deprecated in favor of Atomic Add/Delete
 
 	user.Post("/project", h.AddProject)
 	user.Put("/project/:projectId", h.UpdateProject)

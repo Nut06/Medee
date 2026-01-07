@@ -21,10 +21,50 @@ func main() {
 
 	fmt.Println("🌱 Starting database seeding...")
 
-	seedInstitutes(db)
-	seedFieldOfStudies(db)
+	// seedInstitutes(db)
+	// seedFieldOfStudies(db)
+	seedSkills(db)
 
 	fmt.Println("✅ Seeding completed!")
+}
+
+func seedSkills(db *gorm.DB) {
+	skills := []string{
+		// Languages
+		"Go", "Golang", "Python", "JavaScript", "TypeScript", "Java", "C#", "C++", "C", "Rust", "Swift", "Kotlin", "PHP", "Ruby", "Dart", "Scala", "Elixir", "Haskell", "Lua", "Perl", "R", "Shell", "SQL", "HTML", "CSS", "Assembly", "Matlab", "Groovy", "Objective-C", "VBA", "Visual Basic",
+
+		// Frontend Frameworks/Libraries
+		"React", "Vue.js", "Angular", "Svelte", "Next.js", "Nuxt.js", "SolidJS", "Qwik", "jQuery", "Ember.js", "Backbone.js", "Preact", "Alpine.js", "Lit", "Stencil", "Tailwind CSS", "Bootstrap", "Material UI", "Chakra UI", "Ant Design", "Bulma", "Sass", "Less", "Styled Components",
+
+		// Backend Frameworks/Libraries
+		"Node.js", "Express.js", "NestJS", "Fastify", "Django", "Flask", "FastAPI", "Spring Boot", "Laravel", "Symfony", "Ruby on Rails", "ASP.NET Core", "Gin", "Fiber", "Echo", "Chi", "Beego", "Revel", "Phoenix", "Ktor", "Vapor",
+
+		// Mobile
+		"Flutter", "React Native", "SwiftUI", "Jetpack Compose", "Xamarin", "Ionic", "Cordova", "Capacitor", "Expo", "Unity", "Unreal Engine", "Godot",
+
+		// Database
+		"PostgreSQL", "MySQL", "MariaDB", "SQLite", "MongoDB", "Redis", "Cassandra", "Elasticsearch", "DynamoDB", "Firestore", "CouchDB", "Neo4j", "Oracle", "Microsoft SQL Server", "CockroachDB", "TiDB", "ClickHouse", "InfluxDB", "Prometheus", "Supabase", "Firebase",
+
+		// DevOps & Cloud
+		"Docker", "Kubernetes", "AWS", "Google Cloud Platform", "Azure", "Terraform", "Ansible", "Jenkins", "GitLab CI", "GitHub Actions", "CircleCI", "Travis CI", "Nginx", "Apache", "Linux", "Ubuntu", "CentOS", "Debian", "Bash", "PowerShell", "Vagrant", "OpenShift", "Heroku", "Netlify", "Vercel", "DigitalOcean", "Linode", "Cloudflare",
+
+		// Tools & Others
+		"Git", "GitHub", "GitLab", "Bitbucket", "Jira", "Confluence", "Trello", "Notion", "Slack", "Discord", "Zoom", "Microsoft Teams", "Postman", "Insomnia", "Swagger", "OpenAPI", "GraphQL", "gRPC", "WebSocket", "WebRTC", "Socket.io", "Kafka", "RabbitMQ", "ActiveMQ", "ZeroMQ", "NATS", "Redis Pub/Sub", "Celery", "Bull, Sidekiq",
+
+		// AI/ML
+		"TensorFlow", "PyTorch", "Keras", "Scikit-learn", "Pandas", "NumPy", "Matplotlib", "Seaborn", "OpenCV", "NLTK", "Spacy", "Hugging Face", "OpenAI API", "LangChain",
+	}
+
+	count := 0
+	for _, name := range skills {
+		result := db.FirstOrCreate(&domain.Skill{}, domain.Skill{Name: name})
+		if result.Error != nil {
+			log.Printf("❌ Error seeding skill %s: %v", name, result.Error)
+		} else if result.RowsAffected > 0 {
+			count++
+		}
+	}
+	log.Printf("✅ Seeded %d skills (total list: %d)", count, len(skills))
 }
 
 func seedInstitutes(db *gorm.DB) {
