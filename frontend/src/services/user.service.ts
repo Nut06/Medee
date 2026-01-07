@@ -107,8 +107,8 @@ export const deleteEducation = async (id: string): Promise<User> => {
 
 // Skills
 export const updateSkills = async (skills: Skill[]): Promise<User> => {
-  const res = await api.put("/user/skills", { skills });
-  return res.data as User;
+  const { data } = await api.put("/user/skills", { skills });
+  return data as User;
 };
 
 // Projects

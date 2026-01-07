@@ -250,7 +250,7 @@ export const fieldOfStudyService = {
       const sanitized = sanitizeSearchQuery(query);
       const response = await api.get<{
         results: EnhancedBackendFieldOfStudy[];
-      }>("/fields-of-study/search", {
+      }>("/field-of-studies/search", {
         params: { q: sanitized, level },
       });
 
