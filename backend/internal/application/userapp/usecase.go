@@ -62,7 +62,13 @@ func (s *Usecase) UpdateProfile(ctx context.Context, id string, req *user.Update
 	}
 
 	if len(skillIds) > 0 {
-		err = s.userRepo.UpdateSkills(ctx, id, skillIds)
+		skillsCmd := &user.UpdateSkillsCommand{
+			Skills: make([]user.SkillDTO, len(skillIds)),
+		}
+		for i, sid := range skillIds {
+			skillsCmd.Skills[i] = user.SkillDTO{ID: sid, Name: ""}
+		}
+		err = s.userRepo.UpdateSkills(ctx, id, skillsCmd)
 		if err != nil {
 			return nil, err
 		}
@@ -165,9 +171,9 @@ func (s *Usecase) DeleteEducation(ctx context.Context, id string) error {
 	return s.userRepo.DeleteEducation(ctx, id)
 }
 
-// UpdateSkills updates user skills
-func (s *Usecase) UpdateSkills(ctx context.Context, userID string, skills []string) error {
-	return s.userRepo.UpdateSkills(ctx, userID, skills)
+// UpdateSkills updates user skills (bulk replace)
+func (s *Usecase) UpdateSkills(ctx context.Context, userID string, req *user.UpdateSkillsCommand) error {
+	return s.userRepo.UpdateSkills(ctx, userID, req)
 }
 
 // AddProject adds project and returns the created project

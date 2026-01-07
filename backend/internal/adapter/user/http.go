@@ -288,21 +288,6 @@ func (h *HTTPHandler) DeleteEducation(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func (h *HTTPHandler) UpdateSkills(c *fiber.Ctx) error {
-	userId := c.Locals("user_id").(string)
-	var req struct {
-		Skills []string `json:"skills"`
-	}
-	if err := c.BodyParser(&req); err != nil {
-		return h.handleError(err)
-	}
-	err := h.usecase.UpdateSkills(c.Context(), userId, req.Skills)
-	if err != nil {
-		return h.handleError(err)
-	}
-	return c.SendStatus(fiber.StatusOK)
-}
-
 func (h *HTTPHandler) AddProject(c *fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	var req domain.PortfolioItem
@@ -349,6 +334,19 @@ func (h *HTTPHandler) AddSkill(c *fiber.Ctx) error {
 		return h.handleError(err)
 	}
 	return c.SendStatus(fiber.StatusCreated)
+}
+
+func (h *HTTPHandler) UpdateSkills(c *fiber.Ctx) error {
+	userId := c.Locals("user_id").(string)
+	var req user.UpdateSkillsCommand
+	if err := c.BodyParser(&req); err != nil {
+		return h.handleError(err)
+	}
+	err := h.usecase.UpdateSkills(c.Context(), userId, &req)
+	if err != nil {
+		return h.handleError(err)
+	}
+	return c.SendStatus(fiber.StatusOK)
 }
 
 func (h *HTTPHandler) DeleteSkill(c *fiber.Ctx) error {
