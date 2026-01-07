@@ -42,6 +42,12 @@ type LoginResponse struct {
 	Token     string       `json:"accessToken"`
 }
 
+type RefreshResponse struct {
+	User      UserResponse `json:"user"`
+	Companies []Company    `json:"companies"`
+	Token     string       `json:"accessToken"`
+}
+
 type UserResponse struct {
 	// Basic Info
 	ID        string `json:"id"`

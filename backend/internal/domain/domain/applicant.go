@@ -42,6 +42,10 @@ type Education struct {
 	Description    *string `gorm:"type:text"`
 	Degree         string
 	GraduationYear *int
+
+	// ✅ Transient fields (read-only) - populated by repository SELECT queries
+	InstituteName    string `gorm:"->"`
+	FieldOfStudyName string `gorm:"->"`
 }
 
 type Institute struct {
