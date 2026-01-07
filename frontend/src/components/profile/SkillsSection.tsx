@@ -12,26 +12,86 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { useProfile } from "@/hooks/useProfile";
 import type { Skill } from "@/utils/types/user.type";
+import { Autocomplete } from "@/components/ui/autocomplete";
+import { skillService } from "@/services/skill.service";
+
+// Internal component for the Skill Input logic to reuse between Standalone and Card
+function SkillInput({
+  onAddSkill,
+  tempSkills,
+}: {
+  onAddSkill: (name: string) => void;
+  tempSkills: Skill[];
+}) {
+  const [inputValue, setInputValue] = useState("");
+
+  const handleManualAdd = () => {
+    const trimmed = inputValue.trim();
+    if (
+      trimmed &&
+      !tempSkills.some((s) => s.name?.toLowerCase() === trimmed.toLowerCase())
+    ) {
+      onAddSkill(trimmed);
+      setInputValue("");
+    }
+  };
+
+  // Handle selection from Autocomplete dropdown
+  const handleValueChange = (value: string) => {
+    setInputValue(value);
+    // When user selects from dropdown, Autocomplete calls this with the selected value
+    // We auto-add if it's a selection (non-empty after trim)
+    const trimmed = value.trim();
+    if (
+      trimmed &&
+      !tempSkills.some((s) => s.name?.toLowerCase() === trimmed.toLowerCase())
+    ) {
+      // This is a selection - add it immediately
+      onAddSkill(trimmed);
+      // Clear input after a short delay to let Autocomplete update first
+      setTimeout(() => setInputValue(""), 0);
+    }
+  };
+
+  return (
+    <div className="flex gap-2">
+      <div className="flex-1">
+        <Autocomplete
+          value={inputValue}
+          onValueChange={handleValueChange}
+          searchFn={skillService.search}
+          placeholder="Search or type a skill..."
+          emptyMessage="Press Enter or click + to add"
+        />
+      </div>
+      <Button
+        onClick={handleManualAdd}
+        size="icon"
+        disabled={!inputValue.trim()}
+      >
+        <Plus className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+}
 
 // Standalone Skills Section for Edit Profile Page
 export function SkillsSection() {
   const { user, onUpdateSkills, isSaving } = useProfile();
   const [tempSkills, setTempSkills] = useState<Skill[]>([]);
-  const [newSkill, setNewSkill] = useState("");
 
   useEffect(() => {
     setTempSkills(user.skills || []);
   }, [user.skills]);
 
-  const handleAddSkill = () => {
-    if (newSkill.trim()) {
-      if (!tempSkills.some((s) => s.name === newSkill.trim())) {
-        setTempSkills([...tempSkills, { name: newSkill.trim() }]);
+  const handleAddSkill = (name: string) => {
+    const trimmed = name.trim();
+    if (trimmed) {
+      if (!tempSkills.some((s) => s.name === trimmed)) {
+        setTempSkills([...tempSkills, { name: trimmed }]);
       }
-      setNewSkill("");
     }
   };
 
@@ -39,26 +99,10 @@ export function SkillsSection() {
     setTempSkills(tempSkills.filter((s) => s.name !== skillName));
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleAddSkill();
-    }
-  };
-
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <Input
-          placeholder="Type a skill and press Enter"
-          value={newSkill}
-          onChange={(e) => setNewSkill(e.target.value)}
-          onKeyDown={handleKeyDown}
-        />
-        <Button onClick={handleAddSkill} size="icon">
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
+      <SkillInput onAddSkill={handleAddSkill} tempSkills={tempSkills} />
+
       <div className="flex flex-wrap gap-2 min-h-[100px] p-4 border rounded-md bg-muted/50">
         {tempSkills.length === 0 ? (
           <p className="text-sm text-muted-foreground w-full text-center self-center">
@@ -79,7 +123,7 @@ export function SkillsSection() {
         )}
       </div>
       <p className="text-sm text-muted-foreground">
-        Add up to 15 skills. Press Enter or click + to add.
+        Add up to 15 skills. Select from suggestions or type your own.
       </p>
 
       {/* Save Button */}
@@ -97,31 +141,23 @@ export default function SkillsSectionCard() {
   const { user, onUpdateSkills, isSaving } = useProfile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [tempSkills, setTempSkills] = useState<Skill[]>([]);
-  const [newSkill, setNewSkill] = useState("");
 
   const handleOpen = () => {
     setTempSkills(user.skills || []);
     setIsDialogOpen(true);
   };
 
-  const handleAddSkill = () => {
-    if (newSkill.trim()) {
-      if (!tempSkills.some((s) => s.name === newSkill.trim())) {
-        setTempSkills([...tempSkills, { name: newSkill.trim() }]);
+  const handleAddSkill = (name: string) => {
+    const trimmed = name.trim();
+    if (trimmed) {
+      if (!tempSkills.some((s) => s.name === trimmed)) {
+        setTempSkills([...tempSkills, { name: trimmed }]);
       }
-      setNewSkill("");
     }
   };
 
   const handleRemoveSkill = (skillName: string) => {
     setTempSkills(tempSkills.filter((s) => s.name !== skillName));
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleAddSkill();
-    }
   };
 
   const handleSave = async () => {
@@ -148,17 +184,8 @@ export default function SkillsSectionCard() {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Add a skill (e.g. React)"
-                  value={newSkill}
-                  onChange={(e) => setNewSkill(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-                <Button onClick={handleAddSkill} size="icon">
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+              <SkillInput onAddSkill={handleAddSkill} tempSkills={tempSkills} />
+
               <div className="flex flex-wrap gap-2 min-h-[100px] p-4 border rounded-md bg-muted/50">
                 {tempSkills.length === 0 ? (
                   <p className="text-sm text-muted-foreground w-full text-center self-center">
