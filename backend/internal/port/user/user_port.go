@@ -21,7 +21,7 @@ type UserService interface {
 	AddEducation(ctx context.Context, userID string, req *domain.Education) (*domain.Education, error)
 	UpdateEducation(ctx context.Context, id string, req *domain.Education) (*domain.Education, error)
 	DeleteEducation(ctx context.Context, id string) error
-	UpdateSkills(ctx context.Context, userID string, skills []string) error
+	UpdateSkills(ctx context.Context, userID string, req *dto.UpdateSkillsCommand) error
 	AddProject(ctx context.Context, userID string, req *domain.PortfolioItem) (*domain.PortfolioItem, error)
 	UpdateProject(ctx context.Context, id string, req *domain.PortfolioItem) (*domain.PortfolioItem, error)
 	DeleteProject(ctx context.Context, id string) error
@@ -46,7 +46,7 @@ type UserRepository interface {
 	AddEducation(ctx context.Context, education *domain.Education) (*domain.Education, error)
 	UpdateEducation(ctx context.Context, education *domain.Education) (*domain.Education, error)
 	DeleteEducation(ctx context.Context, id string) error
-	UpdateSkills(ctx context.Context, userID string, skills []string) error
+	UpdateSkills(ctx context.Context, userID string, req *dto.UpdateSkillsCommand) error
 	AddProject(ctx context.Context, project *domain.PortfolioItem) (*domain.PortfolioItem, error)
 	UpdateProject(ctx context.Context, project *domain.PortfolioItem) (*domain.PortfolioItem, error)
 	DeleteProject(ctx context.Context, id string) error

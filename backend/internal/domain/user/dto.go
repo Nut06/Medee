@@ -71,6 +71,10 @@ type AddUserSkillCommand struct {
 	Name    *string `json:"name"`    // Optional: if creating new
 }
 
+type UpdateSkillsCommand struct {
+	Skills []SkillDTO `json:"skills"`
+}
+
 type UpdateUserSkillCommand struct {
 	Level string `json:"level"`
 }
