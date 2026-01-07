@@ -138,7 +138,13 @@ func (r *userRepository) GetFullProfile(ctx context.Context, id string) (*domain
 	err := r.db.WithContext(ctx).
 		Preload("ApplicantProfile").
 		Preload("WorkExperiences").
-		Preload("Educations").
+		Preload("Educations", func(db *gorm.DB) *gorm.DB {
+			return db.Select(`educations.*, 
+					institutes.name as institute_name,
+					field_of_studies.name as field_of_study_name`).
+				Joins("LEFT JOIN institutes ON educations.institute_id = institutes.id").
+				Joins("LEFT JOIN field_of_studies ON educations.field_of_study_id = field_of_studies.id")
+		}).
 		Preload("UserSkills.Skill").
 		Preload("PortfolioItems").
 		Where("id = ?", id).First(&user).Error
@@ -171,6 +177,32 @@ func (r *userRepository) AddEducation(ctx context.Context, education *domain.Edu
 	if err := r.db.WithContext(ctx).Create(education).Error; err != nil {
 		return nil, err
 	}
+
+	// ✅ Populate transient name fields
+	var institute domain.Institute
+	if err := r.db.First(&institute, "id = ?", education.InstituteID).Error; err == nil {
+		education.InstituteName = institute.Name
+		fmt.Printf("✅ Populated InstituteName: %s\n", institute.Name)
+	} else {
+		fmt.Printf("❌ Failed to find Institute ID: %s, error: %v\n", education.InstituteID, err)
+	}
+
+	var field domain.FieldOfStudy
+	if err := r.db.First(&field, "id = ?", education.FieldOfStudyID).Error; err == nil {
+		// Use Name first, fallback to Title if Name is empty
+		if field.Name != "" {
+			education.FieldOfStudyName = field.Name
+		} else {
+			education.FieldOfStudyName = field.Title
+		}
+		fmt.Printf("✅ Populated FieldOfStudyName: %s\n", education.FieldOfStudyName)
+	} else {
+		fmt.Printf("❌ Failed to find FieldOfStudy ID: %s, error: %v\n", education.FieldOfStudyID, err)
+	}
+
+	fmt.Printf("🔍 Returning education: InstituteName=%s, FieldOfStudyName=%s\n",
+		education.InstituteName, education.FieldOfStudyName)
+
 	return education, nil
 }
 
@@ -178,6 +210,22 @@ func (r *userRepository) UpdateEducation(ctx context.Context, education *domain.
 	if err := r.db.WithContext(ctx).Save(education).Error; err != nil {
 		return nil, err
 	}
+
+	// ✅ Populate transient name fields
+	var institute domain.Institute
+	if err := r.db.First(&institute, "id = ?", education.InstituteID).Error; err == nil {
+		education.InstituteName = institute.Name
+	}
+
+	var field domain.FieldOfStudy
+	if err := r.db.First(&field, "id = ?", education.FieldOfStudyID).Error; err == nil {
+		if field.Name != "" {
+			education.FieldOfStudyName = field.Name
+		} else {
+			education.FieldOfStudyName = field.Title
+		}
+	}
+
 	return education, nil
 }
 

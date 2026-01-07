@@ -4,6 +4,10 @@ import (
 	"time"
 )
 
-var TTL = 24 * time.Hour
-
-var FiveSec = 5 * time.Second
+var (
+	TTL        time.Duration = 24 * time.Hour
+	FiveSec    time.Duration = 5 * time.Second
+	SevenDays  time.Duration = 7 * 24 * time.Hour
+	FifteenMin time.Duration = 15 * time.Minute
+	// FifteenMin time.Duration = 1 * time.Minute
+)

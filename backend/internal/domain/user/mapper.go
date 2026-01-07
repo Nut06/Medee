@@ -87,6 +87,10 @@ func ToFullProfileResponse(u *domain.User) *FullProfileResponse {
 			resp.Projects[i] = *ToProjectResponse(&proj)
 		}
 	}
+	fmt.Println("FullProfileResponse: ")
+	for i, edu := range resp.Educations {
+		fmt.Println(i, edu)
+	}
 
 	return resp
 }
@@ -122,11 +126,17 @@ func ToEducationResponse(edu *domain.Education) *EducationResponse {
 		return nil
 	}
 
-	// Note: Education domain uses InstituteID and FieldOfStudyID
-	// This mapper needs the Institute and FieldOfStudy to be preloaded
-	// or you need to pass the resolved names from the repository layer
-	// For now, returning IDs as strings until relationships are resolved
-	fieldOfStudyID := edu.FieldOfStudyID.String()
+	instituteName := edu.InstituteName
+	fmt.Printf("Institute name is : %s\n", instituteName)
+	if instituteName == "" {
+		// Fallback: ถ้า repository ไม่ populate ให้ใช้ ID
+		instituteName = edu.InstituteID.String()
+	}
+
+	var fieldOfStudyName *string
+	if edu.FieldOfStudyName != "" {
+		fieldOfStudyName = &edu.FieldOfStudyName
+	}
 
 	var startDate string
 	if edu.StartDate != nil {
@@ -147,9 +157,9 @@ func ToEducationResponse(edu *domain.Education) *EducationResponse {
 
 	return &EducationResponse{
 		ID:           edu.ID.String(),
-		School:       edu.InstituteID.String(), // TODO: Preload Institute to get Name
+		School:       instituteName,
 		Degree:       edu.Degree,
-		FieldOfStudy: &fieldOfStudyID, // TODO: Preload FieldOfStudy to get Name
+		FieldOfStudy: fieldOfStudyName,
 		StartDate:    startDate,
 		EndDate:      endDate,
 		GPA:          gpa,
