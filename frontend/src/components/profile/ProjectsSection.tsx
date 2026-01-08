@@ -239,13 +239,11 @@ export default function ProjectsSection() {
         </Dialog>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* @ts-ignore */}
-        {user.projects && user.projects.length === 0 ? (
+        {!user.projects || user.projects.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground border-2 border-dashed rounded-lg">
             <p>No projects added yet.</p>
           </div>
         ) : (
-          /* @ts-ignore */
           user.projects.map((project: any) => (
             <Card key={project.id} className="overflow-hidden">
               {project.imageURL && (
