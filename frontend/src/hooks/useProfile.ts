@@ -74,10 +74,9 @@ export const useProfile = () => {
     },
   });
 
-  // Helper to invalidate queries and update store
-  const onSuccess = (data: any, message: string) => {
+  // Helper to invalidate queries and refetch
+  const onSuccess = async (message: string) => {
     queryClient.invalidateQueries({ queryKey: ["profile"] });
-    setUser(data);
     toast.success(message);
   };
 
@@ -86,103 +85,227 @@ export const useProfile = () => {
     toast.error(message);
   };
 
+  // ========== Factory Functions for DRY Optimistic Updates ==========
+  type ProfileField = "experiences" | "educations" | "skills" | "projects";
+
+  // Factory for DELETE mutations
+  const createDeleteMutation = <T>(
+    mutationFn: (id: string) => Promise<T>,
+    field: ProfileField,
+    successMsg: string,
+    errorMsg: string
+  ) =>
+    useMutation({
+      mutationFn,
+      onMutate: async (id: string) => {
+        await queryClient.cancelQueries({ queryKey: ["profile"] });
+        const previousProfile = queryClient.getQueryData(["profile"]);
+
+        const updater = (old: any) => ({
+          ...old,
+          [field]: old?.[field]?.filter((item: any) => item.id !== id) || [],
+        });
+
+        queryClient.setQueryData(["profile"], updater);
+        setUser(updater(user));
+
+        return { previousProfile };
+      },
+      onError: (error, _id, context: any) => {
+        if (context?.previousProfile) {
+          queryClient.setQueryData(["profile"], context.previousProfile);
+          setUser(context.previousProfile);
+        }
+        onError(error, errorMsg);
+      },
+      onSuccess: () => onSuccess(successMsg),
+    });
+
+  // Factory for ADD mutations
+  const createAddMutation = <TInput, TOutput>(
+    mutationFn: (data: TInput) => Promise<TOutput>,
+    field: ProfileField,
+    successMsg: string,
+    errorMsg: string
+  ) =>
+    useMutation({
+      mutationFn,
+      onMutate: async (newItem: TInput) => {
+        await queryClient.cancelQueries({ queryKey: ["profile"] });
+        const previousProfile = queryClient.getQueryData(["profile"]);
+
+        const tempItem = { ...newItem, id: `temp-${Date.now()}` };
+
+        const updater = (old: any) => ({
+          ...old,
+          [field]: [...(old?.[field] || []), tempItem],
+        });
+
+        queryClient.setQueryData(["profile"], updater);
+        setUser(updater(user));
+
+        return { previousProfile };
+      },
+      onError: (error, _item, context: any) => {
+        if (context?.previousProfile) {
+          queryClient.setQueryData(["profile"], context.previousProfile);
+          setUser(context.previousProfile);
+        }
+        onError(error, errorMsg);
+      },
+      onSuccess: () => onSuccess(successMsg),
+    });
+
+  // Factory for UPDATE mutations
+  const createUpdateMutation = <TInput, TOutput>(
+    mutationFn: (vars: { id: string; data: TInput }) => Promise<TOutput>,
+    field: ProfileField,
+    successMsg: string,
+    errorMsg: string
+  ) =>
+    useMutation({
+      mutationFn,
+      onMutate: async (vars: { id: string; data: TInput }) => {
+        await queryClient.cancelQueries({ queryKey: ["profile"] });
+        const previousProfile = queryClient.getQueryData(["profile"]);
+
+        const updater = (old: any) => ({
+          ...old,
+          [field]:
+            old?.[field]?.map((item: any) =>
+              item.id === vars.id ? { ...item, ...vars.data } : item
+            ) || [],
+        });
+
+        queryClient.setQueryData(["profile"], updater);
+        setUser(updater(user));
+
+        return { previousProfile };
+      },
+      onError: (error, _vars, context: any) => {
+        if (context?.previousProfile) {
+          queryClient.setQueryData(["profile"], context.previousProfile);
+          setUser(context.previousProfile);
+        }
+        onError(error, errorMsg);
+      },
+      onSuccess: () => onSuccess(successMsg),
+    });
+  // ===================================================================
+
   // Mutations
   const updateProfileMutation = useMutation({
     mutationFn: updateUser,
-    onSuccess: (data) => onSuccess(data, "Profile updated successfully"),
+    onSuccess: () => onSuccess("Profile updated successfully"),
     onError: (error) => onError(error, "Failed to update profile"),
   });
 
   const uploadAvatarMutation = useMutation({
     mutationFn: uploadAvatar,
-    onSuccess: (data) => onSuccess(data, "Avatar updated successfully"),
+    onSuccess: () => onSuccess("Avatar updated successfully"),
     onError: (error) => onError(error, "Failed to upload avatar"),
   });
 
   const deleteAvatarMutation = useMutation({
     mutationFn: deleteAvatar,
-    onSuccess: (data) => onSuccess(data, "Avatar deleted successfully"),
+    onSuccess: () => onSuccess("Avatar deleted successfully"),
     onError: (error) => onError(error, "Failed to delete avatar"),
   });
 
   const uploadResumeMutation = useMutation({
     mutationFn: uploadResume,
-    onSuccess: (data) => onSuccess(data, "Resume uploaded successfully"),
+    onSuccess: () => onSuccess("Resume uploaded successfully"),
     onError: (error) => onError(error, "Failed to upload resume"),
   });
 
   const deleteResumeMutation = useMutation({
     mutationFn: deleteResume,
-    onSuccess: (data) => onSuccess(data, "Resume deleted successfully"),
+    onSuccess: () => onSuccess("Resume deleted successfully"),
     onError: (error) => onError(error, "Failed to delete resume"),
   });
 
   // Experience Mutations
-  const addExperienceMutation = useMutation({
-    mutationFn: addExperience,
-    onSuccess: (data) => onSuccess(data, "Experience added"),
-    onError: (error) => onError(error, "Failed to add experience"),
-  });
-
-  const updateExperienceMutation = useMutation({
-    mutationFn: (vars: { id: string; data: any }) =>
-      updateExperience(vars.id, vars.data),
-    onSuccess: (data) => onSuccess(data, "Experience updated"),
-    onError: (error) => onError(error, "Failed to update experience"),
-  });
-
-  const deleteExperienceMutation = useMutation({
-    mutationFn: deleteExperience,
-    onSuccess: (data) => onSuccess(data, "Experience deleted"),
-    onError: (error) => onError(error, "Failed to delete experience"),
-  });
+  const addExperienceMutation = createAddMutation(
+    addExperience,
+    "experiences",
+    "Experience added",
+    "Failed to add experience"
+  );
+  const updateExperienceMutation = createUpdateMutation(
+    (vars: { id: string; data: any }) => updateExperience(vars.id, vars.data),
+    "experiences",
+    "Experience updated",
+    "Failed to update experience"
+  );
+  const deleteExperienceMutation = createDeleteMutation(
+    deleteExperience,
+    "experiences",
+    "Experience deleted",
+    "Failed to delete experience"
+  );
 
   // Education Mutations
-  const addEducationMutation = useMutation({
-    mutationFn: addEducation,
-    onSuccess: (data) => onSuccess(data, "Education added"),
-    onError: (error) => onError(error, "Failed to add education"),
-  });
+  const addEducationMutation = createAddMutation(
+    addEducation,
+    "educations",
+    "Education added",
+    "Failed to add education"
+  );
+  const updateEducationMutation = createUpdateMutation(
+    (vars: { id: string; data: any }) => updateEducation(vars.id, vars.data),
+    "educations",
+    "Education updated",
+    "Failed to update education"
+  );
+  const deleteEducationMutation = createDeleteMutation(
+    deleteEducation,
+    "educations",
+    "Education deleted",
+    "Failed to delete education"
+  );
 
-  const updateEducationMutation = useMutation({
-    mutationFn: (vars: { id: string; data: any }) =>
-      updateEducation(vars.id, vars.data),
-    onSuccess: (data) => onSuccess(data, "Education updated"),
-    onError: (error) => onError(error, "Failed to update education"),
-  });
-
-  const deleteEducationMutation = useMutation({
-    mutationFn: deleteEducation,
-    onSuccess: (data) => onSuccess(data, "Education deleted"),
-    onError: (error) => onError(error, "Failed to delete education"),
-  });
-
-  // Skills Mutations
+  // Skills Mutations (replace entire array)
   const updateSkillsMutation = useMutation({
     mutationFn: updateSkills,
-    onSuccess: (data) => onSuccess(data, "Skills updated"),
-    onError: (error) => onError(error, "Failed to update skills"),
+    onMutate: async (newSkills) => {
+      await queryClient.cancelQueries({ queryKey: ["profile"] });
+      const previousProfile = queryClient.getQueryData(["profile"]);
+
+      const updater = (old: any) => ({ ...old, skills: newSkills });
+      queryClient.setQueryData(["profile"], updater);
+      setUser(updater(user));
+
+      return { previousProfile };
+    },
+    onError: (error, _newSkills, context: any) => {
+      if (context?.previousProfile) {
+        queryClient.setQueryData(["profile"], context.previousProfile);
+        setUser(context.previousProfile);
+      }
+      onError(error, "Failed to update skills");
+    },
+    onSuccess: () => onSuccess("Skills updated"),
   });
 
   // Projects Mutations
-  const addProjectMutation = useMutation({
-    mutationFn: addProject,
-    onSuccess: (data) => onSuccess(data, "Project added"),
-    onError: (error) => onError(error, "Failed to add project"),
-  });
-
-  const updateProjectMutation = useMutation({
-    mutationFn: (vars: { id: string; data: any }) =>
-      updateProject(vars.id, vars.data),
-    onSuccess: (data) => onSuccess(data, "Project updated"),
-    onError: (error) => onError(error, "Failed to update project"),
-  });
-
-  const deleteProjectMutation = useMutation({
-    mutationFn: deleteProject,
-    onSuccess: (data) => onSuccess(data, "Project deleted"),
-    onError: (error) => onError(error, "Failed to delete project"),
-  });
+  const addProjectMutation = createAddMutation(
+    addProject,
+    "projects",
+    "Project added",
+    "Failed to add project"
+  );
+  const updateProjectMutation = createUpdateMutation(
+    (vars: { id: string; data: any }) => updateProject(vars.id, vars.data),
+    "projects",
+    "Project updated",
+    "Failed to update project"
+  );
+  const deleteProjectMutation = createDeleteMutation(
+    deleteProject,
+    "projects",
+    "Project deleted",
+    "Failed to delete project"
+  );
 
   // Handlers (Wrappers to match previous API)
   const onSubmit = (data: ProfileFormValues) => {
@@ -196,23 +319,42 @@ export const useProfile = () => {
   const onUploadResume = (file: File) => uploadResumeMutation.mutate(file);
   const onDeleteResume = () => deleteResumeMutation.mutate();
 
-  const onAddExperience = (data: any) => addExperienceMutation.mutate(data);
-  const onUpdateExperience = (id: string, data: any) =>
-    updateExperienceMutation.mutate({ id, data });
-  const onDeleteExperience = (id: string) =>
-    deleteExperienceMutation.mutate(id);
+  const onAddExperience = async (data: any) => {
+    await addExperienceMutation.mutateAsync(data);
+  };
+  const onUpdateExperience = async (id: string, data: any) => {
+    await updateExperienceMutation.mutateAsync({ id, data });
+  };
 
-  const onAddEducation = (data: any) => addEducationMutation.mutate(data);
-  const onUpdateEducation = (id: string, data: any) =>
-    updateEducationMutation.mutate({ id, data });
-  const onDeleteEducation = (id: string) => deleteEducationMutation.mutate(id);
+  const onDeleteExperience = async (id: string) => {
+    await deleteExperienceMutation.mutateAsync(id);
+  };
 
-  const onUpdateSkills = (skills: any[]) => updateSkillsMutation.mutate(skills);
+  const onAddEducation = async (data: any) => {
+    await addEducationMutation.mutateAsync(data);
+  };
+  const onUpdateEducation = async (id: string, data: any) => {
+    await updateEducationMutation.mutateAsync({ id, data });
+  };
+  const onDeleteEducation = async (id: string) => {
+    await deleteEducationMutation.mutateAsync(id);
+  };
 
-  const onAddProject = (data: any) => addProjectMutation.mutate(data);
-  const onUpdateProject = (id: string, data: any) =>
-    updateProjectMutation.mutate({ id, data });
-  const onDeleteProject = (id: string) => deleteProjectMutation.mutate(id);
+  const onUpdateSkills = async (skills: any[]) => {
+    await updateSkillsMutation.mutateAsync(skills);
+  };
+
+  const onAddProject = async (data: any) => {
+    await addProjectMutation.mutateAsync(data);
+  };
+
+  const onUpdateProject = async (id: string, data: any) => {
+    await updateProjectMutation.mutateAsync({ id, data });
+  };
+
+  const onDeleteProject = async (id: string) => {
+    await deleteProjectMutation.mutateAsync(id);
+  };
 
   const isLoading =
     isProfileLoading ||
