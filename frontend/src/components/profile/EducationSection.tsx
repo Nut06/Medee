@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Autocomplete } from "@/components/ui/autocomplete";
 import {
   instituteService,
@@ -17,7 +17,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -50,9 +49,184 @@ const educationSchema = z.object({
 
 type EducationFormValues = z.infer<typeof educationSchema>;
 
-export function EducationSection() {
-  const { user, onAddEducation, onUpdateEducation, onDeleteEducation } =
-    useProfile();
+// Shared Education Form Dialog
+function EducationFormDialog({
+  isOpen,
+  onOpenChange,
+  editingId,
+  form,
+  onSubmit,
+  isSaving,
+}: {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  editingId: string | null;
+  form: ReturnType<typeof useForm<EducationFormValues>>;
+  onSubmit: (data: EducationFormValues) => void;
+  isSaving?: boolean;
+}) {
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>
+            {editingId ? "Edit Education" : "Add Education"}
+          </DialogTitle>
+          <DialogDescription>
+            Add your educational background to your profile.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="instituteName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Institute Name</FormLabel>
+                  <FormControl>
+                    <Autocomplete
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      searchFn={instituteService.search}
+                      placeholder="Search institute..."
+                      emptyMessage="No institutes found."
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="degree"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Degree</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Bachelor of Science" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="fieldOfStudy"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Field of Study</FormLabel>
+                  <FormControl>
+                    <Autocomplete
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      searchFn={fieldOfStudyService.search}
+                      placeholder="Search field of study..."
+                      emptyMessage="No fields found."
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="graduationYear"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Graduation Year (optional)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="e.g. 2020" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save changes"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Shared Education List Component
+function EducationList({
+  educations,
+  onEdit,
+  onDelete,
+}: {
+  educations: Education[];
+  onEdit: (edu: Education) => void;
+  onDelete: (id: string) => void;
+}) {
+  if (!educations || educations.length === 0) {
+    return (
+      <div className="p-6 text-center border rounded-lg bg-muted/50">
+        <GraduationCap className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+        <p className="text-sm text-muted-foreground">
+          No education added yet. Click "Add Education" to get started.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {educations.map((edu: Education) => (
+        <div
+          key={edu.id}
+          className="p-4 border rounded-lg bg-card hover:bg-accent/50 transition-colors"
+        >
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="font-semibold">{edu.degree}</h3>
+              <p className="text-sm text-muted-foreground">
+                {edu.instituteName}
+              </p>
+              {edu.fieldOfStudy && (
+                <p className="text-sm text-muted-foreground">
+                  {edu.fieldOfStudy}
+                </p>
+              )}
+              {edu.graduationYear && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Graduated: {edu.graduationYear}
+                </p>
+              )}
+            </div>
+            <div className="flex gap-1">
+              <Button variant="ghost" size="icon" onClick={() => onEdit(edu)}>
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => edu.id && onDelete(edu.id)}
+              >
+                <Trash2 className="h-4 w-4 text-destructive" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Hook for education form logic
+function useEducationForm() {
+  const {
+    user,
+    onAddEducation,
+    onUpdateEducation,
+    onDeleteEducation,
+    isSaving,
+  } = useProfile();
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -105,14 +279,45 @@ export function EducationSection() {
       fieldOfStudy: "",
       graduationYear: "",
     });
+    setIsDialogOpen(true);
   };
 
   const handleDialogChange = (open: boolean) => {
     setIsDialogOpen(open);
-    if (open && !editingId) {
-      handleAddNew();
+    if (!open) {
+      setEditingId(null);
+      form.reset();
     }
   };
+
+  return {
+    user,
+    form,
+    isDialogOpen,
+    editingId,
+    isSaving,
+    onSubmit,
+    handleEdit,
+    handleAddNew,
+    handleDialogChange,
+    onDeleteEducation,
+  };
+}
+
+// Standalone Section for EditProfilePage
+export function EducationSection() {
+  const {
+    user,
+    form,
+    isDialogOpen,
+    editingId,
+    isSaving,
+    onSubmit,
+    handleEdit,
+    handleAddNew,
+    handleDialogChange,
+    onDeleteEducation,
+  } = useEducationForm();
 
   return (
     <div className="space-y-4">
@@ -120,155 +325,73 @@ export function EducationSection() {
         <p className="text-sm text-muted-foreground">
           Add your educational background.
         </p>
-        <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
-          <DialogTrigger asChild>
-            <Button size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Education
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>
-                {editingId ? "Edit Education" : "Add Education"}
-              </DialogTitle>
-              <DialogDescription>
-                Add your educational background to your profile.
-              </DialogDescription>
-            </DialogHeader>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                <FormField
-                  control={form.control}
-                  name="instituteName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Institute Name</FormLabel>
-                      <FormControl>
-                        <Autocomplete
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          searchFn={instituteService.search}
-                          placeholder="Search institute..."
-                          emptyMessage="No institutes found."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="degree"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Degree</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g. Bachelor of Science"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="fieldOfStudy"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Field of Study</FormLabel>
-                      <FormControl>
-                        <Autocomplete
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          searchFn={fieldOfStudyService.search}
-                          placeholder="Search field of study..."
-                          emptyMessage="No fields found."
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="graduationYear"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Graduation Year (optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="e.g. 2020"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <DialogFooter>
-                  <Button type="submit">Save changes</Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+        <Button size="sm" onClick={handleAddNew}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Education
+        </Button>
       </div>
 
-      <div className="space-y-3">
-        {user.educations && user.educations.length > 0 ? (
-          user.educations.map((edu: Education) => (
-            <Card key={edu.id} className="p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-semibold">{edu.degree}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {edu.instituteName}
-                  </p>
-                  {edu.fieldOfStudy && (
-                    <p className="text-sm text-muted-foreground">
-                      {edu.fieldOfStudy}
-                    </p>
-                  )}
-                  {edu.graduationYear && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Graduated: {edu.graduationYear}
-                    </p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(edu)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => edu.id && onDeleteEducation(edu.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))
-        ) : (
-          <Card className="p-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              No education added yet. Click "Add Education" to get started.
-            </p>
-          </Card>
-        )}
-      </div>
+      <EducationFormDialog
+        isOpen={isDialogOpen}
+        onOpenChange={handleDialogChange}
+        editingId={editingId}
+        form={form}
+        onSubmit={onSubmit}
+        isSaving={isSaving}
+      />
+
+      <EducationList
+        educations={user.educations || []}
+        onEdit={handleEdit}
+        onDelete={onDeleteEducation}
+      />
     </div>
+  );
+}
+
+// Card + Dialog version for ProfilePage (LinkedIn-style inline editing)
+export default function EducationSectionCard() {
+  const {
+    user,
+    form,
+    isDialogOpen,
+    editingId,
+    isSaving,
+    onSubmit,
+    handleEdit,
+    handleAddNew,
+    handleDialogChange,
+    onDeleteEducation,
+  } = useEducationForm();
+
+  return (
+    <Card className="w-full">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="flex items-center gap-2">
+          <GraduationCap className="h-5 w-5" />
+          Education
+        </CardTitle>
+        <Button variant="outline" size="sm" onClick={handleAddNew}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add
+        </Button>
+      </CardHeader>
+      <CardContent>
+        <EducationFormDialog
+          isOpen={isDialogOpen}
+          onOpenChange={handleDialogChange}
+          editingId={editingId}
+          form={form}
+          onSubmit={onSubmit}
+          isSaving={isSaving}
+        />
+
+        <EducationList
+          educations={user.educations || []}
+          onEdit={handleEdit}
+          onDelete={onDeleteEducation}
+        />
+      </CardContent>
+    </Card>
   );
 }
