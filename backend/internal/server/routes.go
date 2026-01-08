@@ -7,6 +7,7 @@ import (
 	institute_adapter "backend/internal/adapter/institute"
 	skilladapter "backend/internal/adapter/skill"
 	useradapter "backend/internal/adapter/user"
+	storage "backend/internal/adapter/storage"
 	"backend/internal/application/fieldapp"
 	"backend/internal/application/instituteapp"
 	"backend/internal/database"
@@ -42,6 +43,15 @@ func Auth(app *fiber.App, db *gorm.DB) {
 	// FieldOfStudy routes (public for autocomplete)
 	fieldGroup := api.Group("/field-of-studies")
 	fieldOfStudyRoute(fieldGroup, db)
+
+	storageGroup := api.Group("/storage")
+
+	storageRoute(storageGroup)
+}
+
+func storageRoute(router fiber.Router){
+	storageHandler := storage.NewStorageHandler()
+	router.Post("/upload/signed-url", storageHandler.GetSignedUploadURL)
 }
 
 func instituteRoute(router fiber.Router, db *gorm.DB, redisClient *redis.Client) {

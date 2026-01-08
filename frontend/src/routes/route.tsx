@@ -26,7 +26,7 @@ export const AppRoutes = () => {
         </Route>
         <Route element={<RequireRole role="user" />}>
           <Route path="/user" element={<ProfilePage />} />
-          <Route path="/user/edit-profile" element={<EditProfilePage />} />
+          {/* <Route path="/user/edit-profile" element={<EditProfilePage />} /> */}
         </Route>
       </Route>
 
