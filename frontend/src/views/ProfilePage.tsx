@@ -1,40 +1,22 @@
 import { useProfile } from "@/hooks/useProfile";
 import ExperienceSection from "@/components/profile/ExperienceSection";
 import AboutSection from "@/components/profile/AboutSection";
-import SkillsSection from "@/components/profile/SkillsSection";
+import SkillsSectionCard from "@/components/profile/SkillsSection";
 import ProjectsSection from "@/components/profile/ProjectsSection";
 import ProfileCompletenessCard from "@/components/profile/ProfileCompletenessCard";
 import AvatarUpload from "@/components/profile/AvatarUpload";
+import PersonalInfoCard from "@/components/profile/PersonalInfoSection";
+import EducationSectionCard from "@/components/profile/EducationSection";
+import ResumeSectionCard from "@/components/profile/ResumeSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Linkedin, Github, Globe, Download, Share2 } from "lucide-react";
-import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
+import { Linkedin, Github, Globe, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import {
-  downloadResume,
-  getShareableLink,
-  copyToClipboard,
-} from "@/utils/profileUtils";
+import { getShareableLink, copyToClipboard } from "@/utils/profileUtils";
 import { AuthNavbar } from "@/components/navbar/AuthNavbar";
 
 export default function ProfilePage() {
-  const { user, isLoading } = useProfile(); // Fetch full profile with skills, experiences, etc.
-
-  const handleDownloadResume = async () => {
-    if (user.resumeURL) {
-      try {
-        await downloadResume(
-          user.resumeURL,
-          `${user.firstName}_${user.lastName}_Resume.pdf`
-        );
-        toast.success("Resume downloaded successfully");
-      } catch (error) {
-        toast.error("Failed to download resume");
-      }
-    } else {
-      toast.error("No resume available");
-    }
-  };
+  const { user, isLoading } = useProfile();
 
   const handleShareProfile = async () => {
     if (user.id) {
@@ -122,16 +104,7 @@ export default function ProfilePage() {
                     )}
                   </div>
 
-                  <div className="pt-4 w-full space-y-2">
-                    <Button
-                      variant="default"
-                      className="w-full"
-                      onClick={handleDownloadResume}
-                      disabled={!user.resumeURL}
-                    >
-                      <Download className="mr-2 h-4 w-4" />
-                      Download Resume
-                    </Button>
+                  <div className="pt-4 w-full">
                     <Button
                       variant="outline"
                       className="w-full"
@@ -140,7 +113,6 @@ export default function ProfilePage() {
                       <Share2 className="mr-2 h-4 w-4" />
                       Share Profile
                     </Button>
-                    <EditProfileDialog />
                   </div>
                 </div>
               </div>
@@ -161,15 +133,18 @@ export default function ProfilePage() {
               </TabsList>
 
               <TabsContent value="about" className="space-y-6">
+                <PersonalInfoCard />
                 <AboutSection />
+                <ResumeSectionCard />
               </TabsContent>
 
               <TabsContent value="experience" className="space-y-6">
                 <ExperienceSection />
+                <EducationSectionCard />
               </TabsContent>
 
               <TabsContent value="skills" className="space-y-6">
-                <SkillsSection />
+                <SkillsSectionCard />
               </TabsContent>
 
               <TabsContent value="projects" className="space-y-6">
