@@ -44,14 +44,14 @@ func Auth(app *fiber.App, db *gorm.DB) {
 	fieldGroup := api.Group("/field-of-studies")
 	fieldOfStudyRoute(fieldGroup, db)
 
-	storageGroup := api.Group("/storage")
+	uploadGroup := api.Group("/upload")
 
-	storageRoute(storageGroup)
+	uploadRoute(uploadGroup)
 }
 
-func storageRoute(router fiber.Router){
+func uploadRoute(router fiber.Router){
 	storageHandler := storage.NewStorageHandler()
-	router.Post("/upload/signed-url", storageHandler.GetSignedUploadURL)
+	router.Post("/signed-url", storageHandler.GetSignedUploadURL)
 }
 
 func instituteRoute(router fiber.Router, db *gorm.DB, redisClient *redis.Client) {
