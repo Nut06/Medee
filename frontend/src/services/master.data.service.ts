@@ -119,22 +119,20 @@ export const instituteService = {
         params.country = country;
       }
 
-      const response = await api.get<{ results: EnhancedBackendInstitute[] }>(
+      const { data } = await api.get<{ results: EnhancedBackendInstitute[] }>(
         "/institutes/search",
         { params }
       );
 
       // Map backend format to frontend interface, then to AutocompleteItem
-      const institutes: Institute[] = (response.data.results || []).map(
-        (item) => ({
-          id: item.ID,
-          name: item.Name,
-          country: item.Country,
-          domain: item.Domain,
-          webPages: item.WebPages,
-          source: item.Source,
-        })
-      );
+      const institutes: Institute[] = (data.results || []).map((item) => ({
+        id: item.ID,
+        name: item.Name,
+        country: item.Country,
+        domain: item.Domain,
+        webPages: item.WebPages,
+        source: item.Source,
+      }));
 
       return institutes.map(instituteToAutocompleteItem);
     } catch (error) {
@@ -160,12 +158,12 @@ export const instituteService = {
         params.country = country;
       }
 
-      const response = await api.get<{ results: EnhancedBackendInstitute[] }>(
+      const { data } = await api.get<{ results: EnhancedBackendInstitute[] }>(
         "/institutes/search",
         { params }
       );
 
-      return (response.data.results || []).map((item) => ({
+      return (data.results || []).map((item) => ({
         id: item.ID,
         name: item.Name,
         country: item.Country,
@@ -183,10 +181,10 @@ export const instituteService = {
    * Get institute by ID (existing endpoint)
    */
   getById: async (id: string): Promise<Institute> => {
-    const response = await api.get<BackendInstitute>(`/institutes/${id}`);
+    const { data } = await api.get<BackendInstitute>(`/institutes/${id}`);
     return {
-      id: response.data.ID,
-      name: response.data.Name,
+      id: data.ID,
+      name: data.Name,
     };
   },
 };
@@ -208,24 +206,22 @@ export const fieldOfStudyService = {
 
     try {
       const sanitized = sanitizeSearchQuery(query);
-      const response = await api.get<{
+      const { data } = await api.get<{
         results: EnhancedBackendFieldOfStudy[];
       }>("/field-of-studies/search", {
         params: { q: sanitized, level },
       });
 
       // Map backend format to frontend interface, then to AutocompleteItem
-      const fields: FieldOfStudy[] = (response.data.results || []).map(
-        (item) => ({
-          id: item.ID,
-          code: item.Code,
-          title: item.Title,
-          name: item.Name, // Legacy field
-          category: item.Category,
-          level: item.Level,
-          isStem: item.IsStem,
-        })
-      );
+      const fields: FieldOfStudy[] = (data.results || []).map((item) => ({
+        id: item.ID,
+        code: item.Code,
+        title: item.Title,
+        name: item.Name, // Legacy field
+        category: item.Category,
+        level: item.Level,
+        isStem: item.IsStem,
+      }));
 
       return fields.map(fieldOfStudyToAutocompleteItem);
     } catch (error) {
@@ -248,13 +244,13 @@ export const fieldOfStudyService = {
 
     try {
       const sanitized = sanitizeSearchQuery(query);
-      const response = await api.get<{
+      const { data } = await api.get<{
         results: EnhancedBackendFieldOfStudy[];
       }>("/field-of-studies/search", {
         params: { q: sanitized, level },
       });
 
-      return (response.data.results || []).map((item) => ({
+      return (data.results || []).map((item) => ({
         id: item.ID,
         code: item.Code,
         title: item.Title,
@@ -273,14 +269,14 @@ export const fieldOfStudyService = {
    * Get field of study by ID (existing endpoint)
    */
   getById: async (id: string): Promise<FieldOfStudy> => {
-    const response = await api.get<BackendFieldOfStudy>(
+    const { data } = await api.get<BackendFieldOfStudy>(
       `/field-of-studies/${id}`
     );
     return {
-      id: response.data.ID,
+      id: data.ID,
       code: "", // Legacy data may not have code
-      title: response.data.Name, // Legacy: Name is used as title
-      name: response.data.Name, // Also populate name for consistency
+      title: data.Name, // Legacy: Name is used as title
+      name: data.Name, // Also populate name for consistency
     };
   },
 };

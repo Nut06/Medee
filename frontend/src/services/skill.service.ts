@@ -25,12 +25,12 @@ export const skillService = {
     try {
       const sanitized = sanitizeSearchQuery(query);
       // Backend returns array directly: [{ID: string, Name: string}]
-      const response = await api.get<{ ID: string; Name: string }[]>("/skill", {
+      const { data } = await api.get<{ ID: string; Name: string }[]>("/skill", {
         params: { q: sanitized },
       });
 
       // Map backend response (PascalCase) to AutocompleteItem (camelCase)
-      return (response.data || []).map((item) => ({
+      return (data || []).map((item) => ({
         id: item.ID,
         name: item.Name,
       }));
@@ -47,8 +47,8 @@ export const skillService = {
   create: async (name: string): Promise<Skill | null> => {
     try {
       // Assuming POST /skill creates a new skill
-      const response = await api.post<Skill>("/skill", { name });
-      return response.data;
+      const { data } = await api.post<Skill>("/skill", { name });
+      return data;
     } catch (error) {
       console.error("Failed to create skill:", error);
       return null;

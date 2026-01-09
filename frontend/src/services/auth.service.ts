@@ -9,20 +9,18 @@ import type {
 export const register = async (
   input: RegisterRequest
 ): Promise<RegisterResponse> => {
-  const res = await api.post<RegisterResponse>("/auth/register", input);
-  const data = (await res.data) as RegisterResponse;
-  return data;
+  const { data } = await api.post<RegisterResponse>("/auth/register", input);
+  return data as RegisterResponse;
 };
 
 export const loginLocal = async (
   input: LoginRequest
 ): Promise<LoginResponse> => {
-  const res = await api.post<LoginResponse>("/auth/login", input);
-  const data = (await res.data) as LoginResponse;
+  const { data } = await api.post<LoginResponse>("/auth/login", input);
   localStorage.setItem("accessToken", data.accessToken);
-  return data;
+  return data as LoginResponse;
 };
 
-export const logout = async ():Promise<void> => {
-    await api.post("/auth/logout");
+export const logout = async (): Promise<void> => {
+  await api.post("/auth/logout");
 };
