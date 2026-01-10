@@ -44,7 +44,7 @@ func Auth(app *fiber.App, db *gorm.DB) {
 	fieldGroup := api.Group("/field-of-studies")
 	fieldOfStudyRoute(fieldGroup, db)
 
-	uploadGroup := api.Group("/upload")
+	uploadGroup := api.Group("/upload", AuthMiddleware(jwtService))
 
 	uploadRoute(uploadGroup)
 }

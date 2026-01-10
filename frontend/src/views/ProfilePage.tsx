@@ -54,7 +54,7 @@ export default function ProfilePage() {
             <div className="bg-card rounded-lg border p-6 shadow-sm sticky top-6">
               <div className="flex flex-col items-center space-y-4">
                 <AvatarUpload
-                  avatarURL={user.AvatarURL}
+                  avatarURL={user.avatarURL}
                   firstName={user.firstName}
                   lastName={user.lastName}
                 />

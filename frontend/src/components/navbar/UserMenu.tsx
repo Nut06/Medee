@@ -36,7 +36,7 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={user.AvatarURL} alt={user.firstName} />
+            <AvatarImage src={user.avatarURL} alt={user.firstName} />
             <AvatarFallback>{getInitials()}</AvatarFallback>
           </Avatar>
         </Button>

@@ -10,7 +10,7 @@ export interface User {
   bio?: string;
   tagline?: string; // Profile subtitle/tagline
   phoneNumber?: string;
-  AvatarURL?: string;
+  avatarURL?: string;
   resumeURL?: string; // URL to downloadable resume
   linkedInURL?: string;
   githubURL?: string;
@@ -35,12 +35,22 @@ export interface Company {
 }
 
 export interface LoginResponse {
-  user: Pick<User, "id" | "firstName" | "lastName" | "email" 
-      | "AvatarURL" | "bio" | "phoneNumber" | "linkedInURL" 
-      | "githubURL" | "websiteURL">;
+  user: Pick<
+    User,
+    | "id"
+    | "firstName"
+    | "lastName"
+    | "email"
+    | "avatarURL"
+    | "bio"
+    | "phoneNumber"
+    | "linkedInURL"
+    | "githubURL"
+    | "websiteURL"
+  >;
 
   companies?: Company[];
-  accessToken:string
+  accessToken: string;
 }
 
 export interface RegisterRequest {
@@ -51,9 +61,19 @@ export interface RegisterRequest {
 }
 
 export interface RegisterResponse {
-  user: Pick<User, "id" | "firstName" | "lastName" | "email" 
-      | "AvatarURL" | "bio" | "phoneNumber" | "linkedInURL" 
-      | "githubURL" | "websiteURL">;
+  user: Pick<
+    User,
+    | "id"
+    | "firstName"
+    | "lastName"
+    | "email"
+    | "avatarURL"
+    | "bio"
+    | "phoneNumber"
+    | "linkedInURL"
+    | "githubURL"
+    | "websiteURL"
+  >;
   companies?: Company[];
 }
 
@@ -62,7 +82,7 @@ export interface UpdateUserRequest {
   lastName?: string;
   email?: string;
   phoneNumber?: string;
-  AvatarURL?: string;
+  avatarURL?: string;
   linkedInURL?: string;
   githubURL?: string;
   websiteURL?: string;

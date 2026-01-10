@@ -7,6 +7,7 @@ import type {
   Skill,
   AddProjectRequest,
 } from "@/utils/types/user.type";
+import { uploadService } from "./upload.service";
 
 export const getUser = async (): Promise<User> => {
   const { data } = await api.get("/user");
@@ -19,13 +20,9 @@ export const updateUser = async (input: UpdateUserRequest): Promise<User> => {
 };
 
 export const uploadAvatar = async (file: File): Promise<User> => {
-  const formData = new FormData();
-  formData.append("avatar", file);
-  const { data } = await api.put<User>(`/user/avatar`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const publicUrl = await uploadService.uploadImage(file);
+
+  const { data } = await api.put<User>("/user", { avatarURL: publicUrl });
   return data as User;
 };
 

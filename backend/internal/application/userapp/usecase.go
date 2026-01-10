@@ -52,10 +52,12 @@ func (s *Usecase) UpdateProfile(ctx context.Context, id string, req *user.Update
 		FirstName:   req.FirstName,
 		LastName:    req.LastName,
 		Email:       req.Email,
+		AvatarURL:   req.AvatarURL,
 		LinkedInURL: &req.LinkedInURL,
 		GitHubURL:   &req.GitHubURL,
 		WebsiteURL:  &req.WebsiteURL,
 	}
+
 	domainUser, err := s.userRepo.Update(ctx, id, &userInput)
 	if err != nil {
 		return nil, err
