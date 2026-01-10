@@ -10,6 +10,7 @@ type UpdateProfileCommand struct {
 	FirstName   string     `json:"firstName,omitempty"`
 	LastName    string     `json:"lastName,omitempty"`
 	Email       string     `json:"email,omitempty"`
+	AvatarURL   *string    `json:"avatarURL,omitempty"`
 	LinkedInURL string     `json:"linkedInURL,omitempty"`
 	GitHubURL   string     `json:"githubURL,omitempty"`
 	WebsiteURL  string     `json:"websiteURL,omitempty"`
@@ -85,7 +86,7 @@ type UserProfileResponse struct {
 	FirstName   string    `json:"firstName"`
 	LastName    string    `json:"lastName"`
 	Email       string    `json:"email"`
-	AvatarURL   *string   `json:"AvatarURL,omitempty"`
+	AvatarURL   *string   `json:"avatarURL,omitempty"`
 	ResumeURL   *string   `json:"resumeURL,omitempty"`
 	Skill       *SkillDTO `json:"skill,omitempty"`
 	Bio         *string   `json:"bio,omitempty"`
@@ -99,7 +100,7 @@ type FullProfileResponse struct {
 	FirstName   string                   `json:"firstName"`
 	LastName    string                   `json:"lastName"`
 	Email       string                   `json:"email"`
-	AvatarURL   *string                  `json:"AvatarURL,omitempty"`
+	AvatarURL   *string                  `json:"avatarURL,omitempty"`
 	ResumeURL   *string                  `json:"resumeURL,omitempty"`
 	Bio         *string                  `json:"bio,omitempty"`
 	LinkedInURL *string                  `json:"linkedInURL,omitempty"`

@@ -56,7 +56,7 @@ type UserResponse struct {
 	Email     string `json:"email"`
 
 	// Profile Info
-	AvatarURL   *string `json:"AvatarURL,omitempty"`
+	AvatarURL   *string `json:"avatarURL,omitempty"`
 	Bio         *string `json:"bio,omitempty"`
 	PhoneNumber *string `json:"phoneNumber,omitempty"`
 
