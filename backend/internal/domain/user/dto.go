@@ -17,6 +17,10 @@ type UpdateProfileCommand struct {
 	UserSkills  []SkillDTO `json:"userSkills,omitempty"`
 }
 
+type UploadAvatarCommand struct {
+	AvatarURL string `json:"avatarURL,omitempty"`
+}
+
 // Experience Commands
 type AddExperienceCommand struct {
 	Position    string  `json:"position"`

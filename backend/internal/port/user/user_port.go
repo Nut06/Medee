@@ -32,7 +32,7 @@ type UserService interface {
 type UserRepository interface {
 	FindById(ctx context.Context, id string) (*domain.User, error)
 	Update(ctx context.Context, id string, req *domain.User) (*domain.User, error)
-	UploadAvatar(ctx context.Context, id string, file *multipart.FileHeader) (*domain.User, error)
+	UploadAvatar(ctx context.Context, id string, url string) (*domain.User, error)
 	DeleteAvatar(ctx context.Context, id string) (*domain.User, error)
 	UploadResume(ctx context.Context, id string, file *multipart.FileHeader) (*domain.User, error)
 	DeleteResume(ctx context.Context, id string) (*domain.User, error)

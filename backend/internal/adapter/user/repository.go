@@ -53,20 +53,13 @@ func (r *userRepository) Update(ctx context.Context, id string, req *domain.User
 	return &user, nil
 }
 
-func (r *userRepository) UploadAvatar(ctx context.Context, id string, file *multipart.FileHeader) (*domain.User, error) {
+func (r *userRepository) UploadAvatar(ctx context.Context, id string, url string) (*domain.User, error) {
 	// In a real application, you would upload the file to a storage service (S3, GCS, etc.) here.
 	// For now, we'll just simulate it by returning the filename as the URL.
 	// You might want to implement a separate Storage Port/Adapter for this.
 
-	avatarURL := "https://example.com/uploads/" + file.Filename // Placeholder
-
 	var user domain.User
-	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&user).Error; err != nil {
-		return nil, err
-	}
-
-	user.AvatarURL = &avatarURL
-	if err := r.db.WithContext(ctx).Save(&user).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(&user).Where("id = ?", id).Update("avatar_url", url).First(&user).Error; err != nil {
 		return nil, err
 	}
 
