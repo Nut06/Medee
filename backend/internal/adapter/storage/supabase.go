@@ -3,13 +3,15 @@ package storage
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	storage_go "github.com/supabase-community/storage-go"
 )
 
 type SupabaseStorage struct {
-	client *storage_go.Client
-	bucket string
+	client     *storage_go.Client
+	bucket     string
+	projectURL string
 }
 
 func NewSupabaseStorage() *SupabaseStorage {
@@ -23,14 +25,15 @@ func NewSupabaseStorage() *SupabaseStorage {
 	client := storage_go.NewClient(storageURL, serviceKey, nil)
 
 	return &SupabaseStorage{
-		client: client,
-		bucket: bucket,
+		client:     client,
+		bucket:     bucket,
+		projectURL: projectURL,
 	}
 }
 
 type SignedUploadResponse struct {
 	SignedURL string `json:"signedURL"`
-	Path  string `json:"path"`
+	Path      string `json:"path"`
 }
 
 func (s *SupabaseStorage) CreateSignedUploadURL(filename string) (*SignedUploadResponse, error) {
@@ -38,11 +41,17 @@ func (s *SupabaseStorage) CreateSignedUploadURL(filename string) (*SignedUploadR
 	if err != nil {
 		return nil, fmt.Errorf("failed to create signed upload url: %w", err)
 	}
-	
+
 	fmt.Print("response upload url success")
+
+	signedURL := resp.Url
+	if !strings.HasPrefix(signedURL, "http") {
+		signedURL = fmt.Sprintf("%s/storage/v1%s", s.projectURL, signedURL)
+	}
+
 	return &SignedUploadResponse{
-		SignedURL: resp.Url,
-		Path: filename,
+		SignedURL: signedURL,
+		Path:      filename,
 	}, nil
 }
 
