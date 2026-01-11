@@ -23,8 +23,9 @@ import (
 func Auth(app *fiber.App, db *gorm.DB) {
 	api := app.Group("/")
 
-	// Initialize Redis
+	// Initialize Redis, and supabase
 	redisClient := database.NewRedisClient()
+	supabase := storage.NewSupabaseStorage()
 	jwtService := authadapter.NewJWTService(os.Getenv("JWT_SECRET"), utils.FifteenMin, utils.SevenDays)
 
 	authGroup := api.Group("/auth")
@@ -46,11 +47,11 @@ func Auth(app *fiber.App, db *gorm.DB) {
 
 	uploadGroup := api.Group("/upload", AuthMiddleware(jwtService))
 
-	uploadRoute(uploadGroup)
+	uploadRoute(uploadGroup, supabase)
 }
 
-func uploadRoute(router fiber.Router){
-	storageHandler := storage.NewStorageHandler()
+func uploadRoute(router fiber.Router, supabase *storage.SupabaseStorage){
+	storageHandler := storage.NewStorageHandler(supabase)
 	router.Post("/signed-url", storageHandler.GetSignedUploadURL)
 }
 

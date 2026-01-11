@@ -86,7 +86,7 @@ export const useProfile = () => {
   };
 
   // ========== Factory Functions for DRY Optimistic Updates ==========
-  type ProfileField = "experiences" | "educations" | "skills" | "projects";
+  type ProfileField = "avatarURL" | "experiences" | "educations" | "skills" | "projects";
 
   // Factory for DELETE mutations
   const createDeleteMutation = <T>(
@@ -202,7 +202,10 @@ export const useProfile = () => {
 
   const uploadAvatarMutation = useMutation({
     mutationFn: uploadAvatar,
-    onSuccess: () => onSuccess("Avatar updated successfully"),
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(["profile"], updatedUser);
+      onSuccess("Avatar updated successfully");
+    },
     onError: (error) => onError(error, "Failed to upload avatar"),
   });
 

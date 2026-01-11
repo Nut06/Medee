@@ -22,7 +22,8 @@ export const updateUser = async (input: UpdateUserRequest): Promise<User> => {
 export const uploadAvatar = async (file: File): Promise<User> => {
   const publicUrl = await uploadService.uploadImage(file);
 
-  const { data } = await api.put<User>("/user", { avatarURL: publicUrl });
+  const { data } = await api.put<User>("/user/avatar", { avatarURL: publicUrl });
+  
   return data as User;
 };
 

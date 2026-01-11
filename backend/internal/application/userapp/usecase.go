@@ -80,8 +80,8 @@ func (s *Usecase) UpdateProfile(ctx context.Context, id string, req *user.Update
 }
 
 // UploadAvatar uploads avatar and returns updated profile
-func (s *Usecase) UploadAvatar(ctx context.Context, id string, file *multipart.FileHeader) (*user.UserProfileResponse, error) {
-	domainUser, err := s.userRepo.UploadAvatar(ctx, id, file)
+func (s *Usecase) UploadAvatar(ctx context.Context, id string, url string) (*user.UserProfileResponse, error) {
+	domainUser, err := s.userRepo.UploadAvatar(ctx, id, url)
 	if err != nil {
 		return nil, err
 	}

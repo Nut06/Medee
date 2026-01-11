@@ -20,6 +20,7 @@ export const uploadService = {
         "Content-Type": file.type,
       },
     });
+    console.log("Upload Image success");
     return publicUrl;
   },
 
