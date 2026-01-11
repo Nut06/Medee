@@ -1,64 +1,51 @@
 package storage
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
+
+	storage_go "github.com/supabase-community/storage-go"
 )
 
 type SupabaseStorage struct {
-	projectURL string
-	serviceKey string
-	bucket     string
+	client *storage_go.Client
+	bucket string
 }
 
 func NewSupabaseStorage() *SupabaseStorage {
+	projectURL := os.Getenv("SUPABASE_PROJECT_URL")
+	serviceKey := os.Getenv("SUPABASE_SERVICE_KEY")
+	bucket := os.Getenv("SUPABASE_BUCKET")
+
+	// Initialize storage-go client
+	// storage-go expects the storage URL (e.g., scheme://<project_ref>.supabase.co/storage/v1)
+	storageURL := fmt.Sprintf("%s/storage/v1", projectURL)
+	client := storage_go.NewClient(storageURL, serviceKey, nil)
+
 	return &SupabaseStorage{
-		projectURL: os.Getenv("SUPABASE_PROJECT_URL"),
-		serviceKey: os.Getenv("SUPABASE_SERVICE_KEY"),
-		bucket:     os.Getenv("SUPABASE_BUCKET"),
+		client: client,
+		bucket: bucket,
 	}
 }
 
 type SignedUploadResponse struct {
 	SignedURL string `json:"signedURL"`
-	Token     string `json:"token"`
-	Path      string `json:"path"`
+	Path  string `json:"path"`
 }
 
 func (s *SupabaseStorage) CreateSignedUploadURL(filename string) (*SignedUploadResponse, error) {
-	url := fmt.Sprintf("%s/storage/v1/object/upload/sign/%s/%s",
-		s.projectURL, s.bucket, filename)
-
-	req, err := http.NewRequest("POST", url, nil)
+	resp, err := s.client.CreateSignedUploadUrl(s.bucket, filename)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		return nil, fmt.Errorf("failed to create signed upload url: %w", err)
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+s.serviceKey)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to call supabase: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("supabase error (%d): %s", resp.StatusCode, string(body))
-	}
-
-	var result SignedUploadResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	return &result, nil
+	
+	fmt.Print("response upload url success")
+	return &SignedUploadResponse{
+		SignedURL: resp.Url,
+		Path: filename,
+	}, nil
 }
 
 func (s *SupabaseStorage) GetPublicURL(path string) string {
-	return fmt.Sprintf("%s/storage/v1/object/public/%s/%s",
-		s.projectURL, s.bucket, path)
+	return s.client.GetPublicUrl(s.bucket, path).SignedURL
 }

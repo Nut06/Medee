@@ -56,12 +56,12 @@ func (h *HTTPHandler) GetUser(c *fiber.Ctx) error {
 
 func (h *HTTPHandler) UploadAvatar(c *fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
-	file, err := c.FormFile("avatar")
-	if err != nil {
+	var req user.UploadAvatarCommand; 
+	if err := c.BodyParser(&req); err != nil {
 		return h.handleError(user.ErrInvalidRequestBody)
 	}
 
-	user, err := h.usecase.UploadAvatar(c.Context(), userId, file)
+	user, err := h.usecase.UploadAvatar(c.Context(), userId, req.AvatarURL)
 	if err != nil {
 		return h.handleError(err)
 	}

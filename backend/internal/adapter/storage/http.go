@@ -11,8 +11,8 @@ type StorageHandler struct {
 	storage *SupabaseStorage
 }
 
-func NewStorageHandler() *StorageHandler {
-	return &StorageHandler{storage: NewSupabaseStorage()}
+func NewStorageHandler(supabase *SupabaseStorage) *StorageHandler {
+	return &StorageHandler{storage: supabase}
 }
 
 type SignedURLRequest struct {
@@ -25,7 +25,7 @@ func (h *StorageHandler) GetSignedUploadURL(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
-
+	fmt.Println("From http GetSignedUploadURL")
 	if req.Filename == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "filename is required"})
 	}
@@ -40,7 +40,7 @@ func (h *StorageHandler) GetSignedUploadURL(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"uploadUrl": result.SignedURL,
-		"path":      uniqueName,
+		"path":      result.Path,
 		"publicUrl": h.storage.GetPublicURL(uniqueName),
 	})
 }
