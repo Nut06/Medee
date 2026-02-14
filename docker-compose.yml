@@ -1,20 +1,12 @@
 services:
 
-  frontend-prod:
+  frontend:
     build:
       context: ./frontend
       dockerfile: ./frontend/Dockerfile
-    image: docker-frontend-prod
-    ports:
-      - "8080:8080"
-
-  frontend-dev:
-    build:
-      context: ./frontend
-      dockerfile: ./frontend/Dockerfile.dev
     image: docker-frontend-dev
     ports:
-      - "5173:5173"
+      - "${APP_PORT}:5173"
     develop:
       watch:
         - path: ./frontend/src
@@ -27,21 +19,13 @@ services:
   #     dockerfile: ./frontend/Dockerfile.dev
   #   command:  ["pnpm", "test"]
 
-  backend-prod:
+  backend:
     build:
       context: ./backend
       dockerfile: ./backend/Dockerfile
-    image: docker-backend-prod
+    image: docker-backend
     ports:
-      - "3000:3000"
-
-  backend-dev:
-    build:
-      context: ./backend
-      dockerfile: ./backend/Dockerfile.dev
-    image: docker-backend-dev
-    ports:
-      - "3000:3000"
+      - "${API_PORT}:3000"
     develop:
       watch:
         - path: ./backend
@@ -60,7 +44,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
     
     
     healthcheck:
