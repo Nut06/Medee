@@ -7,7 +7,6 @@ import GuestRoute from "./GuestRoute";
 import RequireRole from "./RequireRole";
 import CompanyPage from "@/views/CompanyPage";
 import ProfilePage from "@/views/ProfilePage";
-import EditProfilePage from "@/views/EditProfilePage";
 
 export const AppRoutes = () => {
   return (
