@@ -1,4 +1,3 @@
-// utils/validation.ts
 export const sanitizeSearchQuery = (query: string): string => {
   // Remove dangerous characters
   return query
