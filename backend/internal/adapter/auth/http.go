@@ -66,9 +66,11 @@ func (h *HTTPHandler) Refresh(c *fiber.Ctx) error {
 		return h.handleError(auth.ErrInvalidRefreshToken)
 	}
 
-	res, tokens, err := h.uc.Refresh(ctx, authport.RefreshCommand{
+	refreshcmd := authport.RefreshCommand{
 		RefreshToken: rt,
-	})
+	}
+
+	res, tokens, err := h.uc.Refresh(ctx, refreshcmd)
 
 	if err != nil {
 		return h.handleError(err)

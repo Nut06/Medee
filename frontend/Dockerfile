@@ -2,7 +2,6 @@ FROM dhi.io/node:25-alpine3.23-sfw-ent-dev as base
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-
 RUN corepack enable
 
 FROM base AS prod
