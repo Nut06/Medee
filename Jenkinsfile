@@ -6,35 +6,59 @@ pipeline {
     }
 
     stages {
-        stage('Build'){
+        stage('Build') {
             steps {
-                githubNotify context: 'ci/jenkins/build', status: 'PENDING', description: 'Building the Application'
+                setGitHubPullRequestStatus(
+                    context: 'ci/jenkins/build',
+                    message: 'Building the Application',
+                    state: 'PENDING'
+                )
 
                 sh 'echo Build Stage'
             }
 
             post {
                 success {
-                    githubNotify context: 'ci/jenkins/build', status: 'SUCCESS', description: 'Build finished successful'
+                    setGitHubPullRequestStatus(
+                        context: 'ci/jenkins/build',
+                        message: 'Build finished successful',
+                        state: 'SUCCESS'
+                    )
                 }
                 failure {
-                    githubNotify context: 'ci/jenkins/build', status: 'FAILURE', description: 'Build failed'
+                    setGitHubPullRequestStatus(
+                        context: 'ci/jenkins/build',
+                        message: 'Build failed',
+                        state: 'FAILURE'
+                    )
                 }
             }
         }
 
         stage('Security Scan') {
             steps {
-                githubNotify context: 'ci/jenkins/security', status: 'PENDING', description: 'Scanning for vulnerabilities...'
-                
+                setGitHubPullRequestStatus(
+                    context: 'ci/jenkins/security',
+                    message: 'Scanning for vulnerabilities...',
+                    state: 'PENDING'
+                )
+
                 sh 'echo Security Scan Stage'
             }
             post {
                 success {
-                    githubNotify context: 'ci/jenkins/security', status: 'SUCCESS', description: 'No critical vulnerabilities found.'
+                    setGitHubPullRequestStatus(
+                        context: 'ci/jenkins/security',
+                        message: 'No critical vulnerabilities found.',
+                        state: 'SUCCESS'
+                    )
                 }
                 failure {
-                    githubNotify context: 'ci/jenkins/security', status: 'FAILURE', description: 'Security vulnerabilities detected!'
+                    setGitHubPullRequestStatus(
+                        context: 'ci/jenkins/security',
+                        message: 'Security vulnerabilities detected!',
+                        state: 'FAILURE'
+                    )
                 }
             }
         }
@@ -42,16 +66,28 @@ pipeline {
         // --- 3. Stage: Unit Test ---
         stage('Unit Test') {
             steps {
-                githubNotify context: 'ci/jenkins/test', status: 'PENDING', description: 'Running unit tests...'
-                
+                setGitHubPullRequestStatus(
+                    context: 'ci/jenkins/test',
+                    message: 'Running unit tests...',
+                    state: 'PENDING'
+                )
+
                 sh 'echo Unit Test Stage'
             }
             post {
                 success {
-                    githubNotify context: 'ci/jenkins/test', status: 'SUCCESS', description: 'All tests passed!'
+                    setGitHubPullRequestStatus(
+                        context: 'ci/jenkins/test',
+                        message: 'All tests passed!',
+                        state: 'SUCCESS'
+                    )
                 }
                 failure {
-                    githubNotify context: 'ci/jenkins/test', status: 'FAILURE', description: 'Some tests failed.'
+                    setGitHubPullRequestStatus(
+                        context: 'ci/jenkins/test',
+                        message: 'Some tests failed.',
+                        state: 'FAILURE'
+                    )
                 }
             }
         }
@@ -61,7 +97,7 @@ pipeline {
         // sending email
         always {
             echo 'Pipeline execution finished'
-            
+
             script {
                 def buildStatus = currentBuild.currentResult
                 def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.userId ?: 'Github User'
