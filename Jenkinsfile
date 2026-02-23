@@ -6,59 +6,41 @@ pipeline {
     }
 
     stages {
+        stage('Clean work space') {
+            steps {
+                cleanWs()
+            }
+        }
+
         stage('Build') {
             steps {
-                setGitHubPullRequestStatus(
-                    context: 'ci/jenkins/build',
-                    message: 'Building the Application',
-                    state: 'PENDING'
-                )
+                sh 'echo Starting Build Stage...'
 
                 sh 'echo Build Stage'
             }
 
             post {
                 success {
-                    setGitHubPullRequestStatus(
-                        context: 'ci/jenkins/build',
-                        message: 'Build finished successful',
-                        state: 'SUCCESS'
-                    )
+                    sh 'echo Build finished successfully!'
                 }
                 failure {
-                    setGitHubPullRequestStatus(
-                        context: 'ci/jenkins/build',
-                        message: 'Build failed',
-                        state: 'FAILURE'
-                    )
+                    sh 'echo Build failed!'
                 }
             }
         }
 
         stage('Security Scan') {
             steps {
-                setGitHubPullRequestStatus(
-                    context: 'ci/jenkins/security',
-                    message: 'Scanning for vulnerabilities...',
-                    state: 'PENDING'
-                )
+                sh 'echo Scanning for vulnerabilities...'
 
                 sh 'echo Security Scan Stage'
             }
             post {
                 success {
-                    setGitHubPullRequestStatus(
-                        context: 'ci/jenkins/security',
-                        message: 'No critical vulnerabilities found.',
-                        state: 'SUCCESS'
-                    )
+                    sh 'echo No critical vulnerabilities found.'
                 }
                 failure {
-                    setGitHubPullRequestStatus(
-                        context: 'ci/jenkins/security',
-                        message: 'Security vulnerabilities detected!',
-                        state: 'FAILURE'
-                    )
+                    sh 'echo Security vulnerabilities detected!'
                 }
             }
         }
@@ -66,28 +48,16 @@ pipeline {
         // --- 3. Stage: Unit Test ---
         stage('Unit Test') {
             steps {
-                setGitHubPullRequestStatus(
-                    context: 'ci/jenkins/test',
-                    message: 'Running unit tests...',
-                    state: 'PENDING'
-                )
+                sh 'echo Running unit tests...'
 
                 sh 'echo Unit Test Stage'
             }
             post {
                 success {
-                    setGitHubPullRequestStatus(
-                        context: 'ci/jenkins/test',
-                        message: 'All tests passed!',
-                        state: 'SUCCESS'
-                    )
+                    sh 'echo All tests passed!'
                 }
                 failure {
-                    setGitHubPullRequestStatus(
-                        context: 'ci/jenkins/test',
-                        message: 'Some tests failed.',
-                        state: 'FAILURE'
-                    )
+                    sh 'echo Some tests failed.'
                 }
             }
         }
