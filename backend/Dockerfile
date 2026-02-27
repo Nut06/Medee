@@ -14,7 +14,6 @@ FROM build as run-test-stage
 
 RUN go test -v ./...
 
-
 FROM dhi.io/golang:1.25.6-debian13 as runner
 
 WORKDIR /

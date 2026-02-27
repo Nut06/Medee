@@ -6,9 +6,16 @@ pipeline {
     }
 
     stages {
+        
         stage('Clean work space') {
             steps {
                 cleanWs()
+            }
+        }
+
+        stage("Test Docker"){
+            steps {
+                sh 'docker info'
             }
         }
 
