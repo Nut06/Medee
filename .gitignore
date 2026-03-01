@@ -10,7 +10,7 @@ lerna-debug.log*
 infrastructure/terraform/.terraform.*
 infrastructure/terraform/.terraform
 infrastructure/terraform/terraform.*
-infrastructure/terraform/cmd.sh
+infrastructure/terraform/cmd/ssh.sh
 
 terraform.*
 docs/

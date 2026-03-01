@@ -34,7 +34,11 @@ sleep 5
 sudo chmod 777 /var/run/docker.sock
 
 sleep 10
-docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
+docker run -d --name sonar -p 9000:9000 \
+        -v sonarqube_data:/opt/sonarqube/data \
+        -v sonarqube_logs:/opt/sonarqube/logs \
+        -v sonarqube_extensions:/opt/sonarqube/extensions \
+        dhi.io/sonarqube:25-debian13
 sleep 5
 
 # 3. Install trivy ON THE INSTANCE
