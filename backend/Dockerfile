@@ -10,6 +10,7 @@ COPY . ./
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping
 
+# copy sperate stage to run test in another stage
 FROM build as run-test-stage
 
 RUN go test -v ./...
