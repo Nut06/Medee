@@ -42,7 +42,7 @@ services:
     ports:
       - "2376:2376"
     environment:
-      - DOCKER_TLS_CERTDIR=/cert
+      - DOCKER_TLS_CERTDIR=/certs
     privileged: true
     restart: unless-stopped
     networks:
@@ -64,7 +64,7 @@ services:
       - jenkins
     environment:
       - DOCKER_HOST=tcp://docker:2376
-      - DOCKER_CERT_PATH=/cert/clients
+      - DOCKER_CERT_PATH=/certs/client
       - DOCKER_TLS_VERIFY=1
     volumes:
       - jenkins_data:/var/jenkins_home
@@ -72,7 +72,26 @@ services:
     ports:
       - "8000:8080"
       - "50000:50000"
-      
+
+
+  sonarqube:
+    image: dhi.io/sonarqube:25-debian13
+    container_name: sonarqube
+    networks:
+      - jenkins
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    ports:
+      - "9000:9000"
+    volumes:
+    # : data files, such as the embedded H2 database and Elasticsearch indexes
+      - sonarqube_data:/opt/sonarqube/data
+      # : contains SonarQube logs about access, web process, CE process, Elasticsearch logs
+      - sonarqube_logs:/opt/sonarqube/logs
+      # : for 3rd party plugins
+      - sonarqube_extensions:/opt/sonarqube/extensions
+
+
   db:
     image: postgres:18
     container_name: db
@@ -147,3 +166,6 @@ volumes:
   redis_data:
   jenkins_data:
   jenkins_docker_certs:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:
