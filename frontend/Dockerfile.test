@@ -1,0 +1,22 @@
+# Use Playwright's official image which includes browsers and OS dependencies
+FROM mcr.microsoft.com/playwright:v1.58.2-noble
+
+# Prevent npm/pnpm prompts and use CI mode
+ENV CI=true
+
+WORKDIR /app
+
+# Enable corepack for pnpm support natively in Node
+RUN corepack enable
+
+# Copy package config first to leverage Docker cache
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies exclusively (ignoring scripts for now if needed, but standard install is fine)
+RUN pnpm install --frozen-lockfile
+
+# Copy the rest of the application code
+COPY . .
+
+# The command to run when the container starts
+CMD ["pnpm", "test"]

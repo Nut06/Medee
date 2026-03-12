@@ -35,7 +35,7 @@ services:
   # ["pnpm", "test"]
 
     
-
+  # docker compose up -d jenkins-blueocean jenkins-docker
   jenkins-docker:
     image: docker:dind
     container_name: jenkins-docker
@@ -139,7 +139,7 @@ services:
         "--requirepass", "${REDIS_PASSWORD}"
       ]
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_PASSWORD="redis123456"
 
 # set when backend ready for image
 # services:
