@@ -7,6 +7,8 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+frontend/.pnpm-store
+
 infrastructure/terraform/.terraform.*
 infrastructure/terraform/.terraform
 infrastructure/terraform/terraform.*
