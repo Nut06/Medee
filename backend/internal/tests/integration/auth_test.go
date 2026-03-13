@@ -39,6 +39,10 @@ func TestAuth_RegisterAndLoginFlow(t *testing.T) {
 	database.DB.Table("users").Where("email = ?", "integration@example.com").Count(&count)
 	assert.Equal(t, int64(1), count)
 
+	// Clear refresh tokens created during Register before Login
+	// This prevents a JWT token collision when both actions run within the same second.
+	database.DB.Exec("TRUNCATE TABLE refresh_tokens;")
+
 	// 2. Login User Action
 	loginReq := auth.LoginRequest{
 		Email:    "integration@example.com",
@@ -75,4 +79,7 @@ func TestAuth_RegisterAndLoginFlow(t *testing.T) {
 
 	err = json.NewDecoder(respProfile.Body).Decode(&profileResp)
 	assert.NoError(t,err)
+
+	assert.Equal(t, "integration@example.com", profileResp.Email)
+	assert.Equal(t, "Integration", profileResp.FirstName)
 }
