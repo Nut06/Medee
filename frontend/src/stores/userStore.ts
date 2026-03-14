@@ -1,4 +1,3 @@
-import { logout } from "@/services/auth.service";
 import type { User } from "@/utils/types/user.type";
 import { create } from "zustand";
 
@@ -7,8 +6,9 @@ interface UserState {
   setUser: (
     user: User | Partial<User> | null,
     key?: keyof User,
-    value?: unknown
+    value?: unknown,
   ) => void;
+  setAccessToken: (accessToken: string) => void;
   isAuth: boolean;
   setAuth: (b: boolean) => void;
   clearAuth: () => Promise<void>;
@@ -22,7 +22,7 @@ export const useUserStore = create<UserState>((set) => ({
       set((state) =>
         state.user
           ? { user: { ...state.user, [key]: value as User[keyof User] } }
-          : state
+          : state,
       );
       return;
     }
@@ -37,6 +37,14 @@ export const useUserStore = create<UserState>((set) => ({
       isAuth: true,
     }));
   },
+
+  setAccessToken: (accessToken: string) => {
+    localStorage.setItem("accessToken", accessToken);
+    set({
+      isAuth: true,
+    });
+  },
+
   isAuth: false,
   setAuth: (b: boolean) => {
     set({
@@ -44,7 +52,7 @@ export const useUserStore = create<UserState>((set) => ({
     });
   },
   clearAuth: async () => {
-    await logout();
+    localStorage.removeItem("accessToken");
     set({
       user: {},
       isAuth: false,

@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,10 +21,10 @@ import type { RegisterRequest } from "@/utils/types/user.type";
 import { useUserStore } from "@/stores/userStore";
 
 const registerSchema = z.object({
-  firstName: z.string().min(1, "กรุณากรอกชื่อ"),
-  lastName: z.string().min(1, "กรุณากรอกนามสกุล"),
-  email: z.string().email("กรุณากรอก Email"),
-  password: z.string().min(6, "กรุณากรอกรหัสผ่าน"),
+  firstName: z.string({ error: "กรุณากรอกชื่อ" }).min(1, "กรุณากรอกชื่อ"),
+  lastName: z.string({ error: "กรุณากรอกนามสกุล" }).min(1, "กรุณากรอกนามสกุล"),
+  email: z.email("กรุณากรอก Email"),
+  password: z.string({ error: "กรุณากรอกรหัสผ่าน" }).min(6, "กรุณากรอกรหัสผ่าน"),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -34,7 +35,10 @@ export const RegisterForm = () => {
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
+    mode: "onSubmit",
     defaultValues: {
+      firstName: "",
+      lastName: "",
       email,
       password,
     },
@@ -203,9 +207,11 @@ export const RegisterForm = () => {
           />
 
           {error && (
-            <p className="text-sm font-medium text-destructive">
-              {error || "Unable to log in. Please try again."}
-            </p>
+            <Alert variant="destructive">
+              <AlertDescription>
+                {error || "Unable to register. Please try again."}
+              </AlertDescription>
+            </Alert>
           )}
 
           <Button type="submit" className="w-full" disabled={loading}>

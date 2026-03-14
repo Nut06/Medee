@@ -1,5 +1,6 @@
 import { loginLocal, register } from "@/services/auth.service";
 import { useUserStore } from "@/stores/userStore";
+
 import type {
   LoginRequest,
   LoginResponse,
@@ -7,6 +8,7 @@ import type {
   User,
 } from "@/utils/types/user.type";
 import { useReducer } from "react";
+import axios from "axios";
 
 type AuthFormState = {
   firstName: string;
@@ -43,7 +45,7 @@ function reducer(state: AuthFormState, action: Action): AuthFormState {
 
 export function useAuthForm() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { setUser, setAuth } = useUserStore();
+  const { setUser } = useUserStore();
 
   const setField = (key: keyof AuthFormState, val: string | boolean) => {
     dispatch({ type: "SET_FIELD", key, val });
@@ -54,23 +56,31 @@ export function useAuthForm() {
   const registerUser = async (input: RegisterRequest): Promise<void> => {
     try {
       setField("loading", true);
-      const data = (await register(input)) as User;
-      setUser(data);
+      setField("error", "");
+
+      const response = await register(input);
+      if (response.user) {
+        setUser(response.user);
+      }
     } catch (error: unknown) {
-      if (error instanceof Error) {
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data?.message || "Registration failed";
+        setField("error", message);
+      } else if (error instanceof Error) {
         setField("error", error.message);
       } else {
         setField("error", "An unknown error occurred");
       }
     } finally {
       setField("loading", false);
-      resetForm();
     }
   };
 
-  const loginUser = async (input: LoginRequest): Promise<void> => {
+  const loginUser = async (input: LoginRequest): Promise<boolean> => {
     try {
       setField("loading", true);
+      setField("error", "");
+
       const loginRes: LoginResponse = await loginLocal(input);
       const { user: rawUser, companies = [] } = loginRes;
       const user = rawUser as User;
@@ -79,16 +89,13 @@ export function useAuthForm() {
       }
 
       setUser(user);
-      setAuth(true);
+      resetForm();
+      return true; // ← บอกว่า success
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        setField("error", error.message);
-      } else {
-        setField("error", "An unknown error occurred");
-      }
+      setField("error", "Invalid username or password");
+      return false; // ← บอกว่า fail
     } finally {
       setField("loading", false);
-      resetForm();
     }
   };
 
