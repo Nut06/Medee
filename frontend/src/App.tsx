@@ -9,20 +9,20 @@ function App() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const user = await getUser();
-        if (user) {
-          setUser(user);
-          setAuth(true);
-        }
-      } catch (error) {
-        console.log("Not authenticated");
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) {
         setAuth(false);
-        setUser(null);
+        return;
+      }
+
+      const user = await getUser();
+      if (user) {
+        setUser(user);
+        setAuth(true);
       }
     };
     checkAuth();
-  }, [setUser, setAuth]);
+  }, [ setUser, setAuth]);
 
   return (
     <>

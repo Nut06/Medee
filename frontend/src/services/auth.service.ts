@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import { useUserStore } from "@/stores/userStore";
 import type {
   LoginRequest,
   LoginResponse,
@@ -7,20 +8,40 @@ import type {
 } from "@/utils/types/user.type";
 
 export const register = async (
-  input: RegisterRequest
+  input: RegisterRequest,
 ): Promise<RegisterResponse> => {
-  const { data } = await api.post<RegisterResponse>("/auth/register", input);
-  return data as RegisterResponse;
+  try {
+    const { data } = await api.post<LoginResponse>("/auth/register", input);
+    // Store accessToken (refreshToken stays in HttpOnly cookie)
+    if (data.accessToken) {
+      useUserStore.getState().setAccessToken(data.accessToken);
+    }
+    return data as RegisterResponse;
+  } catch (error) {
+    console.error("Register error:", error);
+    throw error; // Throw for caller to handle
+  }
 };
 
 export const loginLocal = async (
-  input: LoginRequest
+  input: LoginRequest,
 ): Promise<LoginResponse> => {
-  const { data } = await api.post<LoginResponse>("/auth/login", input);
-  localStorage.setItem("accessToken", data.accessToken);
-  return data as LoginResponse;
+  try {
+    const { data } = await api.post<LoginResponse>("/auth/login", input);
+    // Store accessToken (refreshToken stays in HttpOnly cookie)
+    useUserStore.getState().setAccessToken(data.accessToken);
+    return data as LoginResponse;
+  } catch (error) {
+    console.error("Login error:", error);
+    throw error; // Throw for caller to handle
+  }
 };
 
 export const logout = async (): Promise<void> => {
-  await api.post("/auth/logout");
+  try {
+    await api.post("/auth/logout");
+  } catch (error) {
+    console.error("Logout request failed:", error);
+    // Still clear auth even if logout endpoint fails
+  }
 };

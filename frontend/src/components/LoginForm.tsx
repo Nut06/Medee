@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -11,7 +12,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuthForm } from "@/hooks/userAuthForm";
@@ -19,20 +19,24 @@ import type { LoginRequest } from "@/utils/types/user.type";
 import { useUserStore } from "@/stores/userStore";
 
 const loginSchema = z.object({
-  email: z.email("Please enter a valid email  address."),
+  email: z
+    .email({ message: "please enter a valid email" })
+    .min(1, "Email is required"),
   password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const LoginForm = () => {
-  const { email, password, setField, loading, error, loginUser } = useAuthForm();
+  const { email, password, setField, loading, error, loginUser } =
+    useAuthForm();
   const { user } = useUserStore();
-  
+
   const navigate = useNavigate();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
+    mode: "onSubmit",
     defaultValues: {
       email,
       password,
@@ -45,21 +49,15 @@ export const LoginForm = () => {
       password: values.password,
     };
 
-    setField("email", values.email);
-    setField("password", values.password);
+    const success = await loginUser(payload);
+    if (!success) {
+      return;
+    }
 
-    try {
-      setField("loading", true);
-      await loginUser(payload);
-      if (user.companies && user.companies.length > 0) {
-        navigate("/company");
-      } else {
-        navigate("/user");
-      }
-    } catch (error) {
-      console.error("Login failed:", error);
-    } finally {
-      setField("loading", false);
+    if (user.companies && user.companies.length > 0) {
+      navigate("/company");
+    } else {
+      navigate("/user");
     }
   };
 
@@ -82,6 +80,12 @@ export const LoginForm = () => {
           onSubmit={form.handleSubmit(handleLoginSubmit)}
           className="space-y-6"
         >
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
           <FormField
             control={form.control}
             name="email"
@@ -104,7 +108,6 @@ export const LoginForm = () => {
                     />
                   </div>
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -131,7 +134,6 @@ export const LoginForm = () => {
                     />
                   </div>
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -141,12 +143,6 @@ export const LoginForm = () => {
               ลืมรหัสผ่าน?
             </a>
           </div>
-
-          {error && (
-            <p className="text-sm font-medium text-destructive">
-              {error || "Unable to log in. Please try again."}
-            </p>
-          )}
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Logging In..." : "เข้าสู่ระบบ"}
@@ -166,4 +162,3 @@ export const LoginForm = () => {
     </div>
   );
 };
-

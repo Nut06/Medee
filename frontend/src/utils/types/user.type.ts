@@ -34,6 +34,7 @@ export interface Company {
   description?: string;
 }
 
+
 export interface LoginResponse {
   user: Pick<
     User,
