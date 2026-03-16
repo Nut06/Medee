@@ -1,14 +1,21 @@
-FROM dhi.io/node:25.8-debian13 as base
+# FROM dhi.io/node:25.8.1-alpine3.22-dev as base
+# FROM dhi.io/node:25.8.1-alpine3.22 as base
+FROM dhi.io/node:25.8-debian13-dev as base
+# FROM node:25.8-bookworm-slim as base
+WORKDIR /app
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
+COPY . /app
 
 FROM base AS build
-COPY pnpm-lock.yaml /app
+ARG VITE_API_URL=/api
+ENV VITE_API_URL=$VITE_API_URL
 WORKDIR /app
-RUN pnpm fetch --prod
-COPY . /app
+COPY pnpm-lock.yaml package.json ./
+RUN pnpm install --frozen-lockfile
+COPY . .
 RUN pnpm run build
 
 FROM build as run-test-stage
