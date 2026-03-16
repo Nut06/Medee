@@ -20,7 +20,7 @@ export default defineConfig({
       instances: [{ browser: "chromium" }],
     },
     globals: true,
-    environment: "jsdom",
+    // environment: "jsdom",
     setupFiles: "./src/test/setup.ts",
     css: true,
   },

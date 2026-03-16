@@ -15,6 +15,7 @@ ENV VITE_API_URL=$VITE_API_URL
 WORKDIR /app
 COPY pnpm-lock.yaml package.json ./
 RUN pnpm install --frozen-lockfile
+RUN pnpm exec playwright install --with-deps chromium
 COPY . .
 RUN pnpm run build
 
