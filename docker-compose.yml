@@ -1,96 +1,112 @@
+# db go_pgadmin redis
 services:
-
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   image: docker-frontend-dev
+  # traefik:
+  #   image: dhi.io/traefik:3.6.10-debian13
+  #   container_name: traefik
+  #   restart: unless-stopped
   #   ports:
-  #     - "${APP_PORT}:5173"
-  #   develop:
-  #     watch:
-  #       - path: ./frontend/src
-  #         action: sync
-  #         target: /app
-  
+  #     - "80:80"
+  #     - "443:443"
+  #   networks:
+  #     - proxy
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - letsencrypt:/letsencrypt
+  #   command:
+  #     - --api.dashboard=true
+  #     - --api.insecure=true
+  #     - --providers.docker=true
+  #     - --providers.docker.network=proxy
+  #     - --providers.docker.exposedByDefault=false # ปลอดภัยกว่า: ต้องระบุเจาะจงถึงจะใช้งาน
+  #     - --entrypoints.web.address=:80
+  #     - --entrypoints.web.http.redirections.entrypoint.to=websecure
+  #     - --entrypoints.websecure.address=:443
+  #     - --entrypoints.websecure.asDefault=true
+  #     - --entrypoints.websecure.http.tls.certresolver=myresolver
+  #     - --certificatesresolvers.myresolver.acme.tlschallenge=true
+  #     - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.api.rule=Host(`traefik.medee.local`)" # Dashboard URL
+  #     - "traefik.http.routers.api.service=api@internal"
+  #     - "traefik.http.routers.api.middlewares=myauth"
+  #     - "traefik.http.middlewares.myauth.basicauth.users=test:$$apr1$$H6uskkkW$$IgXLP6ewTrSuBkTrqE8wj/"
+
+  frontend:
+    image: frontend-debian:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=/api
+    container_name: frontend
+    ports:
+      - "${APP_PORT}:8080"
+    depends_on:
+      - backend
+    networks:
+      - proxy
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.frontend.rule=Host(`medee.local`)"
+    #   - "traefik.http.services.frontend.loadbalancer.server.port=8080"
+    # develop:
+    #   watch:
+    #     - path: ./frontend/src
+    #       action: sync
+    #       target: /app
+
   # frontend-test:
   #   build:
   #     context: ./frontend
   #     dockerfile: ./frontend/Dockerfile.dev
   #   command:  ["pnpm", "test"]
 
-  # backend:
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #   image: docker-backend
-  #   ports:
-  #     - "${API_PORT}:3000"
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    image: backend-debian:lts
+    environment:
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_HOST=db
+      - DB_PORT
+      - DB_SSLMODE=disable
+      - HTTPS=true
+      # - CORS=http://medee.local,https://medee.local
+      - CORS=http://localhost:8080
+      - REDIS_PASSWORD
+      - REDIS_URL=http://redis:6379
+      - APP_PORT=3000
+      - JWT_SECRET
+      - SUPABASE_PROJECT_URL
+      - SUPABASE_SERVICE_KEY
+      - SUPABASE_BUCKET
+      - CI="true"
+
+    ports:
+      - "${API_PORT}:3000"
+    networks:
+      - proxy
+    depends_on:
+      db:
+        condition: service_healthy
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.backend.rule=Host(`medee.local`) && PathPrefix(`/api`)"
+    #   - "traefik.http.middlewares.strip-api.stripprefix.prefixes=/api"
+    #   - "traefik.http.routers.backend.middlewares=strip-api"
+    #   - "traefik.http.services.backend.loadbalancer.server.port=3000"
   #   develop:
   #     watch:
   #       - path: ./backend
   #         action: sync
   #         target: /app
-  
+
   # ["pnpm", "test"]
-
-    
-  # docker compose up -d jenkins-blueocean jenkins-docker
-  jenkins-docker:
-    image: docker:dind
-    container_name: jenkins-docker
-    ports:
-      - "2376:2376"
-    environment:
-      - DOCKER_TLS_CERTDIR=/certs
-    privileged: true
-    restart: unless-stopped
-    networks:
-      jenkins:
-        aliases:
-          - docker
-    volumes:
-      - jenkins_docker_certs:/certs/client
-      - jenkins_data:/var/jenkins_home
-
-  jenkins-blueocean:
-    build:
-      context: ./Jenkins
-      dockerfile: Dockerfile
-    image: jenkins-blueocean
-    container_name: jenkins-blue-ocean
-    restart: on-failure
-    networks:
-      - jenkins
-    environment:
-      - DOCKER_HOST=tcp://docker:2376
-      - DOCKER_CERT_PATH=/certs/client
-      - DOCKER_TLS_VERIFY=1
-    volumes:
-      - jenkins_data:/var/jenkins_home
-      - jenkins_docker_certs:/certs/client:ro
-    ports:
-      - "8000:8080"
-      - "50000:50000"
-
-
-  sonarqube:
-    image: dhi.io/sonarqube:25-debian13
-    container_name: sonarqube
-    networks:
-      - jenkins
-    environment:
-      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
-    ports:
-      - "9000:9000"
-    volumes:
-    # : data files, such as the embedded H2 database and Elasticsearch indexes
-      - sonarqube_data:/opt/sonarqube/data
-      # : contains SonarQube logs about access, web process, CE process, Elasticsearch logs
-      - sonarqube_logs:/opt/sonarqube/logs
-      # : for 3rd party plugins
-      - sonarqube_extensions:/opt/sonarqube/extensions
-
 
   db:
     image: postgres:18
@@ -103,28 +119,30 @@ services:
       - postgres_data:/var/lib/postgresql
     ports:
       - "${DB_PORT}:5432"
-    
-    
+    networks:
+      - proxy
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 3s
       retries: 10
 
-
   go_pgadmin:
     image: elestio/pgadmin:latest
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL} 
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     ports:
       - "5050:80"
+    networks:
+      - proxy
     depends_on:
       - db
-  
+
   redis:
     image: redis:latest
     container_name: redis
@@ -132,14 +150,73 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    command: 
+    command:
       [
-        "redis-server", 
-        "--appendonly", "yes", 
-        "--requirepass", "${REDIS_PASSWORD}"
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--requirepass",
+        "${REDIS_PASSWORD}",
       ]
+    networks:
+      - proxy
     environment:
       - REDIS_PASSWORD="redis123456"
+
+  # docker compose up -d jenkins-blueocean jenkins-docker
+  # jenkins-docker:
+  #   image: docker:dind
+  #   container_name: jenkins-docker
+  #   ports:
+  #     - "2376:2376"
+  #   environment:
+  #     - DOCKER_TLS_CERTDIR=/certs
+  #   privileged: true
+  #   restart: unless-stopped
+  #   networks:
+  #     jenkins:
+  #       aliases:
+  #         - docker
+  #   volumes:
+  #     - jenkins_docker_certs:/certs/client
+  #     - jenkins_data:/var/jenkins_home
+
+  # jenkins-blueocean:
+  #   build:
+  #     context: ./Jenkins
+  #     dockerfile: Dockerfile
+  #   image: jenkins-blueocean
+  #   container_name: jenkins-blue-ocean
+  #   restart: on-failure
+  #   networks:
+  #     - jenkins
+  #   environment:
+  #     - DOCKER_HOST=tcp://docker:2376
+  #     - DOCKER_CERT_PATH=/certs/client
+  #     - DOCKER_TLS_VERIFY=1
+  #   volumes:
+  #     - jenkins_data:/var/jenkins_home
+  #     - jenkins_docker_certs:/certs/client:ro
+  #   ports:
+  #     - "8000:8080"
+  #     - "50000:50000"
+
+  # sonarqube:
+  #   image: dhi.io/sonarqube:25-debian13
+  #   container_name: sonarqube
+  #   networks:
+  #     - jenkins
+  #   environment:
+  #     - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+  #   ports:
+  #     - "9000:9000"
+  #   volumes:
+  #   # : data files, such as the embedded H2 database and Elasticsearch indexes
+  #     - sonarqube_data:/opt/sonarqube/data
+  #     # : contains SonarQube logs about access, web process, CE process, Elasticsearch logs
+  #     - sonarqube_logs:/opt/sonarqube/logs
+  #     # : for 3rd party plugins
+  #     - sonarqube_extensions:/opt/sonarqube/extensions
 
 # set when backend ready for image
 # services:
@@ -157,15 +234,18 @@ services:
 #       - ./project-relative-path/:/project-package/
 
 networks:
-  jenkins:
-    name: jenkins
+  proxy:
+    name: proxy
+  # jenkins:
+  #   name: jenkins
 
 volumes:
   postgres_data:
   pgadmin_data:
   redis_data:
-  jenkins_data:
-  jenkins_docker_certs:
-  sonarqube_data:
-  sonarqube_logs:
-  sonarqube_extensions:
+  letsencrypt:
+  # jenkins_data:
+  # jenkins_docker_certs:
+  # sonarqube_data:
+  # sonarqube_logs:
+  # sonarqube_extensions:
