@@ -2,7 +2,10 @@ package integration_test
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
@@ -73,7 +76,32 @@ func TestMain(m *testing.M) {
 		log.Fatalf("failed to get redis endpoint: %v", err)
 	}
 
-	// 3. Override Environment Variables for the test execution
+	// 3. Setup Mock HIPO API Server
+	mockHipoServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		// Return mock university data for testing
+		fmt.Fprint(w, `[
+			{
+				"name": "Chiang Mai University",
+				"country": "Thailand",
+				"alpha_two_code": "TH",
+				"state-province": "Chiang Mai",
+				"domains": ["cmu.ac.th"],
+				"web_pages": ["http://www.cmu.ac.th/"]
+			},
+			{
+				"name": "Mahidol University",
+				"country": "Thailand",
+				"alpha_two_code": "TH",
+				"state-province": "Bangkok",
+				"domains": ["mahidol.ac.th"],
+				"web_pages": ["http://www.mahidol.ac.th/"]
+			}
+		]`)
+	}))
+	defer mockHipoServer.Close()
+
+	// 4. Override Environment Variables for the test execution
 	os.Setenv("DB_HOST", pgHost)
 	os.Setenv("DB_PORT", pgPort.Port())
 	os.Setenv("DB_USER", "testuser")
@@ -82,11 +110,12 @@ func TestMain(m *testing.M) {
 	os.Setenv("REDIS_URL", redisURL)
 	os.Setenv("JWT_SECRET", "supersecretkey_for_tests")
 	os.Setenv("CORS", "http://localhost:5173")
+	os.Setenv("HIPO_BASE_URL", mockHipoServer.URL)
 
-	// 4. Initialize the Server with dynamic configurations
+	// 5. Initialize the Server with dynamic configurations
 	app = server.NewServer()
 
-	// 5. Run all integration tests in the package
+	// 6. Run all integration tests in the package
 	code := m.Run()
 
 	os.Exit(code)
@@ -94,7 +123,7 @@ func TestMain(m *testing.M) {
 
 func clearUsersTable() {
 	if database.DB != nil {
-		// Clean both users and their related refresh tokens 
+		// Clean both users and their related refresh tokens
 		// Using CASCADE to ensure foreign key dependencies are wiped
 		database.DB.Exec("TRUNCATE TABLE refresh_tokens, users CASCADE;")
 	}

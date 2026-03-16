@@ -12,6 +12,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuthForm } from "@/hooks/userAuthForm";
@@ -108,6 +109,7 @@ export const LoginForm = () => {
                     />
                   </div>
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -134,6 +136,7 @@ export const LoginForm = () => {
                     />
                   </div>
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />

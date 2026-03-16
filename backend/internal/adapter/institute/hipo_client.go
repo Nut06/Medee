@@ -2,12 +2,13 @@ package institute_adapter
 
 import (
 	"backend/internal/domain/domain"
+	"backend/internal/utils"
 	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
-	"backend/internal/utils"
+	"os"
 )
 
 type HipoAPIClient struct {
@@ -16,8 +17,12 @@ type HipoAPIClient struct {
 }
 
 func NewHipoAPIClient() *HipoAPIClient {
+	baseURL := os.Getenv("HIPO_BASE_URL")
+	if baseURL == "" {
+		baseURL = "http://universities.hipolabs.com"
+	}
 	return &HipoAPIClient{
-		baseURL: "http://universities.hipolabs.com",
+		baseURL: baseURL,
 		httpClient: &http.Client{
 			Timeout: utils.FiveSec,
 		},

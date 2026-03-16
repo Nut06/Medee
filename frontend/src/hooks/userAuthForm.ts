@@ -92,7 +92,7 @@ export function useAuthForm() {
       resetForm();
       return true; // ← บอกว่า success
     } catch (error: unknown) {
-      setField("error", "Invalid username or password");
+      setField("error", "Invalid email or password");
       return false; // ← บอกว่า fail
     } finally {
       setField("loading", false);

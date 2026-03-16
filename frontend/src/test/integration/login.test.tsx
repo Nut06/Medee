@@ -77,7 +77,7 @@ describe("LoginForm Integration Tests", () => {
   //   fireEvent.click(screen.getByRole("button", { name: /เข้าสู่ระบบ/i }));
 
   //   await waitFor(() => {
-  //     expect(screen.getByText(/Invalid credentials/i)).toBeInTheDocument();
+  //     expect(screen.getAllByText("Invalid email or password")).toBeInTheDocument();
   //   });
   // });
 
