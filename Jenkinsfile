@@ -28,7 +28,7 @@ pipeline {
                 stage('Frontend (Vitest)') {
                     steps {
                         script{
-                            sh 'docker build --target run-test-stage -f frontend/Dockerfile frontend/'
+                            sh 'DOCKER_BUILDKIT=1 docker build --target run-test-stage -f frontend/Dockerfile frontend/'
                          }
                     }
                 }
@@ -36,7 +36,7 @@ pipeline {
                 stage('Backend (Go)') {
                     steps {
                         script{
-                            sh 'docker build --target run-test-stage -f backend/Dockerfile backend/'
+                            sh 'DOCKER_BUILDKIT=1 docker build --target run-test-stage -f backend/Dockerfile backend/'
                         }
                     }
                 }
