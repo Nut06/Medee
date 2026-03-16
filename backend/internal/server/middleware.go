@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 func AuthMiddleware(jwtService *authadapter.JWTService) fiber.Handler {
-	return func(c *fiber.Ctx) error {
+	return func(c fiber.Ctx) error {
 		fmt.Println("From auth middleware")
 		
 		tokenString := c.Get("Authorization")

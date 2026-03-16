@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
 )
 
@@ -57,7 +57,7 @@ func NewHTTPHandler(db *gorm.DB, jwtService *JWTService) *HTTPHandler {
 	return &HTTPHandler{uc: usecase, userRepo: userRepo, cfg: cfg}
 }
 
-func (h *HTTPHandler) Refresh(c *fiber.Ctx) error {
+func (h *HTTPHandler) Refresh(c fiber.Ctx) error {
 	ctx := h.context(c)
 
 	rt := c.Cookies(h.cfg.RefreshCookieName)
@@ -92,9 +92,9 @@ func (h *HTTPHandler) Refresh(c *fiber.Ctx) error {
 
 }
 
-func (h *HTTPHandler) Register(c *fiber.Ctx) error {
+func (h *HTTPHandler) Register(c fiber.Ctx) error {
 	var req auth.RegisterRequest
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return h.handleError(auth.ErrInvalidRequestBody)
 	}
 
@@ -128,11 +128,11 @@ func (h *HTTPHandler) Register(c *fiber.Ctx) error {
 	})
 }
 
-func (h *HTTPHandler) Login(c *fiber.Ctx) error {
+func (h *HTTPHandler) Login(c fiber.Ctx) error {
 	ctx := h.context(c)
 
 	var req auth.LoginRequest
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return h.handleError(auth.ErrInvalidRequestBody)
 	}
 
@@ -164,7 +164,7 @@ func (h *HTTPHandler) Login(c *fiber.Ctx) error {
 	})
 }
 
-func (h *HTTPHandler) Logout(c *fiber.Ctx) error {
+func (h *HTTPHandler) Logout(c fiber.Ctx) error {
 	ctx := h.context(c)
 	rt := c.Cookies(h.cfg.RefreshCookieName)
 	if rt == "" {
@@ -202,7 +202,7 @@ func (h *HTTPHandler) handleError(err error) *fiber.Error {
 	}
 }
 
-func (h *HTTPHandler) clearCookies(c *fiber.Ctx) {
+func (h *HTTPHandler) clearCookies(c fiber.Ctx) {
 	c.Cookie(&fiber.Cookie{
 		Name:     h.cfg.AccessCookieName,
 		Value:    "",
@@ -226,7 +226,7 @@ func (h *HTTPHandler) clearCookies(c *fiber.Ctx) {
 	})
 }
 
-func (h *HTTPHandler) setRefreshCookie(c *fiber.Ctx, tokens *auth.TokenPair) {
+func (h *HTTPHandler) setRefreshCookie(c fiber.Ctx, tokens *auth.TokenPair) {
 	refreshMaxAge := h.cfg.RefreshMaxAge
 
 	c.Cookie(&fiber.Cookie{
@@ -241,8 +241,8 @@ func (h *HTTPHandler) setRefreshCookie(c *fiber.Ctx, tokens *auth.TokenPair) {
 	})
 }
 
-func (h *HTTPHandler) context(c *fiber.Ctx) context.Context {
-	if uc := c.UserContext(); uc != nil {
+func (h *HTTPHandler) context(c fiber.Ctx) context.Context {
+	if uc := c.Context(); uc != nil {
 		return uc
 	}
 	return context.Background()

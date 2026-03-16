@@ -15,7 +15,7 @@ import (
 func TestInstitute_SearchWithValidQuery(t *testing.T) {
 	// This is a public endpoint, no auth required
 	req := httptest.NewRequest(http.MethodGet, "/institutes/search?q=ma", nil)
-	resp, err := app.Test(req, -1)
+	resp, err := app.Test(req)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -35,7 +35,7 @@ func TestInstitute_SearchWithValidQuery(t *testing.T) {
 // ─────────────────────────────────────────────────────────────────────────────
 func TestInstitute_SearchWithShortQueryReturns400(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/institutes/search?q=a", nil)
-	resp, err := app.Test(req, -1)
+	resp, err := app.Test(req)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 }
@@ -45,7 +45,7 @@ func TestInstitute_SearchWithShortQueryReturns400(t *testing.T) {
 // ─────────────────────────────────────────────────────────────────────────────
 func TestInstitute_SearchWithNoQueryReturns400(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/institutes/search", nil)
-	resp, err := app.Test(req, -1)
+	resp, err := app.Test(req)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 }
@@ -55,7 +55,7 @@ func TestInstitute_SearchWithNoQueryReturns400(t *testing.T) {
 // ─────────────────────────────────────────────────────────────────────────────
 func TestInstitute_GetByNonExistentIDReturns404(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/institutes/nonexistent-id-999", nil)
-	resp, err := app.Test(req, -1)
+	resp, err := app.Test(req)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 }
@@ -65,7 +65,7 @@ func TestInstitute_GetByNonExistentIDReturns404(t *testing.T) {
 // ─────────────────────────────────────────────────────────────────────────────
 func TestFieldOfStudy_SearchWithValidQuery(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/field-of-studies/search?q=cs", nil)
-	resp, err := app.Test(req, -1)
+	resp, err := app.Test(req)
 	assert.NoError(t, err)
 	// Should return 200 with results (even if empty, it should not fail)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)

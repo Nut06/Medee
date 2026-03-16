@@ -13,7 +13,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -45,7 +45,7 @@ func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
 	}
 }
 
-func (h *HTTPHandler) GetUser(c *fiber.Ctx) error {
+func (h *HTTPHandler) GetUser(c fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	res, err := h.usecase.GetProfile(c.Context(), userId)
 	if err != nil {
@@ -54,10 +54,10 @@ func (h *HTTPHandler) GetUser(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (h *HTTPHandler) UploadAvatar(c *fiber.Ctx) error {
+func (h *HTTPHandler) UploadAvatar(c fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	var req user.UploadAvatarCommand; 
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return h.handleError(user.ErrInvalidRequestBody)
 	}
 
@@ -68,10 +68,10 @@ func (h *HTTPHandler) UploadAvatar(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
-func (h *HTTPHandler) UpdateProfile(c *fiber.Ctx) error {
+func (h *HTTPHandler) UpdateProfile(c fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	var req user.UpdateProfileCommand
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return h.handleError(user.ErrInvalidRequestBody)
 	}
 
@@ -82,7 +82,7 @@ func (h *HTTPHandler) UpdateProfile(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (h *HTTPHandler) DeleteAvatar(c *fiber.Ctx) error {
+func (h *HTTPHandler) DeleteAvatar(c fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	user, err := h.usecase.DeleteAvatar(c.Context(), userId)
 	if err != nil {
@@ -91,7 +91,7 @@ func (h *HTTPHandler) DeleteAvatar(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
-func (h *HTTPHandler) UploadResume(c *fiber.Ctx) error {
+func (h *HTTPHandler) UploadResume(c fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	file, err := c.FormFile("resume")
 	if err != nil {
@@ -105,7 +105,7 @@ func (h *HTTPHandler) UploadResume(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (h *HTTPHandler) DeleteResume(c *fiber.Ctx) error {
+func (h *HTTPHandler) DeleteResume(c fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	res, err := h.usecase.DeleteResume(c.Context(), userId)
 	if err != nil {
@@ -114,7 +114,7 @@ func (h *HTTPHandler) DeleteResume(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (h *HTTPHandler) GetFullProfile(c *fiber.Ctx) error {
+func (h *HTTPHandler) GetFullProfile(c fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	res, err := h.usecase.GetFullProfile(c.Context(), userId)
 	if err != nil {
@@ -123,10 +123,10 @@ func (h *HTTPHandler) GetFullProfile(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (h *HTTPHandler) AddExperience(c *fiber.Ctx) error {
+func (h *HTTPHandler) AddExperience(c fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	var req user.AddExperienceCommand
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return h.handleError(user.ErrInvalidRequestBody)
 	}
 
@@ -162,10 +162,10 @@ func (h *HTTPHandler) AddExperience(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (h *HTTPHandler) UpdateExperience(c *fiber.Ctx) error {
+func (h *HTTPHandler) UpdateExperience(c fiber.Ctx) error {
 	id := c.Params("experienceId")
 	var req user.UpdateExperienceCommand
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return h.handleError(user.ErrInvalidRequestBody)
 	}
 
@@ -201,7 +201,7 @@ func (h *HTTPHandler) UpdateExperience(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (h *HTTPHandler) DeleteExperience(c *fiber.Ctx) error {
+func (h *HTTPHandler) DeleteExperience(c fiber.Ctx) error {
 	id := c.Params("experienceId")
 	err := h.usecase.DeleteExperience(c.Context(), id)
 	if err != nil {
@@ -210,10 +210,10 @@ func (h *HTTPHandler) DeleteExperience(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func (h *HTTPHandler) AddEducation(c *fiber.Ctx) error {
+func (h *HTTPHandler) AddEducation(c fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	var req user.AddEducationCommand
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return h.handleError(user.ErrInvalidRequestBody)
 	}
 
@@ -245,10 +245,10 @@ func (h *HTTPHandler) AddEducation(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (h *HTTPHandler) UpdateEducation(c *fiber.Ctx) error {
+func (h *HTTPHandler) UpdateEducation(c fiber.Ctx) error {
 	id := c.Params("educationId")
 	var req user.UpdateEducationCommand
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return h.handleError(user.ErrInvalidRequestBody)
 	}
 
@@ -279,7 +279,7 @@ func (h *HTTPHandler) UpdateEducation(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (h *HTTPHandler) DeleteEducation(c *fiber.Ctx) error {
+func (h *HTTPHandler) DeleteEducation(c fiber.Ctx) error {
 	id := c.Params("educationId")
 	err := h.usecase.DeleteEducation(c.Context(), id)
 	if err != nil {
@@ -288,10 +288,10 @@ func (h *HTTPHandler) DeleteEducation(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func (h *HTTPHandler) AddProject(c *fiber.Ctx) error {
+func (h *HTTPHandler) AddProject(c fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	var req domain.PortfolioItem
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return h.handleError(err)
 	}
 	res, err := h.usecase.AddProject(c.Context(), userId, &req)
@@ -301,10 +301,10 @@ func (h *HTTPHandler) AddProject(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (h *HTTPHandler) UpdateProject(c *fiber.Ctx) error {
+func (h *HTTPHandler) UpdateProject(c fiber.Ctx) error {
 	id := c.Params("projectId")
 	var req domain.PortfolioItem
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return h.handleError(err)
 	}
 	res, err := h.usecase.UpdateProject(c.Context(), id, &req)
@@ -314,7 +314,7 @@ func (h *HTTPHandler) UpdateProject(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (h *HTTPHandler) DeleteProject(c *fiber.Ctx) error {
+func (h *HTTPHandler) DeleteProject(c fiber.Ctx) error {
 	id := c.Params("projectId")
 	err := h.usecase.DeleteProject(c.Context(), id)
 	if err != nil {
@@ -323,10 +323,10 @@ func (h *HTTPHandler) DeleteProject(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func (h *HTTPHandler) AddSkill(c *fiber.Ctx) error {
+func (h *HTTPHandler) AddSkill(c fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	var req user.AddUserSkillCommand
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return h.handleError(err)
 	}
 	err := h.usecase.AddSkill(c.Context(), userId, &req)
@@ -336,10 +336,10 @@ func (h *HTTPHandler) AddSkill(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusCreated)
 }
 
-func (h *HTTPHandler) UpdateSkills(c *fiber.Ctx) error {
+func (h *HTTPHandler) UpdateSkills(c fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	var req user.UpdateSkillsCommand
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return h.handleError(err)
 	}
 	err := h.usecase.UpdateSkills(c.Context(), userId, &req)
@@ -349,7 +349,7 @@ func (h *HTTPHandler) UpdateSkills(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-func (h *HTTPHandler) DeleteSkill(c *fiber.Ctx) error {
+func (h *HTTPHandler) DeleteSkill(c fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	id := c.Params("skillId")
 	err := h.usecase.DeleteSkill(c.Context(), userId, id)

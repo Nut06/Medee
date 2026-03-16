@@ -15,7 +15,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
@@ -91,7 +91,7 @@ func authRoute(router fiber.Router, db *gorm.DB, jwtService *authadapter.JWTServ
 
 func userRoute(user fiber.Router, db *gorm.DB) {
 	h := useradapter.NewHTTPHandler(db)
-	user.Use(func(c *fiber.Ctx) error {
+	user.Use(func(c fiber.Ctx) error {
 		fmt.Println("from IP", c.IP())
 		fmt.Println("Method", c.Method())
 		fmt.Println("Path", c.Path())

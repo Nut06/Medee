@@ -30,7 +30,7 @@ func TestAuth_RegisterAndLoginFlow(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 
 	// Execute request via Fiber's Test method
-	resp, err := app.Test(req, -1)
+	resp, err := app.Test(req)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -53,7 +53,7 @@ func TestAuth_RegisterAndLoginFlow(t *testing.T) {
 	reqLogin := httptest.NewRequest(http.MethodPost, "/auth/login", bytes.NewBuffer(loginBody))
 	reqLogin.Header.Set("Content-Type", "application/json")
 
-	respLogin, err := app.Test(reqLogin, -1)
+	respLogin, err := app.Test(reqLogin)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, respLogin.StatusCode)
 
@@ -69,7 +69,7 @@ func TestAuth_RegisterAndLoginFlow(t *testing.T) {
 	reqProfile.Header.Set("Content-Type", "application/json")
 	reqProfile.Header.Set("Authorization", "Bearer " +loginResp.Token)
 
-	respProfile, err := app.Test(reqProfile, -1)
+	respProfile, err := app.Test(reqProfile)
 
 	assert.NoError(t, err)
 	

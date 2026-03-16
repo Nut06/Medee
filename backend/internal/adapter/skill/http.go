@@ -4,7 +4,7 @@ import (
 	"backend/internal/application/skillapp"
 	"backend/internal/domain/domain"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +18,7 @@ func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
 	return &HTTPHandler{usecase: usecase}
 }
 
-func (h *HTTPHandler) GetSkills(c *fiber.Ctx) error {
+func (h *HTTPHandler) GetSkills(c fiber.Ctx) error {
 	query := c.Query("q")
 	if query == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "query param 'q' is required"})
@@ -30,9 +30,9 @@ func (h *HTTPHandler) GetSkills(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func (h *HTTPHandler) CreateSkill(c *fiber.Ctx) error {
+func (h *HTTPHandler) CreateSkill(c fiber.Ctx) error {
 	var req domain.Skill
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return err
 	}
 	res, err := h.usecase.CreateSkill(c.Context(), &req)

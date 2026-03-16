@@ -5,17 +5,18 @@ import (
 	"backend/internal/database"
 	"log"
 	"os"
+	"strings"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/gofiber/fiber/v3/middleware/logger"
 )
 
 func NewServer() *fiber.App {
 
 	app := fiber.New(
 		fiber.Config{
-			ErrorHandler: func(c *fiber.Ctx, err error) error {
+			ErrorHandler: func(c fiber.Ctx, err error) error {
 				log.Printf("Error occur %v", err)
 				code := fiber.StatusInternalServerError
 				if e, ok := err.(*fiber.Error); ok {
@@ -31,15 +32,17 @@ func NewServer() *fiber.App {
 		},
 	)
 
+	originsEnv := os.Getenv("CORS")
+	allowedOrigins := strings.Split(originsEnv, ",")
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     os.Getenv("CORS"),
-		AllowHeaders:     "Origin, Content-type, Accept, Authorization",
-		AllowMethods:     "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+		AllowOrigins:     allowedOrigins,
+		AllowHeaders:     []string{"Origin, Content-type, Accept, Authorization"},
+		AllowMethods:     []string{"GET, POST, PUT, PATCH, DELETE, OPTIONS"},
 		AllowCredentials: true,
 		MaxAge:           3600,
 	}))
 
-	app.Get("/", func(c *fiber.Ctx) error {
+	app.Get("/", func(c fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
 	app.Use(logger.New())

@@ -16,6 +16,7 @@ func main() {
 		log.Printf("No .env was found %v", err)
 	}
 	
+	fmt.Printf("CORS is from: %s \n", os.Getenv("CORS"))
 	fmt.Printf("DB port is at: %s from main \n", os.Getenv("DB_PORT"))
 	fmt.Printf("Redis is at: %s from main \n", os.Getenv("REDIS_PASSWORD"))
 	app := server.NewServer()

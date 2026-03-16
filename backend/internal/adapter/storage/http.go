@@ -3,7 +3,7 @@ package storage
 import (
 	"fmt"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 )
 
@@ -20,9 +20,9 @@ type SignedURLRequest struct {
 	ContentType string `json:"contentType"`
 }
 
-func (h *StorageHandler) GetSignedUploadURL(c *fiber.Ctx) error {
+func (h *StorageHandler) GetSignedUploadURL(c fiber.Ctx) error {
 	var req SignedURLRequest
-	if err := c.BodyParser(&req); err != nil {
+	if err := c.Bind().Body(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	fmt.Println("From http GetSignedUploadURL")

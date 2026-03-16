@@ -3,7 +3,7 @@ package field_of_study_adapter
 import (
 	"backend/internal/application/fieldapp"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 type HTTPHandler struct {
@@ -14,7 +14,7 @@ func NewHTTPHandler(usecase *fieldapp.Usecase) *HTTPHandler {
 	return &HTTPHandler{usecase: usecase}
 }
 
-func (h *HTTPHandler) SearchFieldOfStudies(c *fiber.Ctx) error {
+func (h *HTTPHandler) SearchFieldOfStudies(c fiber.Ctx) error {
 	query := c.Query("q")
 	if query == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -42,7 +42,7 @@ func (h *HTTPHandler) SearchFieldOfStudies(c *fiber.Ctx) error {
 	})
 }
 
-func (h *HTTPHandler) GetFieldOfStudy(c *fiber.Ctx) error {
+func (h *HTTPHandler) GetFieldOfStudy(c fiber.Ctx) error {
 	id := c.Params("id")
 
 	field, err := h.usecase.GetFieldOfStudyById(c.Context(), id)

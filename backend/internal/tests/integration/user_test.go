@@ -31,7 +31,7 @@ func registerAndLogin(t *testing.T, email string) string {
 	})
 	req := httptest.NewRequest(http.MethodPost, "/auth/register", bytes.NewBuffer(registerBody))
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := app.Test(req, -1)
+	resp, err := app.Test(req)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -51,7 +51,7 @@ func registerAndGetToken(t *testing.T, email string) {
 	})
 	req := httptest.NewRequest(http.MethodPost, "/auth/register", bytes.NewBuffer(registerBody))
 	req.Header.Set("Content-Type", "application/json")
-	app.Test(req, -1) //nolint
+	app.Test(req) //nolint
 }
 
 func loginGetToken(t *testing.T, email string) string {
@@ -64,7 +64,7 @@ func loginGetToken(t *testing.T, email string) string {
 	})
 	req := httptest.NewRequest(http.MethodPost, "/auth/login", bytes.NewBuffer(loginBody))
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := app.Test(req, -1)
+	resp, err := app.Test(req)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -98,7 +98,7 @@ func TestUser_UpdateProfile(t *testing.T) {
 		LastName:    "Name",
 		LinkedInURL: "https://linkedin.com/in/test",
 	})
-	resp, err := app.Test(authReq(http.MethodPut, "/user", updateBody, token), -1)
+	resp, err := app.Test(authReq(http.MethodPut, "/user", updateBody, token))
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -124,7 +124,7 @@ func TestUser_AddAndDeleteExperience(t *testing.T) {
 	})
 
 	// Add experience
-	resp, err := app.Test(authReq(http.MethodPost, "/user/experience", expBody, token), -1)
+	resp, err := app.Test(authReq(http.MethodPost, "/user/experience", expBody, token))
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -137,7 +137,7 @@ func TestUser_AddAndDeleteExperience(t *testing.T) {
 	assert.NotEmpty(t, expID)
 
 	// Delete experience
-	delResp, err := app.Test(authReq(http.MethodDelete, "/user/experience/"+expID, nil, token), -1)
+	delResp, err := app.Test(authReq(http.MethodDelete, "/user/experience/"+expID, nil, token))
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, delResp.StatusCode)
 }
@@ -156,7 +156,7 @@ func TestUser_AddAndDeleteEducation(t *testing.T) {
 	})
 
 	// Add education
-	resp, err := app.Test(authReq(http.MethodPost, "/user/education", eduBody, token), -1)
+	resp, err := app.Test(authReq(http.MethodPost, "/user/education", eduBody, token))
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
@@ -169,7 +169,7 @@ func TestUser_AddAndDeleteEducation(t *testing.T) {
 	assert.NotEmpty(t, eduID)
 
 	// Delete education
-	delResp, err := app.Test(authReq(http.MethodDelete, "/user/education/"+eduID, nil, token), -1)
+	delResp, err := app.Test(authReq(http.MethodDelete, "/user/education/"+eduID, nil, token))
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, delResp.StatusCode)
 }
@@ -187,10 +187,10 @@ func TestUser_GetFullProfile(t *testing.T) {
 		CompanyName: "Acme Inc",
 		StartDate:   &startDate,
 	})
-	_, _ = app.Test(authReq(http.MethodPost, "/user/experience", expBody, token), -1)
+	_, _ = app.Test(authReq(http.MethodPost, "/user/experience", expBody, token))
 
 	// Get full profile
-	resp, err := app.Test(authReq(http.MethodGet, "/user/profile", nil, token), -1)
+	resp, err := app.Test(authReq(http.MethodGet, "/user/profile", nil, token))
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 

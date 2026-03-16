@@ -14,7 +14,7 @@ import (
 func TestInstitute_RedisCachingFlow(t *testing.T) {
 	// 1. Initial request (Should hit Database and then set to Redis)
 	req1 := httptest.NewRequest(http.MethodGet, "/institutes/search?q=test", nil)
-	resp1, err := app.Test(req1, -1)
+	resp1, err := app.Test(req1)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp1.StatusCode)
 

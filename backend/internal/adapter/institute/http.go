@@ -3,7 +3,7 @@ package institute_adapter
 import (
 	"backend/internal/application/instituteapp"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 )
 
 type HTTPHandler struct {
@@ -15,7 +15,7 @@ func NewHTTPHandler(usecase *instituteapp.Usecase) *HTTPHandler {
 }
 
 // SearchInstitutes handles GET /institutes/search?q={query}
-func (h *HTTPHandler) SearchInstitutes(c *fiber.Ctx) error {
+func (h *HTTPHandler) SearchInstitutes(c fiber.Ctx) error {
 	query := c.Query("q")
 	if len(query) < 2 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -39,7 +39,7 @@ func (h *HTTPHandler) SearchInstitutes(c *fiber.Ctx) error {
 }
 
 // GetInstitute handles GET /institutes/:id
-func (h *HTTPHandler) GetInstitute(c *fiber.Ctx) error {
+func (h *HTTPHandler) GetInstitute(c fiber.Ctx) error {
 	id := c.Params("id")
 
 	institute, err := h.usecase.GetInstituteById(c.Context(), id)
