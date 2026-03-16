@@ -112,7 +112,7 @@ pipeline {
 
         stage('Push to Registry') {
             steps {
-                scipt {
+                script {
                     docker.withDockerRegistry('https://index.docker.io/v1/', 'Docker') {
                         // Push ทั้งเวอร์ชันระบุเลข Build และเวอร์ชัน latest
                         sh "docker push ${DOCKER_IMAGE}-frontend:${IMAGE_TAG}"
