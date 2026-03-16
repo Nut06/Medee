@@ -24,23 +24,23 @@ pipeline {
         }
 
         stage('Automate test'){
-            parallel{
-                stage('Frontend (Vitest)') {
-                    steps {
-                        script{
-                            sh 'DOCKER_BUILDKIT=1 docker build --target run-test-stage -f frontend/Dockerfile frontend/'
-                         }
+            steps {
+                script {
+                    // 1. ระบุ URL ของ Registry (dhi.io) และ Credentials ID ที่คุณสร้างไว้ใน Jenkins
+                    // สมมติว่า Credentials ID ใน Jenkins ของคุณชื่อ 'dhi-registry-auth'
+                    docker.withRegistry('https://dhi.io', 'Docker') {
+                        
+                        parallel(
+                            'Frontend (Vitest)': {
+                                sh 'DOCKER_BUILDKIT=1 docker build --target run-test-stage -f frontend/Dockerfile frontend/'
+                            },
+                            'Backend (Go)': {
+                                sh 'DOCKER_BUILDKIT=1 docker build --target run-test-stage -f backend/Dockerfile backend/'
+                            }
+                        )
                     }
                 }
-
-                stage('Backend (Go)') {
-                    steps {
-                        script{
-                            sh 'DOCKER_BUILDKIT=1 docker build --target run-test-stage -f backend/Dockerfile backend/'
-                        }
-                    }
-                }
-            }
+    }
         }
 
         stage('Security Scan'){
