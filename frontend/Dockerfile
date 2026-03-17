@@ -1,7 +1,7 @@
 # FROM dhi.io/node:25.8.1-alpine3.22-dev as base
 # FROM dhi.io/node:25.8.1-alpine3.22 as base
-FROM dhi.io/node:25.8-debian13-dev as base
-# FROM node:25.8-bookworm-slim as base
+FROM mcr.microsoft.com/playwright:v1.58.2-noble as base
+# Uses Playwright's official image which includes all OS dependencies and browsers
 WORKDIR /app
 
 ENV PNPM_HOME="/pnpm"
@@ -14,8 +14,8 @@ ARG VITE_API_URL=/api
 ENV VITE_API_URL=$VITE_API_URL
 WORKDIR /app
 COPY pnpm-lock.yaml package.json ./
+# Install dependencies - Playwright postinstall script handles browser setup
 RUN pnpm install --frozen-lockfile
-RUN pnpm exec playwright install --with-deps chromium
 COPY . .
 RUN pnpm run build
 
