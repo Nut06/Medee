@@ -62,6 +62,7 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
+  # terraform destroy -target=module.ec2_jenkins
   # ec2_jenkins
   module "ec2_jenkins" {
     source  = "terraform-aws-modules/ec2-instance/aws"
@@ -69,14 +70,14 @@ data "aws_ami" "ubuntu" {
     associate_public_ip_address = true
     name = "${var.project_name}-jenkins"
     ami = data.aws_ami.ubuntu.id
-    instance_type = "t3.medium"
+    instance_type = "t3.large"
     key_name      = aws_key_pair.jenkins_key.id
     monitoring    = true
     subnet_id     = module.vpc.public_subnets[0]
     
     root_block_device = {
         volume_type = "gp3"
-        volume_size = 14
+        volume_size = 30
         delete_on_termination = true
       }
 
