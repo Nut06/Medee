@@ -144,12 +144,11 @@ pipeline {
     }
 
     post {
+        // sending email & remove build docker image
         always {
             sh 'docker image prune -f || true'
             sh 'docker system df'
-        }
-        // sending email
-        always {
+
             echo 'Pipeline execution finished'
 
             script {
