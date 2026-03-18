@@ -36,7 +36,11 @@ pipeline {
         stage('Backend test'){
             steps {
                 script {
-                    sh 'go test ./backend/internal/...'
+                    sh """
+                        cd backend 
+                        go mod download
+                        go test -v ./...
+                        """
                     // docker.withRegistry('https://dhi.io', 'Docker') {
                     //     sh 'DOCKER_BUILDKIT=1 docker build --target run-test-stage -f backend/Dockerfile backend/'
                     // }
