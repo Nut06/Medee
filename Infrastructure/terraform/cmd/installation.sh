@@ -33,6 +33,29 @@ newgrp docker
 sleep 5
 sudo chmod 777 /var/run/docker.sock
 
+# 1. อัปเดตแพ็กเกจและติดตั้งเครื่องมือพื้นฐาน
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg lsb-release
+
+# 2. เพิ่ม Docker's official GPG key
+sudo mkdir -m 0755 -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# 3. ตั้งค่า Repository
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sleep 10
+
+sudo apt-get update
+sudo apt-get install -y docker-buildx-plugin
+
+# ตรวจสอบเวอร์ชัน (ถ้าขึ้นเลขเวอร์ชันแปลว่ารอดแล้วครับ)
+docker buildx version
+
+# รีสตาร์ท Jenkins เพื่อให้สิทธิ์ใหม่มีผล
+sudo systemctl restart jenkins
 
 sleep 10
 docker run -d --name sonar -p 9000:9000 \
