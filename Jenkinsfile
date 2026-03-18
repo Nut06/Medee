@@ -36,11 +36,13 @@ pipeline {
         stage('Backend test'){
             steps {
                 script {
-                    sh """
-                        cd backend 
-                        go mod download
-                        go test -v ./...
-                        """
+                    docker.withRegistry('https://dhi.io', 'Docker') {
+                        sh """
+                            cd backend 
+                            go mod download
+                            go test -v ./...
+                            """
+                    }
                     // docker.withRegistry('https://dhi.io', 'Docker') {
                     //     sh 'DOCKER_BUILDKIT=1 docker build --target run-test-stage -f backend/Dockerfile backend/'
                     // }
@@ -142,6 +144,10 @@ pipeline {
     }
 
     post {
+        always {
+            sh 'docker image prune -f || true'
+            sh 'docker system df'
+        }
         // sending email
         always {
             echo 'Pipeline execution finished'
