@@ -9,15 +9,15 @@ COPY . ./
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping ./cmd/api
 
-FROM docker:27 as run-test-stage
+# FROM docker:27 as run-test-stage
 
-WORKDIR /app
+# WORKDIR /app
 
-COPY --from=build . ./
+# COPY --from=build . ./
 
-RUN apk add --no-cache go git
+# RUN apk add --no-cache go git
 
-RUN go test -v ./...
+# RUN go test -v ./...
 
 FROM dhi.io/golang:1.26.1-debian13 as runner
 

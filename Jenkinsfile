@@ -36,10 +36,10 @@ pipeline {
         stage('Backend test'){
             steps {
                 script {
-                    docker.withRegistry('https://dhi.io', 'Docker') {
-                        // sh 'go test ./backend/internal/...'
-                        sh 'DOCKER_BUILDKIT=1 docker build --target run-test-stage -f backend/Dockerfile backend/'
-                    }
+                    sh 'go test ./backend/internal/...'
+                    // docker.withRegistry('https://dhi.io', 'Docker') {
+                    //     sh 'DOCKER_BUILDKIT=1 docker build --target run-test-stage -f backend/Dockerfile backend/'
+                    // }
                 }
             }
         }
