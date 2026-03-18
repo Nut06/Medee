@@ -52,7 +52,7 @@ pipeline {
 
         stage('Security Scan'){
             steps {
-                sh 'trivy fs . > trivyfs-report.txt'
+                sh 'trivy fs --cache-dir /var/lib/jenkins/.cache . > trivyfs-report.txt'
             }
         }
 
@@ -79,7 +79,7 @@ pipeline {
                         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                         
                         // สแกน File System
-                        sh "trivy fs . > trivyfs-report.txt"
+                        sh "trivy fs --cache-dir /var/lib/jenkins/.cache . > trivyfs-report.txt"
                     }
                 }
             }
