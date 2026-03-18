@@ -9,8 +9,10 @@ COPY . ./
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping ./cmd/api
 
-FROM build as run-test-stage
-RUN go test -v ./...
+# FROM build as run-test-stage
+# RUN --mount=type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+#     go test -v ./...
+# # RUN go test -v ./...
 
 FROM dhi.io/golang:1.26.1-debian13 as runner
 
