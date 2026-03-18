@@ -43,10 +43,24 @@ pipeline {
                             go test -v ./...
                             """
                     }
-                    // docker.withRegistry('https://dhi.io', 'Docker') {
-                    //     sh 'DOCKER_BUILDKIT=1 docker build --target run-test-stage -f backend/Dockerfile backend/'
-                    // }
                 }
+            }
+        }
+
+        stage('Dependency Scan'){
+            steps {
+                echo'Frontend Depency Install'
+                sh """
+                    cd frontend && \\
+                    npm install --global corepack@latest && \\
+                    corepack enable && \\
+                    corepack prepare pnpm@latest-10 --activate && \\
+                    pnpm install
+                    """
+
+                echo 'Dependency Scan'
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
 
@@ -56,34 +70,19 @@ pipeline {
             }
         }
 
-    stage("Security Analysis"){
-            parallel {
-                stage('SonarQube Analysis') {
-                    steps {
-                        withSonarQubeEnv('sonar-server') {
-                            sh """
-                            $SCANNER_HOME/bin/sonar-scanner \\
-                            -Dsonar.projectName=Medee \\
-                            -Dsonar.projectKey=Medee \\
-                            -Dsonar.branch.name=${env.BRANCH_NAME} \\
-                            -Dsonar.token=${SONAR_TOKEN} \\
-                            """
-                        }
-                    }
-                }
-
-                stage('OWASP & Trivy FS Scan') {
-                    steps {
-                        // สแกน Library (SCA)
-                        dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP'
-                        dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-                        
-                        // สแกน File System
-                        sh "trivy fs --cache-dir /var/lib/jenkins/.cache . > trivyfs-report.txt"
-                    }
+        stage("Security & Code Analysis") {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh """
+                    $SCANNER_HOME/bin/sonar-scanner \\
+                    -Dsonar.projectName=Medee \\
+                    -Dsonar.projectKey=Medee \\
+                    -Dsonar.branch.name=${env.BRANCH_NAME} \\
+                    -Dsonar.token=${SONAR_TOKEN} \\
+                    """
                 }
             }
-    }
+        }
 
     stage ("Quality Gate") {
         steps {
