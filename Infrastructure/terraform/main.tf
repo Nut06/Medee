@@ -15,12 +15,13 @@ provider "aws" {
 
     enable_nat_gateway = false
     enable_vpn_gateway = false
+    enable_dns_hostnames = true    # ← เพิ่มนี่
+    enable_dns_support = true
 
   #   public_subnet_tags = {
   #     # "kubernetes.io/role/elb" = "1"
   #   }
   }
-
   module "jenkins_sg" {
     source = "terraform-aws-modules/security-group/aws"
     name = "jenkins-service-sg"
@@ -64,35 +65,28 @@ data "aws_ami" "ubuntu" {
 
   # terraform destroy -target=module.ec2_jenkins
   # ec2_jenkins
-  module "ec2_jenkins" {
-    source  = "terraform-aws-modules/ec2-instance/aws"
+  # module "ec2_jenkins" {
+  #   source  = "terraform-aws-modules/ec2-instance/aws"
 
-    associate_public_ip_address = true
-    name = "${var.project_name}-jenkins"
-    ami = data.aws_ami.ubuntu.id
-    instance_type = "t3.large"
-    key_name      = aws_key_pair.jenkins_key.id
-    monitoring    = true
-    subnet_id     = module.vpc.public_subnets[0]
+  #   associate_public_ip_address = true
+  #   name = "${var.project_name}-jenkins"
+  #   ami = data.aws_ami.ubuntu.id
+  #   instance_type = "t3.large"
+  #   key_name      = aws_key_pair.jenkins_key.id
+  #   monitoring    = true
+  #   subnet_id     = module.vpc.public_subnets[0]
     
-    root_block_device = {
-        volume_type = "gp3"
-        volume_size = 30
-        delete_on_termination = true
-      }
+  #   root_block_device = {
+  #       volume_type = "gp3"
+  #       volume_size = 30
+  #       delete_on_termination = true
+  #     }
 
-    user_data = <<-EOF
-                  #!/bin/bash
-                  sudo yum update -y
-                  sudo dnf install -y docker
-                  sudo systemctl enable --now docker
-                  EOF
-
-    vpc_security_group_ids = [module.jenkins_sg.security_group_id]
-    tags = {
-      Project = var.project_name
-    }
-  }
+  #   vpc_security_group_ids = [module.jenkins_sg.security_group_id]
+  #   tags = {
+  #     Project = var.project_name
+  #   }
+  # }
 
   resource "aws_key_pair" "jenkins_key" {
     key_name = var.my_key_name

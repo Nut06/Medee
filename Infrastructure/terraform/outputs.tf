@@ -2,17 +2,17 @@
 
 output "jenkins_public_ip" {
   description = "The public IP address assigned to the Jenkins instance"
-  value       = module.ec2_jenkins.public_ip
+  value       = aws_instance.ec2_jenkins.public_ip
 }
 
 output "jenkins_instance_id" {
   description = "The ID of the EC2 instance"
-  value       = module.ec2_jenkins.id
+  value       = aws_instance.ec2_jenkins.id
 }
 
 output "jenkins_url" {
   description = "The URL to access the Jenkins Web UI"
-  value       = "http://${module.ec2_jenkins.public_ip}:8080"
+  value       = "http://${aws_instance.ec2_jenkins.public_ip}:8080"
 }
 
 # --- VPC & Networking Outputs ---
