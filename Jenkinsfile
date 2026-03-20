@@ -90,11 +90,14 @@ pipeline {
         // steps {
         //     waitForQualityGate abortPipeline: true, credentialsId: 'Sonar-token'
         // }
-        timeout(time: 1, unit: 'HOURS'){
-            def qg = waitForQualityGate()
-            if(qg.status != 'OK') {
-                error "Pipeline aborted dueto quality gate failure: ${qg.status}"
-            }
+        // timeout(time: 1, unit: 'HOURS'){
+        //     def qg = waitForQualityGate()
+        //     if(qg.status != 'OK') {
+        //         error "Pipeline aborted dueto quality gate failure: ${qg.status}"
+        //     }
+        // }
+        steps {
+            waitForQualityGate abortPipeline: true
         }
     }
 
