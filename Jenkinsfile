@@ -87,8 +87,14 @@ pipeline {
         }
 
     stage ("Quality Gate") {
-        steps {
-            waitForQualityGate abortPipeline: true, credentialsId: 'Sonar-token'
+        // steps {
+        //     waitForQualityGate abortPipeline: true, credentialsId: 'Sonar-token'
+        // }
+        timeout(time: 1, unit: 'HOURS'){
+            def qg = waitForQualityGate()
+            if(qg.status != 'OK') {
+                error "Pipeline aborted dueto quality gate failure: ${qg.status}"
+            }
         }
     }
 
