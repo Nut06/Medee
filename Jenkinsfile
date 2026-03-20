@@ -80,7 +80,6 @@ pipeline {
                     $SCANNER_HOME/bin/sonar-scanner \\
                     -Dsonar.projectName=Medee \\
                     -Dsonar.projectKey=Medee \\
-                    // -Dsonar.branch.name=${env.BRANCH_NAME} \\
                     -Dsonar.token=${SONAR_TOKEN} \\
                     """
                 }
