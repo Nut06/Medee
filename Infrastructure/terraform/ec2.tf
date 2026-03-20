@@ -22,4 +22,4 @@ resource "aws_instance" "ec2_jenkins" {
     tags = {
         Project = var.project_name
     }
-}
+}   

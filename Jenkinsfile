@@ -75,7 +75,7 @@ pipeline {
 
         stage("Security & Code Analysis") {
             steps {
-                withSonarQubeEnv('sonar-server') {
+                withSonarQubeEnv('sonar-scanner') {
                     sh """
                     $SCANNER_HOME/bin/sonar-scanner \\
                     -Dsonar.projectName=Medee \\
@@ -146,6 +146,19 @@ pipeline {
     }
 
     post {
+        
+        cleanup {
+            /* clean up our workspace */
+            deleteDir()
+            /* clean up tmp directory */
+            dir("${workspace}@tmp") {
+                deleteDir()
+            }
+            /* clean up script directory */
+            dir("${workspace}@script") {
+                deleteDir()
+            }
+        }
         // sending email & remove build docker image
         always {
             sh 'docker image prune -f || true'

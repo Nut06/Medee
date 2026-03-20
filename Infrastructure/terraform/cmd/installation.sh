@@ -23,6 +23,14 @@ sudo systemctl enable jenkins
 sudo systemctl start jenkins
 sleep 10
 
+# install go
+sudo add-apt-repository ppa:longsleep/golang-backports
+sudo apt update
+sudo apt install golang-go
+
+sleep 10
+sudo snap install --classic go
+
 # 2. Install Docker &  SONARQUBE  AS A CONTAINER IN THE EC2 INSTANCE
 sudo apt-get update -y
 sudo apt-get install docker.io -y
