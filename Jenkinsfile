@@ -103,28 +103,26 @@ pipeline {
         // }
     }
 
-        stage('Docker Build & Image Scan'){
-            parallel {
-                stage('Build & Scan Backend'){
-                    steps{
-                        script{
-                            sh 'cd backend'
-                            sh 'docker build -t ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER} .'
-
-                            sh 'trivy image ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER}'
-                        }
+        stage('Build & Image Scan Backend'){
+                steps{
+                    script{
+                        sh """
+                                cd backend && \\
+                                docker build -t ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER} . &&\\
+                                trivy image ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER}
+                            """
                     }
                 }
-
-                stage('Build & Scan Frontend'){
-                    steps{
-                        script{
-                            sh 'cd frontend'
-                            sh 'docker build -t ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER} .'
-
-                            sh 'trivy image ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER}'
-                        }
-                    }
+        }
+        
+        stage('Build & Image Scan Frontend'){
+            steps{
+                script{
+                    sh """
+                        cd frontend && \\
+                        docker build -t ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER} . && \\
+                        trivy image ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER}
+                    """
                 }
             }
         }
