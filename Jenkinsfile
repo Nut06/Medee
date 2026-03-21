@@ -87,6 +87,11 @@ pipeline {
         }
 
     stage ("Quality Gate") {
+
+        steps {
+            waitForQualityGate abortPipeline: true
+        }
+
         // steps {
         //     waitForQualityGate abortPipeline: true, credentialsId: 'Sonar-token'
         // }
@@ -96,9 +101,6 @@ pipeline {
         //         error "Pipeline aborted dueto quality gate failure: ${qg.status}"
         //     }
         // }
-        steps {
-            waitForQualityGate abortPipeline: true
-        }
     }
 
         stage('Docker Build & Image Scan'){
