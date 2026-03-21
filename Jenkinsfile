@@ -105,24 +105,28 @@ pipeline {
 
         stage('Build & Image Scan Backend'){
                 steps{
-                    docker.withRegistry('https://dhi.io', 'Docker') {
-                        sh """
-                                cd backend && \\
-                                docker build -t ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER} . &&\\
-                                trivy image ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER}
-                            """
+                    script {
+                        docker.withRegistry('https://dhi.io', 'Docker') {
+                            sh """
+                                    cd backend && \\
+                                    docker build -t ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER} . &&\\
+                                    trivy image ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER}
+                                """
+                        }
                     }
                 }
         }
         
         stage('Build & Image Scan Frontend'){
             steps{
-                docker.withRegistry('https://dhi.io', 'Docker') {
-                       sh """
-                            cd frontend && \\
-                            docker build -t ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER} . && \\
-                            trivy image ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER}
-                        """
+                script {
+                    docker.withRegistry('https://dhi.io', 'Docker') {
+                        sh """
+                                cd frontend && \\
+                                docker build -t ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER} . && \\
+                                trivy image ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER}
+                            """
+                    }
                 }
             }
         }
