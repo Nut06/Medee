@@ -105,7 +105,7 @@ pipeline {
 
         stage('Build & Image Scan Backend'){
                 steps{
-                    script{
+                    docker.withRegistry('https://dhi.io', 'Docker') {
                         sh """
                                 cd backend && \\
                                 docker build -t ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER} . &&\\
@@ -117,12 +117,12 @@ pipeline {
         
         stage('Build & Image Scan Frontend'){
             steps{
-                script{
-                    sh """
-                        cd frontend && \\
-                        docker build -t ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER} . && \\
-                        trivy image ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER}
-                    """
+                docker.withRegistry('https://dhi.io', 'Docker') {
+                       sh """
+                            cd frontend && \\
+                            docker build -t ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER} . && \\
+                            trivy image ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER}
+                        """
                 }
             }
         }
