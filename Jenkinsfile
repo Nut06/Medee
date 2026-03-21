@@ -88,13 +88,13 @@ pipeline {
 
     stage ("Quality Gate") {
 
-        steps {
-            waitForQualityGate abortPipeline: true
-        }
-
         // steps {
-        //     waitForQualityGate abortPipeline: true, credentialsId: 'Sonar-token'
+        //     waitForQualityGate abortPipeline: true
         // }
+
+        steps {
+            waitForQualityGate abortPipeline: true, credentialsId: 'Sonar-token'
+        }
         // timeout(time: 1, unit: 'HOURS'){
         //     def qg = waitForQualityGate()
         //     if(qg.status != 'OK') {
