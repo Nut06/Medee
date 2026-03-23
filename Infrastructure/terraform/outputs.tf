@@ -33,3 +33,30 @@ output "jenkins_sg_id" {
   description = "The ID of the security group created for Jenkins"
   value       = module.jenkins_sg.security_group_id
 }
+
+# ... existing outputs ...
+
+output "gateway_class_name" {
+  description = "Gateway class name"
+  value       = var.enable_gateway_api ? var.gateway_class_name : null
+}
+
+output "main_gateway_name" {
+  description = "Main gateway name"
+  value       = var.enable_gateway_api ? "main-gateway" : null
+}
+
+output "application_urls" {
+  description = "Application URLs via Gateway API"
+  value = var.enable_gateway_api ? {
+    grafana = "https://grafana.${var.domain_name}"
+    argocd  = "https://argocd.${var.domain_name}"
+    frontend = "https://frontend.${var.domain_name}"
+    backend = "https://backend.${var.domain_name}"
+  } : {}
+}
+
+output "gateway_load_balancer_command" {
+  description = "Command to get Gateway LoadBalancer hostname"
+  value = var.enable_gateway_api ? "kubectl get gateway main-gateway -n gateway-system -o jsonpath='{.status.addresses[0].value}'" : null
+}
