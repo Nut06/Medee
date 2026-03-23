@@ -1,6 +1,3 @@
-provider "aws" {
-  region = "ap-southeast-7"
-}
 
   module "vpc" {
     source = "terraform-aws-modules/vpc/aws"
@@ -10,7 +7,7 @@ provider "aws" {
     map_public_ip_on_launch = true
 
     azs             = var.azs
-  #   private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+    private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
     public_subnets  = var.public_subnets
 
     enable_nat_gateway = false
