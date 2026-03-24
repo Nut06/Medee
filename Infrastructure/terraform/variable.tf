@@ -21,12 +21,6 @@ variable "cluster_name" {
   type = string
 }
 
-variable "additional_namespaces" {
-  description = "Additional namespaces to create for applications"
-  type        = list(string)
-  default     = []
-}
-
 variable "aws_region" {
   type = string
 }
@@ -39,12 +33,6 @@ variable "argocd_namespace" {
   description = "Namespace for ArgoCD"
   type        = string
   default     = "argocd"
-}
-
-variable "additional_namespaces" {
-  description = "Additional namespaces to create for applications"
-  type        = list(string)
-  default     = []
 }
 
 # ... existing variables ...
@@ -78,24 +66,6 @@ variable "enable_external_dns" {
   default     = false
 }
 
-variable "monitoring_namespace" {
-  type        = string
-}
-
-variable "node_group_instance_types" {
-  type        = list(string)
-}
-
-variable "node_group_desired_size" {
-  type        = number
-}
-variable "node_group_max_size" {
-  type        = number
-}
-variable "node_group_min_size" {
-  type        = number
-}
-
 variable "gitops_repo_url" {
   description = "GitOps repository URL"
   type        = string
@@ -105,10 +75,6 @@ variable "gitops_target_revision" {
   description = "GitOps repository target revision"
   type        = string
   default     = "HEAD"
-}
-
-variable "fargate_namespaces" {
- type = list(string)
 }
 
 variable "fargate_namespaces" {
@@ -141,17 +107,7 @@ variable "node_group_min_size" {
   default     = 1
 }
 
-# In your Terraform variables.tf
-variable "infrastructure_namespaces" {
-  description = "Infrastructure namespaces managed by Terraform"
-  type        = list(string)
-  default     = [
-    "argocd",           # GitOps controller
-    "gateway-system",   # Gateway API resources
-    "cert-manager",     # Certificate management
-    "kube-system"       # Kubernetes system (already exists)
-  ]
-}
+
 
 variable "fargate_namespaces" {
   description = "Namespaces that should run on Fargate"
@@ -170,4 +126,15 @@ variable "infrastructure_namespaces" {
     "argocd",
     "gateway-system"
   ]
+}
+
+variable "cert_manager_email" {
+  description = "Email for Let's Encrypt certificates"
+  type        = string
+}
+
+variable "monitoring_namespace" {
+  description = "Monitoring namespace"
+  type        = string
+  default     = "monitoring"
 }

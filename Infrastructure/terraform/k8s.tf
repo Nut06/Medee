@@ -13,7 +13,6 @@ locals {
     ManagedBy   = "terraform"
     Component   = "argocd"
   }
-  argocd_values = templatefile("argocd-values.yaml")
 }
 
 provider "kubernetes" {
@@ -93,7 +92,7 @@ resource "helm_release" "argocd" {
   ]
 
   depends_on = [
-    kubernetes_namespace.essential_namespaces,
+    kubernetes_namespace.infrastructure_namespaces,
     aws_eks_node_group.medee-node-group
   ]
 }
@@ -173,4 +172,21 @@ resource "kubernetes_cluster_role_binding" "argocd_application_controller" {
   }
 
   depends_on = [helm_release.argocd]
+}
+
+# in k8s.tf or separate vault.tf
+resource "helm_release" "vault" {
+  name       = "vault"
+  repository = "https://helm.releases.hashicorp.com"
+  chart      = "vault"
+  namespace  = "vault"
+
+  values = [yamlencode({
+    server = {
+      ha = { enabled = false }   # single node for dev
+    }
+    injector = {
+      enabled = true             # this is the sidecar injector
+    }
+  })]
 }
