@@ -1,7 +1,7 @@
 resource "aws_iam_role" "eks-cluster-role" {
   name = "eks-cluster-role"
 
-  assume_role_policy = jsondecode({
+  assume_role_policy = jsonencode({
     Statement = [{
       Action = "sts:AssumeRole"
       Effect = "Allow"
@@ -38,7 +38,7 @@ resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSNetworkingPolicy" {
   role       = aws_iam_role.eks-cluster-role.name
 }
 
-resource "aws_iam_role" "eks-fargrate" {
+resource "aws_iam_role" "eks-fargate-role" {
   name = "${var.project_name}-eks-fargate-profile"
 
   assume_role_policy = jsonencode({
@@ -343,4 +343,30 @@ resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller" {
   
   policy_arn = aws_iam_policy.aws_load_balancer_controller[0].arn
   role       = aws_iam_role.aws_load_balancer_controller[0].name
+}
+
+resource "aws_iam_role" "ebs_csi" {
+  name = "${var.project_name}-ebs-csi-driver"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRoleWithWebIdentity"
+      Effect = "Allow"
+      Principal = {
+        Federated = aws_iam_openid_connect_provider.eks[0].arn
+      }
+      Condition = {
+        StringEquals = {
+          "${replace(aws_iam_openid_connect_provider.eks[0].url, "https://", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+          "${replace(aws_iam_openid_connect_provider.eks[0].url, "https://", "")}:aud" = "sts.amazonaws.com"
+        }
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ebs_csi" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  role       = aws_iam_role.ebs_csi.name
 }

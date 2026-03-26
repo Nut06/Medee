@@ -11,13 +11,13 @@ resource "aws_eks_cluster" "medee-cluster" {
     endpoint_public_access  = true
     
     subnet_ids = concat(
-      module.vpc.private_subnets,
-      module.vpc.public_subnets
+      var.private_subnets,
+      var.public_subnets
     )
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy,
+    aws_iam_role_policy_attachment.cluster_EKSClusterPolicy,
   ]
 
   tags = {
@@ -31,7 +31,7 @@ resource "aws_eks_node_group" "medee-node-group" {
   cluster_name    = aws_eks_cluster.medee-cluster.name
   node_group_name = "${var.project_name}-node-group"
   node_role_arn   = aws_iam_role.eks-node-role.arn
-  subnet_ids      = module.vpc.private_subnets
+  subnet_ids      = var.private_subnets
 
   capacity_type  = "ON_DEMAND"
   instance_types = var.node_group_instance_types
@@ -47,7 +47,7 @@ resource "aws_eks_node_group" "medee-node-group" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodeMinimalPolicy,
     aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.node_AmazonEC2ContainerRegistryReadOnly,
   ]
@@ -65,7 +65,7 @@ resource "aws_eks_fargate_profile" "medee-fargate" {
   cluster_name           = aws_eks_cluster.medee-cluster.name
   fargate_profile_name   = "${var.project_name}-fargate-${each.value}"
   pod_execution_role_arn = aws_iam_role.eks-fargate-role.arn
-  subnet_ids             = toset(module.vpc.private_subnets)
+  subnet_ids             = toset(var.private_subnets)
 
   selector {
     namespace = each.value
@@ -110,6 +110,6 @@ resource "aws_eks_addon" "kube_proxy" {
 resource "aws_eks_addon" "ebs_csi" {
   cluster_name = aws_eks_cluster.medee-cluster.name
   addon_name   = "aws-ebs-csi-driver"
-  
+  service_account_role_arn = aws_iam_role.ebs_csi.arn
   depends_on = [aws_eks_node_group.medee-node-group]
 }
