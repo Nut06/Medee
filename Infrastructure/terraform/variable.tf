@@ -77,12 +77,6 @@ variable "gitops_target_revision" {
   default     = "HEAD"
 }
 
-variable "fargate_namespaces" {
-  description = "Namespaces for Fargate profiles"
-  type        = list(string)
-  default     = ["frontend-dev", "backend-dev"]
-}
-
 variable "node_group_instance_types" {
   description = "Instance types for the node group"
   type        = list(string)
@@ -137,4 +131,9 @@ variable "monitoring_namespace" {
   description = "Monitoring namespace"
   type        = string
   default     = "monitoring"
+}
+
+variable "acm_certificate_arn" {
+  description = "ACM certificate ARN for HTTPS on the ALB"
+  type        = string
 }

@@ -60,3 +60,7 @@ output "gateway_load_balancer_command" {
   description = "Command to get Gateway LoadBalancer hostname"
   value = var.enable_gateway_api ? "kubectl get gateway main-gateway -n gateway-system -o jsonpath='{.status.addresses[0].value}'" : null
 }
+
+output "argocd_initial_password_command" {
+  value = module.k8s.argocd_initial_password_command
+}

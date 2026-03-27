@@ -1,5 +1,5 @@
 resource "aws_instance" "ec2_jenkins" {
-  ami = data.aws_ami.ubuntu.id
+  ami = "ami-080b376374a682e77"
   instance_type = "t3.large"
   associate_public_ip_address = true
     key_name      = aws_key_pair.jenkins_key.id
@@ -22,4 +22,6 @@ resource "aws_instance" "ec2_jenkins" {
     tags = {
         Project = var.project_name
     }
-}   
+
+    depends_on = [ module.vpc, module.jenkins_sg ]
+}
