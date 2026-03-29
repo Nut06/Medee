@@ -64,3 +64,7 @@ output "gateway_load_balancer_command" {
 output "argocd_initial_password_command" {
   value = module.k8s.argocd_initial_password_command
 }
+
+output "route53_nameservers" {
+  value = aws_route53_zone.main.name_servers
+}
