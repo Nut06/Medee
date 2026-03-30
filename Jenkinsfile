@@ -12,9 +12,10 @@ pipeline {
 
     environment {
         SCANNER_HOME=tool 'sonar-scanner'
-        DOCKER_IMAGE="chetsada/medee-app"
+        DOCKER_IMAGE="0067chetsada/medee-app"
         IMAGE_TAG="${env.BUILD_NUMBER}"
         SONAR_TOKEN=credentials('Sonar-token')
+        GITOPS_BRANCH = "main"
     }
 
     stages {
@@ -148,10 +149,47 @@ pipeline {
             }
         }
 
+        stage('Update GitOps Repository') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'medee-gitops-github-app', variable: 'GITHUB_TOKEN')]) {
+                        sh """
+                            # Clone GitOps repo with token
+                            rm -rf medee-gitops
+                            git clone https://x-access-token:${GITHUB_TOKEN}@github.com/Nut06/medee-gitops.git
+                            cd medee-gitops
+                            
+                            # Configure git
+                            git config user.email "jenkins@medee.local"
+                            git config user.name "Jenkins CI"
+                            
+                            # Update backend image tag
+                            sed -i 's|image: ${DOCKER_IMAGE}-backend:.*|image: ${DOCKER_IMAGE}-backend:${IMAGE_TAG}|g' apps-config/medee-dev/backend/deployment.yaml
+                            
+                            # Update frontend image tag
+                            sed -i 's|image: ${DOCKER_IMAGE}-frontend:.*|image: ${DOCKER_IMAGE}-frontend:${IMAGE_TAG}|g' apps-config/medee-dev/frontend/deployment.yaml
+                            
+                            # Commit and push
+                            git add apps-config/medee-dev/backend/deployment.yaml
+                            git add apps-config/medee-dev/frontend/deployment.yaml
+                            git commit -m "chore: update images to build ${IMAGE_TAG}" || echo "No changes to commit"
+                            git push origin ${GITOPS_BRANCH}
+                            
+                            # Cleanup
+                            cd ..
+                            rm -rf medee-gitops
+                        """
+                    }
+                }
+            }
+}
+
+
         // --- 4. GitOps (ArgoCD Trigger) ---
         stage('Trigger GitOps (ArgoCD)') {
             steps {
                 echo "Deploying Medee Version: ${IMAGE_TAG} to EKS via ArgoCD..."
+                echo "ArgoCD will auto-sync the changes from GitOps repo"
             }
         }
 

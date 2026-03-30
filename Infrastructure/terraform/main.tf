@@ -199,3 +199,42 @@ resource "aws_acm_certificate_validation" "main" {
   certificate_arn         = aws_acm_certificate.main.arn
   validation_record_fqdns = [aws_route53_record.cert_validation.fqdn]
 }
+
+data "kubernetes_service" "alb_hostname" {
+  metadata {
+    name = "main-gateway"
+    namespace = "gateway-system"
+  }
+}
+
+resource "aws_route53_record" "app" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "app.${var.domain_name}"
+  type    = "CNAME"
+  ttl     = 300
+  records = [data.kubernetes_service.alb_hostname.status[0].load_balancer[0].ingress[0].hostname]
+}
+
+resource "aws_route53_record" "api" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "api.${var.domain_name}"
+  type    = "CNAME"
+  ttl     = 300
+  records = [data.kubernetes_service.alb_hostname.status[0].load_balancer[0].ingress[0].hostname]
+}
+
+resource "aws_route53_record" "argocd" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "argocd.${var.domain_name}"
+  type    = "CNAME"
+  ttl     = 300
+  records = [data.kubernetes_service.alb_hostname.status[0].load_balancer[0].ingress[0].hostname]
+}
+
+resource "aws_route53_record" "grafana" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "grafana.${var.domain_name}"
+  type    = "CNAME"
+  ttl     = 300
+  records = [data.kubernetes_service.alb_hostname.status[0].load_balancer[0].ingress[0].hostname]
+}
