@@ -70,9 +70,9 @@ pipeline {
 
         stage('Security Scan'){
             steps {
-                sh 'trivy fs --cache-dir /var/lib/jenkins/.cache . > trivyfs-report.txt'
+                sh 'trivy scan2html fs --cache-dir /var/lib/jenkins/.cache . --scan2html-flags --output trivyfs-report.html'
 
-                archiveArtifacts artifacts: 'trivyfs-report.txt', allowEmptyArchive: true
+                archiveArtifacts artifacts: 'trivyfs-report.html', allowEmptyArchive: true
             }
         }
 
@@ -238,7 +238,7 @@ pipeline {
                 from: 'chetsadakon.chumpia@gmail.com',
                 replyTo: 'chetsadakon.chumpia@gmail.com',
                 mimeType: 'text/html',
-                attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
+                attachmentsPattern: 'trivyfs-report.html,trivyimage.txt'
             )
             }
         }
