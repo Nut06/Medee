@@ -73,6 +73,7 @@ pipeline {
                 // Step 1: Scan และ output ผลออกมาเป็น JSON ก่อน
                 sh 'trivy fs --cache-dir /var/lib/jenkins/.cache --format json --output trivyfs-results.json .'
 
+                // sh 'trivy --no-progress --exit-code 1 --severity HIGH,CRITICAL'
                 // Step 2: แปลงไฟล์ JSON เป็น HTML Report ด้วย scan2html generate
                 sh 'trivy scan2html generate --scan2html-flags --output trivyfs-report.html --from trivyfs-results.json'
 
@@ -204,10 +205,7 @@ pipeline {
 
     post {
         
-        // cleanup {
-        // }
-        // sending email & remove build docker image
-        always {
+        cleanup {
 
             /* clean up our workspace */
             deleteDir()
@@ -219,6 +217,11 @@ pipeline {
             dir("${workspace}@script") {
                 deleteDir()
             }
+        }
+        
+        // sending email & remove build docker image
+        always {
+
             sh 'docker image prune -f || true'
             sh 'docker system df'
 

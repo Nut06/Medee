@@ -81,8 +81,9 @@ echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.
 sudo apt-get update -y
 sleep 5
 sudo apt-get install trivy -y
+# install trivy plugin
+sudo -u jenkins -H trivy --config /dev/null plugin install scan2html
 sleep 5
-
 
 # 5. Install kubectl
 sudo apt update
