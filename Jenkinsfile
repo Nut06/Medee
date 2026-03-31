@@ -70,7 +70,11 @@ pipeline {
 
         stage('Security Scan'){
             steps {
-                sh 'trivy scan2html fs --cache-dir /var/lib/jenkins/.cache . --scan2html-flags --output trivyfs-report.html'
+                // Step 1: Scan และ output ผลออกมาเป็น JSON ก่อน
+                sh 'trivy fs --cache-dir /var/lib/jenkins/.cache --format json --output trivyfs-results.json .'
+
+                // Step 2: แปลงไฟล์ JSON เป็น HTML Report ด้วย scan2html generate
+                sh 'trivy scan2html generate --scan2html-flags --output trivyfs-report.html --from trivyfs-results.json'
 
                 archiveArtifacts artifacts: 'trivyfs-report.html', allowEmptyArchive: true
             }
@@ -200,7 +204,11 @@ pipeline {
 
     post {
         
-        cleanup {
+        // cleanup {
+        // }
+        // sending email & remove build docker image
+        always {
+
             /* clean up our workspace */
             deleteDir()
             /* clean up tmp directory */
@@ -211,9 +219,6 @@ pipeline {
             dir("${workspace}@script") {
                 deleteDir()
             }
-        }
-        // sending email & remove build docker image
-        always {
             sh 'docker image prune -f || true'
             sh 'docker system df'
 
