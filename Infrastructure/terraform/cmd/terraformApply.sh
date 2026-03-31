@@ -62,3 +62,5 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 # port forwarding
 kubectl port-forward svc/argocd-server -n argocd 8080:80
+
+terraform apply -target=module.k8s.kubernetes_manifest.root_application

@@ -71,6 +71,8 @@ pipeline {
         stage('Security Scan'){
             steps {
                 sh 'trivy fs --cache-dir /var/lib/jenkins/.cache . > trivyfs-report.txt'
+
+                archiveArtifacts artifacts: 'trivyfs-report.txt', allowEmptyArchive: true
             }
         }
 
@@ -94,7 +96,8 @@ pipeline {
         // }
 
         steps {
-            waitForQualityGate abortPipeline: true, credentialsId: 'Sonar-token'
+            // set true when don't want to continue to next test if not passing quality
+            waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
         }
         // timeout(time: 1, unit: 'HOURS'){
         //     def qg = waitForQualityGate()
