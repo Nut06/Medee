@@ -143,7 +143,7 @@ pipeline {
         stage('Push to Registry') {
             steps {
                 script {
-                    docker.withDockerRegistry(credentialsId: 'Docker', toolName: 'docker') {
+                    docker.withRegistry('https://index.docker.io/v1/', 'Docker') {
                         // Push ทั้งเวอร์ชันระบุเลข Build และเวอร์ชัน latest
                         sh "docker push ${DOCKER_IMAGE}-frontend:${IMAGE_TAG}"
                         sh "docker push ${DOCKER_IMAGE}-backend:${IMAGE_TAG}"
@@ -151,7 +151,6 @@ pipeline {
                         sh "docker tag ${DOCKER_IMAGE}-backend:${IMAGE_TAG} ${DOCKER_IMAGE}-backend:latest"
                         sh "docker push ${DOCKER_IMAGE}-frontend:latest"
                         sh "docker push ${DOCKER_IMAGE}-backend:latest"
-                        app.push("latest")
                     }
                 }
             }
