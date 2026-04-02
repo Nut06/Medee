@@ -119,10 +119,12 @@ pipeline {
                             sh """
                                     cd backend && \\
                                     docker build -t ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER} . &&\\
-                                    trivy image ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER}
+                                    trivy image ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER} --format json --output trivy-image-backend:${env.BUILD_NUMBER}-result.json &&\\
+                                    trivy scan2html generate --scan2html-flags --output trivy-image-backend-report.html --from trivy-image-backend:${env.BUILD_NUMBER}-result.json
                                 """
                         }
                     }
+                    archiveArtifacts artifacts: 'trivy-image-backend-report.html', allowEmptyArchive: true
                 }
         }
         
@@ -133,10 +135,12 @@ pipeline {
                         sh """
                                 cd frontend && \\
                                 docker build -t ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER} . && \\
-                                trivy image ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER}
+                                trivy image ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER} --format json --output trivy-image-frontend:${env.BUILD_NUMBER}-result.json &&\\
+                                trivy scan2html generate --scan2html-flags --output trivyfs-image-frontend-report.html --from trivy-image-frontend:${env.BUILD_NUMBER}-result.json
                             """
                     }
                 }
+                archiveArtifacts artifacts: 'trivyfs-image-frontend-report.html', allowEmptyArchive: true
             }
         }
 
