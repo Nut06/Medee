@@ -134,7 +134,7 @@ pipeline {
                     docker.withRegistry('https://dhi.io', 'Docker') {
                         sh """
                                 cd frontend && \\
-                                docker build -t ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER} . && \\
+                                docker build -t ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER} .
                             """
                     }
                 }
