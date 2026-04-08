@@ -118,7 +118,7 @@ pipeline {
                         docker.withRegistry('https://dhi.io', 'Docker') {
                             sh """
                                     cd backend && \\
-                                    docker build -t ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER} . &&\\
+                                    docker build -t ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER} .
                                 """
                             }
                     }
