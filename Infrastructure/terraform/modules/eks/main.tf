@@ -7,13 +7,18 @@ resource "aws_eks_cluster" "medee-cluster" {
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
   vpc_config {
-    endpoint_private_access = true
+    endpoint_private_access = false 
     endpoint_public_access  = true
     
     subnet_ids = concat(
       var.private_subnets,
       var.public_subnets
     )
+  }
+
+  access_config {
+    authentication_mode = "API"
+    bootstrap_cluster_creator_admin_permissions = true
   }
 
   depends_on = [

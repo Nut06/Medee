@@ -166,3 +166,4 @@ go.sum
 vendor/
 backend/secret.txt
 infrastructure/terraform/secret/
+scan.html

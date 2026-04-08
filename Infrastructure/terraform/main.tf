@@ -1,4 +1,3 @@
-
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
@@ -86,10 +85,6 @@ data "aws_ami" "ubuntu" {
 #   }
 # }
 
-data "aws_eks_cluster" "medee-cluster" {
-  name       = var.cluster_name
-  depends_on = [module.eks]
-}
 
 resource "aws_key_pair" "jenkins_key" {
   key_name   = var.my_key_name
@@ -98,6 +93,7 @@ resource "aws_key_pair" "jenkins_key" {
 
 module "eks" {
   source                    = "./modules/eks"
+  domain_name = var.domain_name
   cluster_name              = var.cluster_name
   environment               = var.environment
   project_name              = var.project_name
@@ -112,6 +108,69 @@ module "eks" {
 
   depends_on                = [module.vpc, module.jenkins_sg]
 }
+
+# create acm certificate & validation before create gateway
+resource "aws_acm_certificate" "main" {
+  domain_name               = var.domain_name
+  subject_alternative_names = ["*.${var.domain_name}"]
+  validation_method         = "DNS"
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project_name
+    ManagedBy   = "terraform"
+}
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+
+data "aws_eks_cluster" "medee-cluster" {
+  name       = var.cluster_name
+  depends_on = [module.eks]
+}
+
+resource "aws_route53_zone" "main" {
+  name = var.domain_name   # "dodee.me"
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+
+# ลบ locals block ทิ้ง (บรรทัด 147-157)
+
+# แก้ aws_route53_record ให้ใช้ for_each แทน
+# ใช้ตอนที่จะ validation
+# resource "aws_route53_record" "cert_validation" {
+#   for_each = {
+#     for dvo in aws_acm_certificate.main.domain_validation_options : dvo.domain_name => {
+#       name   = dvo.resource_record_name
+#       record = dvo.resource_record_value
+#       type   = dvo.resource_record_type
+#     }
+#   }
+
+#   allow_overwrite = true
+#   name            = each.value.name
+#   records         = [each.value.record]
+#   ttl             = 60
+#   type            = each.value.type
+#   zone_id         = aws_route53_zone.main.zone_id
+# }
+
+# แก้ validation ให้รอทุก records
+# resource "aws_acm_certificate_validation" "main" {
+#   certificate_arn         = aws_acm_certificate.main.arn
+#   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
+# }
+
+
+# gateway
+
 module "gateway" {
   source              = "./modules/gateway"
   enable_gateway_api  = var.enable_gateway_api
@@ -125,13 +184,14 @@ module "gateway" {
   domain_name        = var.domain_name
   lb_controller_role_arn = module.eks.lb_controller_role_arn
 
-  monitoring_namespace = var.monitoring_namespace
   vpc_id = module.vpc.vpc_id
   environment = var.environment
   project_name = var.project_name
-  acm_certificate_arn = var.acm_certificate_arn
+  acm_certificate_arn = aws_acm_certificate.main.arn
 
-  # depends_on   = [module.k8s]
+  depends_on = [
+    aws_acm_certificate.main
+  ]
 }
 
 module "k8s" {
@@ -141,100 +201,25 @@ module "k8s" {
   project_name = var.project_name
 
   enable_gateway_api = var.enable_gateway_api
-  monitoring_namespace = var.monitoring_namespace
   aws_region                = var.aws_region
-  infrastructure_namespaces = var.infrastructure_namespaces
   gitops_repo_url           = var.gitops_repo_url
   gitops_target_revision    = var.gitops_target_revision
   depends_on                = [module.gateway]
 }
 
-resource "aws_route53_zone" "main" {
-  name = var.domain_name   # "dodee.me"
+# module "dns" {
+#   source = "./modules/dns"
 
-  tags = {
-    Environment = var.environment
-    Project     = var.project_name
-  }
-}
+#   route53_zone_id      = aws_route53_zone.main.zone_id
+#   domain_name          = var.domain_name
+#   gateway_service_name = "main-gateway"
+#   gateway_namespace    = "gateway-system"
+#   dns_ttl              = 300
+#   environment          = var.environment
+#   project_name         = var.project_name
 
-resource "aws_acm_certificate" "main" {
-  domain_name               = var.domain_name
-  subject_alternative_names = ["*.${var.domain_name}"]
-  validation_method         = "DNS"
-
-  tags = {
-    Environment = var.environment
-    Project     = var.project_name
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-locals {
-  cert_validation_records = {
-    for dvo in aws_acm_certificate.main.domain_validation_options : dvo.resource_record_name => {
-      name   = dvo.resource_record_name
-      type   = dvo.resource_record_type
-      record = dvo.resource_record_value
-    } if !contains(
-      [for k, v in {} : k],
-      dvo.resource_record_name
-    )
-  }
-}
-
-resource "aws_route53_record" "cert_validation" {
-  zone_id         = aws_route53_zone.main.zone_id
-  name            = tolist(aws_acm_certificate.main.domain_validation_options)[0].resource_record_name
-  type            = tolist(aws_acm_certificate.main.domain_validation_options)[0].resource_record_type
-  records         = [tolist(aws_acm_certificate.main.domain_validation_options)[0].resource_record_value]
-  ttl             = 60
-  allow_overwrite = true
-}
-
-resource "aws_acm_certificate_validation" "main" {
-  certificate_arn         = aws_acm_certificate.main.arn
-  validation_record_fqdns = [aws_route53_record.cert_validation.fqdn]
-}
-
-data "kubernetes_service" "alb_hostname" {
-  metadata {
-    name = "main-gateway"
-    namespace = "gateway-system"
-  }
-}
-
-resource "aws_route53_record" "app" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = "app.${var.domain_name}"
-  type    = "CNAME"
-  ttl     = 300
-  records = [data.kubernetes_service.alb_hostname.status[0].load_balancer[0].ingress[0].hostname]
-}
-
-resource "aws_route53_record" "api" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = "api.${var.domain_name}"
-  type    = "CNAME"
-  ttl     = 300
-  records = [data.kubernetes_service.alb_hostname.status[0].load_balancer[0].ingress[0].hostname]
-}
-
-resource "aws_route53_record" "argocd" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = "argocd.${var.domain_name}"
-  type    = "CNAME"
-  ttl     = 300
-  records = [data.kubernetes_service.alb_hostname.status[0].load_balancer[0].ingress[0].hostname]
-}
-
-resource "aws_route53_record" "grafana" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = "grafana.${var.domain_name}"
-  type    = "CNAME"
-  ttl     = 300
-  records = [data.kubernetes_service.alb_hostname.status[0].load_balancer[0].ingress[0].hostname]
-}
+#   depends_on = [
+#     module.gateway,
+#     module.k8s
+#   ]
+# }

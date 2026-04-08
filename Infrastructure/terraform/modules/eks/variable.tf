@@ -59,3 +59,7 @@ variable "private_subnets" {
 variable "public_subnets" {
   type = list(string)
 }
+
+variable "domain_name" {
+  type = string
+}

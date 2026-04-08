@@ -2,10 +2,6 @@ output "argocd_namespace" {
   value = "argocd"
 }
 
-output "infrastructure_namespaces" {
-  value = [for ns in kubernetes_namespace_v1.infrastructure_namespaces : ns.metadata[0].name]
-}
-
 # output "argocd_root_app_name" {
 #   value = kubernetes_manifest.root_application.manifest.metadata.name
 # }

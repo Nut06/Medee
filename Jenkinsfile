@@ -119,11 +119,11 @@ pipeline {
                             sh """
                                     cd backend && \\
                                     docker build -t ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER} . &&\\
-                                    trivy image ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER} --format json --output trivy-image-backend:${env.BUILD_NUMBER}-result.json &&\\
-                                    trivy scan2html generate --scan2html-flags --output trivy-image-backend-report.html --from trivy-image-backend:${env.BUILD_NUMBER}-result.json
                                 """
-                        }
+                            }
                     }
+                    sh 'trivy image ${DOCKER_IMAGE}-backend-${env.BUILD_NUMBER} --format json --output trivy-image-backend:${env.BUILD_NUMBER}-result.json'
+                    sh 'trivy scan2html generate --scan2html-flags --output trivy-image-backend-report.html --from trivy-image-backend:${env.BUILD_NUMBER}-result.json'
                     archiveArtifacts artifacts: 'trivy-image-backend-report.html', allowEmptyArchive: true
                 }
         }
@@ -135,11 +135,11 @@ pipeline {
                         sh """
                                 cd frontend && \\
                                 docker build -t ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER} . && \\
-                                trivy image ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER} --format json --output trivy-image-frontend:${env.BUILD_NUMBER}-result.json &&\\
-                                trivy scan2html generate --scan2html-flags --output trivyfs-image-frontend-report.html --from trivy-image-frontend:${env.BUILD_NUMBER}-result.json
                             """
                     }
                 }
+                sh 'trivy image ${DOCKER_IMAGE}-frontend:${env.BUILD_NUMBER} --format json --output trivy-image-frontend:${env.BUILD_NUMBER}-result.json'
+                sh 'trivy scan2html generate --scan2html-flags --output trivyfs-image-frontend-report.html --from trivy-image-frontend:${env.BUILD_NUMBER}-result.json'
                 archiveArtifacts artifacts: 'trivyfs-image-frontend-report.html', allowEmptyArchive: true
             }
         }
@@ -175,14 +175,14 @@ pipeline {
                             git config user.name "Jenkins CI"
                             
                             # Update backend image tag
-                            sed -i 's|image: ${DOCKER_IMAGE}-backend:.*|image: ${DOCKER_IMAGE}-backend:${IMAGE_TAG}|g' apps-config/medee-dev/backend/deployment.yaml
+                            sed -i 's|image: ${DOCKER_IMAGE}-backend:.*|image: ${DOCKER_IMAGE}-backend:${IMAGE_TAG}|g' application/medee-dev/backend/deployment.yaml
                             
                             # Update frontend image tag
-                            sed -i 's|image: ${DOCKER_IMAGE}-frontend:.*|image: ${DOCKER_IMAGE}-frontend:${IMAGE_TAG}|g' apps-config/medee-dev/frontend/deployment.yaml
+                            sed -i 's|image: ${DOCKER_IMAGE}-frontend:.*|image: ${DOCKER_IMAGE}-frontend:${IMAGE_TAG}|g' application/medee-dev/frontend/deployment.yaml
                             
                             # Commit and push
-                            git add apps-config/medee-dev/backend/deployment.yaml
-                            git add apps-config/medee-dev/frontend/deployment.yaml
+                            git add application/medee-dev/backend/deployment.yaml
+                            git add application/medee-dev/frontend/deployment.yaml
                             git commit -m "chore: update images to build ${IMAGE_TAG}" || echo "No changes to commit"
                             git push origin ${GITOPS_BRANCH}
                             
@@ -194,6 +194,7 @@ pipeline {
                 }
             }
 }
+
 
 
         // --- 4. GitOps (ArgoCD Trigger) ---

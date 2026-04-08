@@ -113,27 +113,9 @@ variable "fargate_namespaces" {
   ]
 }
 
-variable "infrastructure_namespaces" {
-  description = "Infrastructure namespaces managed by Terraform"
-  type        = list(string)
-  default     = [
-    "argocd",
-    "gateway-system"
-  ]
-}
-
 variable "cert_manager_email" {
   description = "Email for Let's Encrypt certificates"
   type        = string
 }
 
-variable "monitoring_namespace" {
-  description = "Monitoring namespace"
-  type        = string
-  default     = "monitoring"
-}
 
-variable "acm_certificate_arn" {
-  description = "ACM certificate ARN for HTTPS on the ALB"
-  type        = string
-}

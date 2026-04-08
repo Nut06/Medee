@@ -34,12 +34,6 @@ variable "domain_name" {
   default     = "medee.local"
 }
 
-variable "monitoring_namespace" {
-  description = "Monitoring namespace"
-  type        = string
-  default     = "monitoring"
-}
-
 variable "environment" {
   type = string
 }

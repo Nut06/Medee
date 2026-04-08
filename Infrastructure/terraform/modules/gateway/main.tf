@@ -1,18 +1,4 @@
 # -----------------------------------------------
-# Gateway API CRDs
-# -----------------------------------------------
-resource "helm_release" "gateway_api" {
-  count = var.enable_gateway_api ? 1 : 0
-
-  name      = "gateway-api"
-  chart     = "oci://ghcr.io/nicklasfrahm/charts/gateway-api"
-  version   = "0.2.0"
-  namespace = "gateway-system"
-
-  create_namespace = true
-}
-
-# -----------------------------------------------
 # AWS Load Balancer Controller
 # watches Gateway/HTTPRoute objects → creates ALB
 # -----------------------------------------------
@@ -22,7 +8,7 @@ resource "helm_release" "aws_load_balancer_controller" {
   name       = "aws-load-balancer-controller"
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
-  version    = "1.8.1"
+  version    = "3.1.0"
   namespace  = "kube-system"
 
   wait            = true
@@ -56,9 +42,55 @@ resource "helm_release" "aws_load_balancer_controller" {
     podDisruptionBudget = { maxUnavailable = 1 }
   })]
 
-  depends_on = [helm_release.gateway_api[0]]
+  # depends_on = [helm_release.gateway_api[0]]
 }
 
+resource "null_resource" "gatewayAPI_crds" {
+  count = var.enable_gateway_api ? 1 : 0
+  provisioner "local-exec" {
+    command = "kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml"
+  }
+
+  # depends_on = [helm_release.aws_load_balancer_controller[0]]
+}
+
+resource "null_resource" "lbc_gateway_crds" {
+  count = var.enable_gateway_api ? 1 : 0
+  provisioner "local-exec" {
+    command = "kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/refs/heads/main/config/crd/gateway/gateway-crds.yaml"
+  }
+
+  depends_on = [helm_release.aws_load_balancer_controller[0]]
+}
+
+resource "helm_release" "argocd" {
+  name       = "argocd"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo-cd"
+  version    = "9.4.16"
+  namespace  = "argocd"
+
+  create_namespace = true
+  wait          = true
+  wait_for_jobs = true
+  timeout       = 600
+  atomic        = true
+  cleanup_on_fail = true
+
+  values = [
+    yamlencode({
+      server = {
+        service = {
+          type = "ClusterIP"
+        }
+        ingress = {
+          enabled = false
+        }
+      }
+      # Minimal configuration - detailed config goes to GitOps
+    })
+  ]
+}
 # -----------------------------------------------
 # gateway-system namespace
 # -----------------------------------------------
@@ -75,18 +107,11 @@ resource "kubernetes_namespace_v1" "gateway_system" {
     }
   }
 
-  depends_on = [helm_release.aws_load_balancer_controller[0]]
+  # depends_on = [helm_release.aws_load_balancer_controller[0]]
 }
 
-resource "null_resource" "lbc_gateway_crds" {
-  count = var.enable_gateway_api ? 1 : 0
-  provisioner "local-exec" {
-    command = "kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/refs/heads/main/config/crd/gateway/gateway-crds.yaml"
-  }
 
-  depends_on = [helm_release.aws_load_balancer_controller[0]]
-}
-
+# start comment here 2nd step in this file
 # -----------------------------------------------
 # GatewayClass
 # registers ALB as the controller for Gateway objects
@@ -107,10 +132,10 @@ resource "kubernetes_manifest" "gateway_class" {
     }
   }
 
-  depends_on = [
-    helm_release.aws_load_balancer_controller[0],
-    helm_release.gateway_api[0],
-  ]
+  # depends_on = [
+  #   helm_release.aws_load_balancer_controller[0],
+  #   helm_release.gateway_api[0],
+  # ]
 }
 
 
@@ -163,7 +188,6 @@ resource "kubernetes_manifest" "main_gateway" {
   ]
 }
 
-
 resource "kubernetes_manifest" "main_gateway_lbconfig" {
   count = var.enable_gateway_api ? 1 : 0
 
@@ -204,3 +228,80 @@ resource "kubernetes_manifest" "main_gateway_lbconfig" {
   ]
 }
 
+
+resource "helm_release" "prometheus" {
+  name       = "prometheus"
+  repository = "https://prometheus-community.github.io/helm-charts"
+  chart      = "kube-prometheus-stack"
+  version    = "82.18.0"
+  namespace  = "monitoring"
+  
+  create_namespace = true
+  
+  values = [yamlencode({
+    prometheus = {
+      prometheusSpec = {
+        storageSpec = {
+          volumeClaimTemplate = {
+            spec = {
+              storageClassName = "gp3"
+              resources = {
+                requests = {
+                  storage = "10Gi"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    grafana = {
+      enabled = true
+      adminPassword = "admin"
+      persistence = {
+        enabled = true
+        storageClassName = "gp3"
+      }
+    }
+    
+    alertmanager = {
+      alertmanagerSpec = {
+        storage = {
+          volumeClaimTemplate = {
+            spec = {
+              storageClassName = "gp3"
+            }
+          }
+        }
+      }
+  }
+})]
+}
+
+resource "helm_release" "vault" {
+  name       = "vault"
+  repository = "https://helm.releases.hashicorp.com"
+  chart      = "vault"
+  namespace  = "vault"
+
+  create_namespace = true
+
+  values = [yamlencode({
+    server = {
+      ha = {
+        enabled = false
+      }
+
+      dataStorage = {
+        enabled = true
+        size = "5Gi"
+        storageClass = "gp3"  # ← เพิ่มบรรทัดนี้
+      }
+      
+    }
+    injector = {
+      enabled = true
+    }
+  })]
+}
