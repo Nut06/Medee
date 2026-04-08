@@ -122,7 +122,7 @@ pipeline {
                                 """
                             }
                     }
-                    sh "trivy image ${DOCKER_IMAGE}-backend-${env.BUILD_NUMBER} --format json --output trivy-image-backend:${env.BUILD_NUMBER}-result.json"
+                    sh "trivy image ${DOCKER_IMAGE}-backend:${env.BUILD_NUMBER} --format json --output trivy-image-backend:${env.BUILD_NUMBER}-result.json"
                     sh "trivy scan2html generate --scan2html-flags --output trivy-image-backend-report.html --from trivy-image-backend:${env.BUILD_NUMBER}-result.json"
                     archiveArtifacts artifacts: 'trivy-image-backend-report.html', allowEmptyArchive: true
                 }
