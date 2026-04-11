@@ -169,3 +169,5 @@ infrastructure/terraform/secret/
 scan.html
 
 scanning_result/
+
+frontend/.pnpm-store/
