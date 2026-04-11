@@ -126,7 +126,6 @@ resource "aws_acm_certificate" "main" {
   }
 }
 
-
 data "aws_eks_cluster" "medee-cluster" {
   name       = var.cluster_name
   depends_on = [module.eks]

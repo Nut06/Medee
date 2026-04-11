@@ -87,9 +87,9 @@ terraform destroy -target=module.eks
 ### ขั้นตอนที่ 6: ลบ Certificate และ Validation
 
 ```bash
-terraform destroy -target=aws_acm_certificate_validation.main
-terraform destroy -target=aws_route53_record.cert_validation
-terraform destroy -target=aws_acm_certificate.main
+terraform destroy -target=aws_acm_certificate_validation.main -auto-approve
+terraform destroy -target=aws_route53_record.cert_validation -auto-approve
+terraform destroy -target=aws_acm_certificate.main -auto-approve
 ```
 
 ### ขั้นตอนที่ 7: ลบ Route53 Zone
@@ -101,15 +101,15 @@ terraform destroy -target=aws_route53_zone.main -auto-approve
 ### ขั้นตอนที่ 8: ลบ Jenkins Resources
 
 ```bash
-terraform destroy -target=aws_key_pair.jenkins_key
-terraform destroy -target=module.jenkins_sg
+terraform destroy -target=aws_key_pair.jenkins_key -auto-approve
+terraform destroy -target=module.jenkins_sg -auto-approve
 ```
 
 ### ขั้นตอนที่ 9: ลบ VPC
 
 ```bash
 # ลบ VPC, Subnets, NAT Gateway, Internet Gateway
-terraform destroy -target=module.vpc
+terraform destroy -target=module.vpc -auto-approve
 ```
 
 ### ขั้นตอนที่ 10: ตรวจสอบและลบที่เหลือ

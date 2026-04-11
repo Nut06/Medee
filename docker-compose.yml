@@ -77,7 +77,7 @@ services:
       - DB_SSLMODE=disable
       - HTTPS=true
       # - CORS=http://medee.local,https://medee.local
-      - CORS=http://localhost:8080,http://localhost:8080
+      - CORS=http://localhost:8080,http://localhost:5173
       - REDIS_PASSWORD
       - REDIS_URL=http://redis:6379
       - APP_PORT=3000

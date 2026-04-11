@@ -167,3 +167,5 @@ vendor/
 backend/secret.txt
 infrastructure/terraform/secret/
 scan.html
+
+scanning_result/

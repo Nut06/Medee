@@ -60,7 +60,10 @@ terraform import module.gateway.kubernetes_namespace_v1.gateway_system[0] gatewa
 # 
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo
 
-# port forwarding
+# port forwarding argocd
 kubectl port-forward svc/argocd-server -n argocd 8080:80
+
+# port forwarding grafana
+kubectl port-forward svc/prometheus-grafana -n monitoiring 6000:80
 
 terraform apply -target=module.k8s.kubernetes_manifest.root_application
