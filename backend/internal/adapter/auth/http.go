@@ -57,6 +57,7 @@ func NewHTTPHandler(db *gorm.DB, jwtService *JWTService) *HTTPHandler {
 	return &HTTPHandler{uc: usecase, userRepo: userRepo, cfg: cfg}
 }
 
+
 func (h *HTTPHandler) Refresh(c fiber.Ctx) error {
 	ctx := h.context(c)
 

@@ -30,7 +30,7 @@ func NewHTTPHandler(db *gorm.DB) *HTTPHandler {
 	usecase := userapp.NewUsecase(userRepo, skillRepo)
 
 	// Institute and FieldOfStudy usecases
-	redisClient := database.NewRedisClient()
+	redisClient := database.NewRedis()
 	hipoClient := institute_adapter.NewHipoAPIClient()
 	instituteRepo := institute_adapter.NewInstituteRepository(db, redisClient)
 	instituteUsecase := instituteapp.NewUsecase(instituteRepo, hipoClient)

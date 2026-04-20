@@ -12,3 +12,7 @@ var (
 	ErrInvalidUser         = errors.New("auth: invalid user")
 	ErrInvalidRequestBody  = errors.New("auth: invalid request body")
 )
+
+var (
+	ErrInvalidIdempotencyKey = errors.New("Wrong key idempotency")
+)

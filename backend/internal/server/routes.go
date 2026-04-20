@@ -11,12 +11,12 @@ import (
 	"backend/internal/application/fieldapp"
 	"backend/internal/application/instituteapp"
 	"backend/internal/database"
+	"github.com/gofiber/storage/redis/v3"
 	"backend/internal/utils"
 	"fmt"
 	"os"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -24,7 +24,7 @@ func Auth(app *fiber.App, db *gorm.DB) {
 	api := app.Group("/")
 
 	// Initialize Redis, and supabase
-	redisClient := database.NewRedisClient()
+	redisClient := database.NewRedis()
 	supabase := storage.NewSupabaseStorage()
 	jwtService := authadapter.NewJWTService(os.Getenv("JWT_SECRET"), utils.FifteenMin, utils.SevenDays)
 
@@ -55,7 +55,7 @@ func uploadRoute(router fiber.Router, supabase *storage.SupabaseStorage){
 	router.Post("/signed-url", storageHandler.GetSignedUploadURL)
 }
 
-func instituteRoute(router fiber.Router, db *gorm.DB, redisClient *redis.Client) {
+func instituteRoute(router fiber.Router, db *gorm.DB, redisClient *redis.Storage) {
 	repo := institute_adapter.NewInstituteRepository(db, redisClient)
 	hipoClient := institute_adapter.NewHipoAPIClient()
 	usecase := instituteapp.NewUsecase(repo, hipoClient)

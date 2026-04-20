@@ -3,13 +3,22 @@ package server
 
 import (
 	"backend/internal/database"
+	"backend/internal/domain/auth"
+	"backend/internal/utils"
+	"fmt"
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/extractors"
 	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/gofiber/fiber/v3/middleware/csrf"
+	"github.com/gofiber/fiber/v3/middleware/idempotency"
+	"github.com/gofiber/fiber/v3/middleware/limiter"
 	"github.com/gofiber/fiber/v3/middleware/logger"
+	"github.com/gofiber/fiber/v3/middleware/session"
 )
 
 func NewServer() *fiber.App {
@@ -32,8 +41,83 @@ func NewServer() *fiber.App {
 		},
 	)
 
+	
 	originsEnv := os.Getenv("CORS")
 	allowedOrigins := strings.Split(originsEnv, ",")
+	
+	redis := database.NewRedis()
+	sessionStore := session.NewStore(session.Config{
+		Storage:           redis , 
+		CookieSecure:      os.Getenv("HTTPS") == "true",              // HTTPS only
+		CookieHTTPOnly:    true,              // Prevent XSS
+		CookieSameSite:    "Lax",             // CSRF protection
+		IdleTimeout:       utils.ThirtyMin,
+		AbsoluteTimeout:   utils.Oneday, 
+		Extractor:         extractors.FromCookie("__Host-session_id"),
+	})
+
+	locker := &database.RedisLocker{Redis: redis}
+	app.Use(idempotency.New(idempotency.Config{
+    Lifetime: 1 * time.Hour,
+    KeyHeader: "X-Idempotency-Key",
+    KeyHeaderValidate: func(k string) error {
+        if len(k) != 36 {
+            return fmt.Errorf("%w: invalid length", auth.ErrInvalidIdempotencyKey)
+        }
+        return nil
+    },
+    Storage: redis,
+    Lock: locker,
+    KeepResponseHeaders: []string{"Content-Type", "Location"},
+    DisableValueRedaction: false,
+}))
+
+	
+	app.Use(limiter.New(limiter.Config{
+		Next: func(c fiber.Ctx) bool {
+			return c.IP() == "127.0.0.1"
+		},
+		Max:          20,
+		MaxFunc: func(c fiber.Ctx) int {
+		return 20
+		},
+		Expiration:     utils.ThirtySec,
+		ExpirationFunc: func(c fiber.Ctx) time.Duration {
+			// Use longer expiration for sensitive endpoints
+			if c.Path() == "/auth/login" {
+				return utils.SixtySec
+			}
+			return utils.ThirtySec
+		},
+		// KeyGenerator:          func(c fiber.Ctx) string {
+		// 	return c.Get("x-forwarded-for")
+		// },
+
+		// custom later
+		// LimitReached: func(c fiber.Ctx) error {
+		// 	return c.SendFile("./toofast.html")
+		// },
+		Storage: redis,
+	}))
+	
+	csrfCookieName := "XSRF-TOKEN"	
+	
+	if os.Getenv("ENV") == "production" {
+		csrfCookieName = "__Host-csrf_"	
+	}
+	
+	
+	app.Use(csrf.New(csrf.Config{
+		TrustedOrigins: allowedOrigins,
+		CookieName:        csrfCookieName,
+		CookieSecure:      os.Getenv("HTTPS") == "true",
+		CookieHTTPOnly:    true,  // false for SPAs
+		CookieSameSite:    "Lax",
+		CookieSessionOnly: true,
+		Extractor:         extractors.FromHeader(csrfCookieName),
+		Session:           sessionStore,
+	}))
+	
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     allowedOrigins,
 		AllowHeaders:     []string{"Origin, Content-type, Accept, Authorization"},

@@ -1,36 +1,41 @@
 package database
 
 import (
+	"backend/internal/utils"
 	"context"
-	"log"
 	"os"
+	"time"
 
-	"github.com/redis/go-redis/v9"
+	"github.com/gofiber/storage/redis/v3"
 )
 
-func NewRedisClient() *redis.Client {
-	redisURL := os.Getenv("REDIS_URL")
-	if redisURL == "" {
-		redisURL = "localhost:6379"
-	}
 
-	password := os.Getenv("REDIS_PASSWORD")
-	
-	client := redis.NewClient(&redis.Options{
-		Addr:         redisURL,
-		Password:     password,
-		DB:           0,
-		PoolSize:     10,
-		MinIdleConns: 5,
+func NewRedis() *redis.Storage{
+	redisStorage := redis.New(redis.Config{
+		URL: os.Getenv("REDIS_URL"),
+		Port: 6379,
+		Password: os.Getenv("REDIS_PASSWORD"),
+		Database:  0,
+		Reset:     false,
+		TLSConfig: nil,
+		PoolSize:  10,
 	})
 
-	// Test connection
-	ctx := context.Background()
-	if err := client.Ping(ctx).Err(); err != nil {
-		log.Printf("Warning: Redis connection failed: %v. Continuing without cache.", err)
-		return nil // Return nil instead of panicking - graceful degradation
-	}
+	return redisStorage
+}
 
-	log.Println("Redis connected successfully")
-	return client
+type RedisLocker struct {
+	Redis *redis.Storage
+}
+
+func (r *RedisLocker) Lock(key string) error {
+    err := r.Redis.SetWithContext(context.Background(), "lock:"+key, make([]byte, 1), utils.ThirtySec)
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
+func (r *RedisLocker) Unlock(key string) error {
+    return r.Redis.DeleteWithContext(context.Background(), "lock:"+key)
 }

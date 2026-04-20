@@ -7,16 +7,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/redis/go-redis/v9"
+	"github.com/gofiber/storage/redis/v3"
 	"gorm.io/gorm"
 )
 
 type instituteRepository struct {
 	db    *gorm.DB
-	redis *redis.Client
+	redis *redis.Storage
 }
 
-func NewInstituteRepository(db *gorm.DB, redisClient *redis.Client) *instituteRepository {
+func NewInstituteRepository(db *gorm.DB, redisClient *redis.Storage) *instituteRepository {
 	return &instituteRepository{
 		db:    db,
 		redis: redisClient,
@@ -82,10 +82,9 @@ func (r *instituteRepository) SearchInstitutesFromCache(ctx context.Context, que
 
 	cacheKey := fmt.Sprintf("universities:search:%s:%s", query, country)
 
-	val, err := r.redis.Get(ctx, cacheKey).Result()
-	if err == redis.Nil {
-		return nil, false, nil // Cache miss
-	}
+	// val, err := r.redis.Get(ctx, cacheKey).Result()
+	val, err := r.redis.Get(cacheKey)
+	
 	if err != nil {
 		return nil, false, err // Redis error
 	}
@@ -108,7 +107,7 @@ func (r *instituteRepository) CacheInstitutes(ctx context.Context, key string, i
 		return err
 	}
 
-	return r.redis.Set(ctx, key, data, ttl).Err()
+	return r.redis.Set(key, data, ttl)
 }
 
 func (r *instituteRepository) SearchInstitutesWithCountry(ctx context.Context, query string, country string) ([]domain.Institute, error) {

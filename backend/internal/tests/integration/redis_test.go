@@ -1,7 +1,7 @@
 package integration_test
 
 import (
-	"context"
+	// "context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,15 +24,14 @@ func TestInstitute_RedisCachingFlow(t *testing.T) {
 
 	// In your `institute_adapter`, you likely cache it with a key. 
 	// We'll verify Redis holds *some* keys after the request.
-	redisClient := database.NewRedisClient()
+	redisClient := database.NewRedis()
 	
 	// Assuming you use wildcard or a specific prefix for caching institutes like "institute:*"
 	// This ensures Redis was touched during the request lifecycle.
-	ctx := context.Background()
-	keys, err := redisClient.Keys(ctx, "*").Result()
+	keys, err := redisClient.Keys()
 	assert.NoError(t, err)
 	assert.NotEmpty(t, keys, "Redis should contain cached keys after fetching institutes")
 
 	// Clean up Redis after test to prevent pollution
-	redisClient.FlushAll(ctx)
+	redisClient.Close()
 }
