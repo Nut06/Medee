@@ -1,5 +1,4 @@
 import { api } from "@/lib/api";
-import { useUserStore } from "@/stores/userStore";
 import type {
   LoginRequest,
   LoginResponse,
@@ -13,9 +12,6 @@ export const register = async (
   try {
     const { data } = await api.post<LoginResponse>("/auth/register", input);
     // Store accessToken (refreshToken stays in HttpOnly cookie)
-    if (data.accessToken) {
-      useUserStore.getState().setAccessToken(data.accessToken);
-    }
     return data as RegisterResponse;
   } catch (error) {
     console.error("Register error:", error);
@@ -29,7 +25,6 @@ export const loginLocal = async (
   try {
     const { data } = await api.post<LoginResponse>("/auth/login", input);
     // Store accessToken (refreshToken stays in HttpOnly cookie)
-    useUserStore.getState().setAccessToken(data.accessToken);
     return data as LoginResponse;
   } catch (error) {
     console.error("Login error:", error);
