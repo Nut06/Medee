@@ -6,6 +6,7 @@ import (
 	"backend/internal/domain/auth"
 	authport "backend/internal/port/auth"
 	userport "backend/internal/port/user"
+	"backend/internal/utils"
 	"context"
 	"errors"
 	"fmt"
@@ -27,8 +28,8 @@ type CookieConfig struct {
 }
 
 var (
-	thirtyMin = 30 * time.Minute
-	sevenDays = 30 * 24 * time.Hour // Increased to 30 days
+	oneHour = 1 * time.Hour
+	thirtyDays = 30 * 24 * time.Hour // Increased to 30 days
 )
 
 var validate = validator.New()
@@ -44,6 +45,10 @@ func NewHTTPHandler(db *gorm.DB, jwtService *JWTService) *HTTPHandler {
 	cfg := &CookieConfig{
 		Secure:   os.Getenv("HTTPS") == "true",
 		SameSite: "Strict",
+		AccessCookieName: "access_token",
+		RefreshCookieName: "refresh_token",
+		AccessMaxAge: int(utils.FiveSec),
+		RefreshMaxAge: int(utils.ThirtyDays),
 	}
 	
 	usecase := authapp.NewUsecase(
@@ -52,7 +57,7 @@ func NewHTTPHandler(db *gorm.DB, jwtService *JWTService) *HTTPHandler {
 		jwtService,
 		repo,
 	)
-	cfg.RefreshCookieName = "refresh_token"
+
 	userRepo := useradapter.NewRepository(db)
 	return &HTTPHandler{uc: usecase, userRepo: userRepo, cfg: cfg}
 }
@@ -78,6 +83,7 @@ func (h *HTTPHandler) Refresh(c fiber.Ctx) error {
 	}
 
 	h.setRefreshCookie(c, tokens)
+	h.setAccessCookie(c, tokens)
 
 	// Fetch full user from database
 	fullUser, err := h.userRepo.FindById(ctx, res.ID)
@@ -88,7 +94,6 @@ func (h *HTTPHandler) Refresh(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(auth.RefreshResponse{
 		User:      *auth.ToUserResponse(fullUser),
 		Companies: res.Companies,
-		Token:     tokens.AccessToken, // ✅ เพิ่ม: return accessToken ใหม่
 	})
 
 }
@@ -115,6 +120,7 @@ func (h *HTTPHandler) Register(c fiber.Ctx) error {
 	}
 
 	h.setRefreshCookie(c, tokens)
+	h.setAccessCookie(c, tokens)
 
 	// Fetch full user from database
 	ctx := h.context(c)
@@ -161,7 +167,6 @@ func (h *HTTPHandler) Login(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(auth.LoginResponse{
 		User:      *auth.ToUserResponse(fullUser),
 		Companies: res.Companies,
-		Token:     tokens.AccessToken,
 	})
 }
 
@@ -218,7 +223,7 @@ func (h *HTTPHandler) clearCookies(c fiber.Ctx) {
 	c.Cookie(&fiber.Cookie{
 		Name:     h.cfg.RefreshCookieName,
 		Value:    "",
-		Path:     "/",
+		Path:     "/auth/refresh",
 		Domain:   "", // empty means current domain
 		HTTPOnly: true,
 		Secure:   h.cfg.Secure,
@@ -233,12 +238,25 @@ func (h *HTTPHandler) setRefreshCookie(c fiber.Ctx, tokens *auth.TokenPair) {
 	c.Cookie(&fiber.Cookie{
 		Name:     h.cfg.RefreshCookieName,
 		Value:    tokens.RefreshToken,
-		Path:     "/",
+		Path:     "/auth/refresh",
 		Domain:   "", // empty means current domain
 		HTTPOnly: true,
 		Secure:   h.cfg.Secure,
 		SameSite: h.cfg.SameSite,
 		MaxAge:   refreshMaxAge,
+	})
+}
+
+func (h *HTTPHandler) setAccessCookie(c fiber.Ctx, tokens *auth.TokenPair){
+	c.Cookie(&fiber.Cookie{
+		Name:     h.cfg.AccessCookieName,
+		Value:    tokens.AccessToken,
+		Path:     "/",
+		Domain:   "", // empty means current domain
+		HTTPOnly: true,
+		Secure:   h.cfg.Secure,
+		SameSite: h.cfg.SameSite,
+		MaxAge:   h.cfg.AccessMaxAge,
 	})
 }
 
