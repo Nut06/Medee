@@ -19,23 +19,6 @@ import (
 // ─────────────────────────────────────────────────────────────────────────────
 func registerAndLogin(t *testing.T, email string) string {
 	t.Helper()
-
-	clearUsersTable()
-
-	// Register
-	registerBody, _ := json.Marshal(auth.RegisterRequest{
-		FirstName: "Test",
-		LastName:  "User",
-		Email:     email,
-		Password:  "Password123!",
-	})
-	req := httptest.NewRequest(http.MethodPost, "/auth/register", bytes.NewBuffer(registerBody))
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := app.Test(req)
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
-
-	// Flush refresh tokens to avoid collision on back-to-back calls
 	clearUsersTable()
 	registerAndGetToken(t, email)
 	return loginGetToken(t, email)
@@ -71,8 +54,31 @@ func loginGetToken(t *testing.T, email string) string {
 	var loginResp auth.LoginResponse
 	err = json.NewDecoder(resp.Body).Decode(&loginResp)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, loginResp.Token)
-	return loginResp.Token
+
+	// -- เรียกใช้งาน Helper ดึง Cookie ตามชื่อ --
+	accessCookie := getCookieByName(resp, "access_token")
+	assert.NotNil(t, accessCookie, "Expected to find access_token in Set-Cookie header")
+
+	refreshCookie := getCookieByName(resp, "refresh_token")
+	assert.NotNil(t, refreshCookie, "Expected to find refresh_token in Set-Cookie header")
+
+	// คืนค่า access_token กลับไปให้สำหรับฟังก์ชันที่ต้องเอาไปทำ Bearer Header (ถ้ามีอยู่)
+	if accessCookie != nil {
+		return accessCookie.Value
+	}
+	return ""
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helper: getCookieByName - ดึง Cookie จาก http.Response ด้วยชื่อ
+// ─────────────────────────────────────────────────────────────────────────────
+func getCookieByName(resp *http.Response, name string) *http.Cookie {
+	for _, cookie := range resp.Cookies() {
+		if cookie.Name == name {
+			return cookie
+		}
+	}
+	return nil
 }
 
 func authReq(method, path string, body []byte, token string) *http.Request {
