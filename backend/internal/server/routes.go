@@ -22,28 +22,29 @@ import (
 
 func Auth(app *fiber.App, db *gorm.DB) {
 	// Initialize Redis, and supabase
+	approute := app.Group("/")
 	redisClient := database.NewRedis()
 	supabase := storage.NewSupabaseStorage()
 	jwtService := authadapter.NewJWTService(os.Getenv("JWT_SECRET"), utils.FifteenMin, utils.SevenDays)
 
-	authGroup := app.Group("/auth")
+	authGroup := approute.Group("/auth")
 	authRoute(authGroup, db, jwtService)
 
-	userGroup := app.Group("/user", AuthMiddleware(jwtService))
+	userGroup := approute.Group("/user", AuthMiddleware(jwtService))
 	userRoute(userGroup, db)
 
-	skillGroup := app.Group("/skill", AuthMiddleware(jwtService))
+	skillGroup := approute.Group("/skill", AuthMiddleware(jwtService))
 	skillRoute(skillGroup, db)
 
 	// Institute routes (public for autocomplete)
-	instituteGroup := app.Group("/institutes")
+	instituteGroup := approute.Group("/institutes")
 	instituteRoute(instituteGroup, db, redisClient)
 
 	// FieldOfStudy routes (public for autocomplete)
-	fieldGroup := app.Group("/field-of-studies")
+	fieldGroup := approute.Group("/field-of-studies")
 	fieldOfStudyRoute(fieldGroup, db)
 
-	uploadGroup := app.Group("/upload", AuthMiddleware(jwtService))
+	uploadGroup := approute.Group("/upload", AuthMiddleware(jwtService))
 
 	uploadRoute(uploadGroup, supabase)
 }

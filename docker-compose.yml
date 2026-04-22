@@ -32,20 +32,20 @@ services:
   #     - "traefik.http.routers.api.middlewares=myauth"
   #     - "traefik.http.middlewares.myauth.basicauth.users=test:$$apr1$$H6uskkkW$$IgXLP6ewTrSuBkTrqE8wj/"
 
-  frontend:
-    image: frontend-debian:latest
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        - VITE_API_URL=/api
-    container_name: frontend
-    ports:
-      - "${APP_PORT}:8080"
-    depends_on:
-      - backend
-    networks:
-      - proxy
+  # frontend:
+  #   image: frontend-debian:latest
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #     args:
+  #       - VITE_API_URL=/api
+  #   container_name: frontend
+  #   ports:
+  #     - "${APP_PORT}:8080"
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - proxy
     # labels:
     #   - "traefik.enable=true"
     #   - "traefik.http.routers.frontend.rule=Host(`medee.local`)"
@@ -62,39 +62,39 @@ services:
   #     dockerfile: ./frontend/Dockerfile.dev
   #   command:  ["pnpm", "test"]
 
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: backend
-    image: backend-debian:lts
-    environment:
-      - DB_USER
-      - DB_PASSWORD
-      - DB_NAME
-      - DB_HOST=db
-      - DB_PORT
-      - DB_SSLMODE=disable
-      - HTTPS=true
-      # - CORS=http://medee.local,https://medee.local
-      - CORS=http://localhost:8080,http://localhost:5173
-      - REDIS_PASSWORD
-      - REDIS_URL=http://redis:6379
-      - APP_PORT=3000
-      - JWT_SECRET
-      - SUPABASE_PROJECT_URL
-      - SUPABASE_SERVICE_KEY
-      - SUPABASE_BUCKET
-      - CI="true"
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   container_name: backend
+  #   image: backend-debian:lts
+  #   environment:
+  #     - DB_USER
+  #     - DB_PASSWORD
+  #     - DB_NAME
+  #     - DB_HOST=db
+  #     - DB_PORT
+  #     - DB_SSLMODE=disable
+  #     - HTTPS=true
+  #     # - CORS=http://medee.local,https://medee.local
+  #     - CORS=http://localhost:8080, http://localhost:5173
+  #     - REDIS_PASSWORD
+  #     - REDIS_URL=http://redis:6379
+  #     - APP_PORT=3000
+  #     - JWT_SECRET
+  #     - SUPABASE_PROJECT_URL
+  #     - SUPABASE_SERVICE_KEY
+  #     - SUPABASE_BUCKET
+  #     - CI="true"
 
-    ports:
-      - "${API_PORT}:3000"
-    networks:
-      - proxy
-    depends_on:
-      db:
-        condition: service_healthy
-    # labels:
+  #   ports:
+  #     - "${API_PORT}:3000"
+  #   networks:
+  #     - proxy
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   # labels:
     #   - "traefik.enable=true"
     #   - "traefik.http.routers.backend.rule=Host(`medee.local`) && PathPrefix(`/api`)"
     #   - "traefik.http.middlewares.strip-api.stripprefix.prefixes=/api"

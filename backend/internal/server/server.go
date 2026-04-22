@@ -13,12 +13,12 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/extractors"
-	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/csrf"
+	"github.com/gofiber/fiber/v3/middleware/session"
+	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/idempotency"
 	"github.com/gofiber/fiber/v3/middleware/limiter"
 	"github.com/gofiber/fiber/v3/middleware/logger"
-	"github.com/gofiber/fiber/v3/middleware/session"
 )
 
 func NewServer() *fiber.App {
@@ -44,6 +44,14 @@ func NewServer() *fiber.App {
 	originsEnv := os.Getenv("CORS")
 	allowedOrigins := strings.Split(originsEnv, ",")
 
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     allowedOrigins,
+		AllowHeaders:     []string{"Origin, Content-type, Accept, Authorization"},
+		AllowMethods:     []string{"GET, POST, PUT, PATCH, DELETE, OPTIONS"},
+		AllowCredentials: true,
+		MaxAge:           3600,
+	}))
+
 	redis := database.NewRedis()
 	sessionStore := session.NewStore(session.Config{
 		Storage:         redis,
@@ -54,6 +62,24 @@ func NewServer() *fiber.App {
 		AbsoluteTimeout: utils.Oneday,
 		Extractor:       extractors.FromCookie("__Host-session_id"),
 	})
+
+	csrfCookieName := "CSRF-TOKEN"
+	csrfHeaderName := "X-CSRF-Token"
+
+	if os.Getenv("ENV") == "production" {
+		csrfCookieName = "__Host-csrf_"
+	}
+
+	app.Use(csrf.New(csrf.Config{
+		TrustedOrigins:    allowedOrigins,
+		CookieName:        csrfCookieName,
+		CookieSecure:      os.Getenv("HTTPS") == "true",
+		CookieHTTPOnly:    false,
+		CookieSameSite:    "Lax",
+		CookieSessionOnly: true,
+		Extractor:         extractors.FromHeader(csrfHeaderName),
+		Session:           sessionStore,
+	}))
 
 	locker := &database.RedisLocker{Redis: redis}
 	app.Use(idempotency.New(idempotency.Config{
@@ -93,40 +119,24 @@ func NewServer() *fiber.App {
 
 		// custom later
 		// LimitReached: func(c fiber.Ctx) error {
-		// 	return c.SendFile("./toofast.html")
-		// },
-		Storage: redis,
-	}))
+			// 	return c.SendFile("./toofast.html")
+			// },
+			Storage: redis,
+		}))
+		
 
-	csrfCookieName := "XSRF-TOKEN"
-
-	if os.Getenv("ENV") == "production" {
-		csrfCookieName = "__Host-csrf_"
-	}
-
-	app.Use(csrf.New(csrf.Config{
-		TrustedOrigins:    allowedOrigins,
-		CookieName:        csrfCookieName,
-		CookieSecure:      os.Getenv("HTTPS") == "true",
-		CookieHTTPOnly:    false,
-		CookieSameSite:    "Lax",
-		CookieSessionOnly: true,
-		Extractor:         extractors.FromHeader(csrfCookieName),
-		Session:           sessionStore,
-	}))
-
-	app.Use(cors.New(cors.Config{
-		AllowOrigins:     allowedOrigins,
-		AllowHeaders:     []string{"Origin, Content-type, Accept, Authorization"},
-		AllowMethods:     []string{"GET, POST, PUT, PATCH, DELETE, OPTIONS"},
-		AllowCredentials: true,
-		MaxAge:           3600,
+	
+	app.Use(logger.New(logger.Config{
+		Format: "${time} | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${error}\n",
+		TimeFormat: "2006-01-02T15:04:05Z07:00",
+		TimeZone: "UTC",
 	}))
 
 	app.Get("/", func(c fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
-	app.Use(logger.New())
+
+
 	db := database.ConnectDB()
 	database.AutoMigrate(db)
 	Auth(app, db)
