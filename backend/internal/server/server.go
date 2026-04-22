@@ -108,7 +108,7 @@ func NewServer() *fiber.App {
 		TrustedOrigins:    allowedOrigins,
 		CookieName:        csrfCookieName,
 		CookieSecure:      os.Getenv("HTTPS") == "true",
-		CookieHTTPOnly:    true, // false for SPAs
+		CookieHTTPOnly:    false,
 		CookieSameSite:    "Lax",
 		CookieSessionOnly: true,
 		Extractor:         extractors.FromHeader(csrfCookieName),

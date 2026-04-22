@@ -8,7 +8,6 @@ interface UserState {
     key?: keyof User,
     value?: unknown,
   ) => void;
-  setAccessToken: (accessToken: string) => void;
   isAuth: boolean;
   setAuth: (b: boolean) => void;
   clearAuth: () => Promise<void>;
@@ -36,13 +35,6 @@ export const useUserStore = create<UserState>((set) => ({
       user: { ...(state.user ?? {}), ...(payload as Partial<User>) },
       isAuth: true,
     }));
-  },
-
-  setAccessToken: (accessToken: string) => {
-    localStorage.setItem("accessToken", accessToken);
-    set({
-      isAuth: true,
-    });
   },
 
   isAuth: false,

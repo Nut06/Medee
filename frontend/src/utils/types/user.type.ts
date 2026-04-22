@@ -51,7 +51,6 @@ export interface LoginResponse {
   >;
 
   companies?: Company[];
-  accessToken: string;
 }
 
 export interface RegisterRequest {
