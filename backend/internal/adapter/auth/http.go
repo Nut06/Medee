@@ -157,6 +157,7 @@ func (h *HTTPHandler) Login(c fiber.Ctx) error {
 	}
 
 	h.setRefreshCookie(c, tokens)
+	h.setAccessCookie(c, tokens)
 
 	// Fetch full user from database
 	fullUser, err := h.userRepo.FindById(ctx, res.ID)

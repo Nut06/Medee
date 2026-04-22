@@ -29,6 +29,10 @@ func NewJWTService(secret string, accessTTL, refreshTTL time.Duration) *JWTServi
 	}
 }
 
+func (s *JWTService) GetSecret() []byte {
+	return s.secret
+}
+
 func (s *JWTService) GenerateAccess(ctx context.Context, userID uuid.UUID) (string, error) {
 	expiresAt := time.Now().Add(s.accessTTL).Unix()
 	
