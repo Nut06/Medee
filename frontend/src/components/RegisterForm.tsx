@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BriefcaseBusiness, Lock, Mail } from "lucide-react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuthForm } from "@/hooks/userAuthForm";
-import { register } from "@/services/auth.service";
+import { initializeCsrf, register } from "@/services/auth.service";
 import type { RegisterRequest } from "@/utils/types/user.type";
 import { useUserStore } from "@/stores/userStore";
 
@@ -24,7 +25,9 @@ const registerSchema = z.object({
   firstName: z.string({ error: "กรุณากรอกชื่อ" }).min(1, "กรุณากรอกชื่อ"),
   lastName: z.string({ error: "กรุณากรอกนามสกุล" }).min(1, "กรุณากรอกนามสกุล"),
   email: z.email("กรุณากรอก Email"),
-  password: z.string({ error: "กรุณากรอกรหัสผ่าน" }).min(6, "กรุณากรอกรหัสผ่าน"),
+  password: z
+    .string({ error: "กรุณากรอกรหัสผ่าน" })
+    .min(6, "กรุณากรอกรหัสผ่าน"),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -32,6 +35,12 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 export const RegisterForm = () => {
   const { email, password, setField, loading, error } = useAuthForm();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    void initializeCsrf().catch(() => {
+      // Keep UI usable even if CSRF bootstrap fails; submit will still surface API errors.
+    });
+  }, []);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -45,7 +54,7 @@ export const RegisterForm = () => {
   });
 
   const handleLoginSubmit = async (
-    values: RegisterFormValues
+    values: RegisterFormValues,
   ): Promise<void> => {
     const payload: RegisterRequest = {
       email: values.email,

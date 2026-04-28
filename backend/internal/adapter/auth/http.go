@@ -15,6 +15,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/csrf"
 	"gorm.io/gorm"
 )
 
@@ -28,7 +29,7 @@ type CookieConfig struct {
 }
 
 var (
-	oneHour = 1 * time.Hour
+	oneHour    = 1 * time.Hour
 	thirtyDays = 30 * 24 * time.Hour // Increased to 30 days
 )
 
@@ -43,25 +44,34 @@ type HTTPHandler struct {
 func NewHTTPHandler(db *gorm.DB, jwtService *JWTService) *HTTPHandler {
 	repo := NewGormRepository(db)
 	cfg := &CookieConfig{
-		Secure:   os.Getenv("HTTPS") == "true",
-		SameSite: "Strict",
-		AccessCookieName: "access_token",
+		Secure:            os.Getenv("HTTPS") == "true",
+		SameSite:          "Strict",
+		AccessCookieName:  "access_token",
 		RefreshCookieName: "refresh_token",
-		AccessMaxAge: int(utils.FiveSec),
-		RefreshMaxAge: int(utils.ThirtyDays),
+		AccessMaxAge:      int(utils.FiveSec),
+		RefreshMaxAge:     int(utils.ThirtyDays),
 	}
-	
+
 	usecase := authapp.NewUsecase(
 		repo,
 		NewBcryptHasher(0),
 		jwtService,
-		repo,
 	)
 
 	userRepo := useradapter.NewRepository(db)
 	return &HTTPHandler{uc: usecase, userRepo: userRepo, cfg: cfg}
 }
 
+func (h *HTTPHandler) GetCSRFToken(c fiber.Ctx) error {
+	token := csrf.TokenFromContext(c)
+	if token == "" {
+		return fiber.NewError(fiber.StatusInternalServerError, "csrf token not available")
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"csrfToken": token,
+	})
+}
 
 func (h *HTTPHandler) Refresh(c fiber.Ctx) error {
 	ctx := h.context(c)
@@ -174,9 +184,6 @@ func (h *HTTPHandler) Login(c fiber.Ctx) error {
 func (h *HTTPHandler) Logout(c fiber.Ctx) error {
 	ctx := h.context(c)
 	rt := c.Cookies(h.cfg.RefreshCookieName)
-	if rt == "" {
-		return h.handleError(auth.ErrInvalidRefreshToken)
-	}
 	if err := h.uc.Logout(ctx, rt); err != nil {
 		return h.handleError(err)
 	}
@@ -248,7 +255,7 @@ func (h *HTTPHandler) setRefreshCookie(c fiber.Ctx, tokens *auth.TokenPair) {
 	})
 }
 
-func (h *HTTPHandler) setAccessCookie(c fiber.Ctx, tokens *auth.TokenPair){
+func (h *HTTPHandler) setAccessCookie(c fiber.Ctx, tokens *auth.TokenPair) {
 	c.Cookie(&fiber.Cookie{
 		Name:     h.cfg.AccessCookieName,
 		Value:    tokens.AccessToken,

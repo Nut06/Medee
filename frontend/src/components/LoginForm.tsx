@@ -18,7 +18,8 @@ import { Input } from "@/components/ui/input";
 import { useAuthForm } from "@/hooks/userAuthForm";
 import type { LoginRequest } from "@/utils/types/user.type";
 import { useUserStore } from "@/stores/userStore";
-
+import { useEffect } from "react";
+import { initializeCsrf } from "@/services/auth.service";
 const loginSchema = z.object({
   email: z
     .email({ message: "please enter a valid email" })
@@ -35,6 +36,12 @@ export const LoginForm = () => {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+      void initializeCsrf().catch(() => {
+        
+      });
+    }, []);
+    
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: "onSubmit",

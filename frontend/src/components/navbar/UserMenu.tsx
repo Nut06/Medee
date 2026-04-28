@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { logout } from "@/services/auth.service";
 import { useUserStore } from "@/stores/userStore";
 
 export function UserMenu() {
@@ -18,6 +19,7 @@ export function UserMenu() {
 
   const handleLogout = async () => {
     try {
+      await logout();
       await clearAuth();
       navigate("/");
     } catch (error) {

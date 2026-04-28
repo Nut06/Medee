@@ -21,6 +21,19 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/logger"
 )
 
+func normalizeOrigins(originsEnv string) []string {
+	raw := strings.Split(originsEnv, ",")
+	origins := make([]string, 0, len(raw))
+	for _, origin := range raw {
+		trimmed := strings.TrimSpace(origin)
+		if trimmed == "" {
+			continue
+		}
+		origins = append(origins, trimmed)
+	}
+	return origins
+}
+
 func NewServer() *fiber.App {
 
 	app := fiber.New(
@@ -40,31 +53,42 @@ func NewServer() *fiber.App {
 			CaseSensitive:     true,
 		},
 	)
+	
+	csrfCookieName := "CSRF-TOKEN"
+	csrfHeaderName := "X-CSRF-Token"
+	sessionCookieName := "session_id"
 
 	originsEnv := os.Getenv("CORS")
-	allowedOrigins := strings.Split(originsEnv, ",")
+	allowedOrigins := normalizeOrigins(originsEnv)
 
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     allowedOrigins,
-		AllowHeaders:     []string{"Origin, Content-type, Accept, Authorization"},
-		AllowMethods:     []string{"GET, POST, PUT, PATCH, DELETE, OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-type", "Accept", "Authorization", csrfHeaderName},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowCredentials: true,
 		MaxAge:           3600,
 	}))
 
 	redis := database.NewRedis()
-	sessionStore := session.NewStore(session.Config{
+	isHTTPS := os.Getenv("HTTPS") == "true"
+	
+	if isHTTPS {
+		sessionCookieName = "__Host-session_id"
+	}
+
+	sessionConfig := session.Config{
 		Storage:         redis,
-		CookieSecure:    os.Getenv("HTTPS") == "true", // HTTPS only
+		CookieSecure:    isHTTPS,
 		CookieHTTPOnly:  true,                         // Prevent XSS
 		CookieSameSite:  "Lax",                        // CSRF protection
 		IdleTimeout:     utils.ThirtyMin,
 		AbsoluteTimeout: utils.Oneday,
-		Extractor:       extractors.FromCookie("__Host-session_id"),
-	})
+		Extractor:       extractors.FromCookie(sessionCookieName),
+	}
 
-	csrfCookieName := "CSRF-TOKEN"
-	csrfHeaderName := "X-CSRF-Token"
+	sessionStore := session.NewStore(sessionConfig)
+	app.Use(session.New(sessionConfig))
+
 
 	if os.Getenv("ENV") == "production" {
 		csrfCookieName = "__Host-csrf_"
@@ -73,7 +97,7 @@ func NewServer() *fiber.App {
 	app.Use(csrf.New(csrf.Config{
 		TrustedOrigins:    allowedOrigins,
 		CookieName:        csrfCookieName,
-		CookieSecure:      os.Getenv("HTTPS") == "true",
+		CookieSecure:      isHTTPS,
 		CookieHTTPOnly:    false,
 		CookieSameSite:    "Lax",
 		CookieSessionOnly: true,

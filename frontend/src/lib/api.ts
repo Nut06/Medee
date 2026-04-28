@@ -21,6 +21,9 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+api.defaults.xsrfCookieName = 'CSRF-TOKEN';
+api.defaults.xsrfHeaderName = 'X-CSRF-Token';
+
 const refreshAuth = () => api.post('/auth/refresh')
 createAuthRefresh(api, refreshAuth)
 

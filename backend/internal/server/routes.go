@@ -81,6 +81,7 @@ func skillRoute(router fiber.Router, db *gorm.DB) {
 
 func authRoute(router fiber.Router, db *gorm.DB, jwtService *authadapter.JWTService) {
 	h := authadapter.NewHTTPHandler(db, jwtService)
+	router.Get("/csrf-token", h.GetCSRFToken)
 	router.Post("/register", h.Register)
 	router.Post("/login", h.Login)
 	router.Post("/refresh", h.Refresh)
