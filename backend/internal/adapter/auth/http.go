@@ -105,7 +105,6 @@ func (h *HTTPHandler) Refresh(c fiber.Ctx) error {
 		User:      *auth.ToUserResponse(fullUser),
 		Companies: res.Companies,
 	})
-
 }
 
 func (h *HTTPHandler) Register(c fiber.Ctx) error {
@@ -182,11 +181,6 @@ func (h *HTTPHandler) Login(c fiber.Ctx) error {
 }
 
 func (h *HTTPHandler) Logout(c fiber.Ctx) error {
-	ctx := h.context(c)
-	rt := c.Cookies(h.cfg.RefreshCookieName)
-	if err := h.uc.Logout(ctx, rt); err != nil {
-		return h.handleError(err)
-	}
 	h.clearCookies(c)
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "logout success"})
 }

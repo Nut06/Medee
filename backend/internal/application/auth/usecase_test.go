@@ -23,16 +23,14 @@ type authTestSuite struct {
 	repo    *mocks.MockAuthRepo
 	hasher  *mocks.MockPasswordHasher
 	tokens  *mocks.MockTokenService
-	refresh *mocks.MockRefreshTokenStore
 }
 
 func setupAuthTest() *authTestSuite {
 	repo := new(mocks.MockAuthRepo)
 	hasher := new(mocks.MockPasswordHasher)
 	tokens := new(mocks.MockTokenService)
-	refresh := new(mocks.MockRefreshTokenStore)
 
-	uc := NewUsecase(repo, hasher, tokens, refresh)
+	uc := NewUsecase(repo, hasher, tokens)
 
 	return &authTestSuite{
 		usecase: uc,
@@ -74,7 +72,6 @@ func TestRegister_Success(t *testing.T) {
 	// Generate tokens
 	s.tokens.On("GenerateAccess", ctx, userID).Return("access_token", nil)
 	s.tokens.On("GenerateRefresh", ctx, userID).Return("refresh_token", refreshExp, nil)
-	s.refresh.On("SaveRefreshToken", ctx, "refresh_token", userID, refreshExp).Return(nil)
 
 	result, tokenPair, err := s.usecase.Register(ctx, cmd)
 
@@ -157,7 +154,6 @@ func TestLogin_Success(t *testing.T) {
 	s.hasher.On("Compare", ctx, "hashed_password", cmd.Password).Return(nil)
 	s.tokens.On("GenerateAccess", ctx, userID).Return("access_token", nil)
 	s.tokens.On("GenerateRefresh", ctx, userID).Return("refresh_token", refreshExp, nil)
-	s.refresh.On("SaveRefreshToken", ctx, "refresh_token", userID, refreshExp).Return(nil)
 	s.repo.On("GetUserCompanies", ctx, userID.String()).Return([]auth.Company{}, nil)
 
 	result, tokenPair, err := s.usecase.Login(ctx, cmd)
@@ -216,18 +212,6 @@ func TestLogin_WrongPassword(t *testing.T) {
 // Logout Tests
 // ============================================================
 
-func TestLogout_Success(t *testing.T) {
-	s := setupAuthTest()
-	ctx := context.Background()
-
-	s.refresh.On("DeleteRefreshToken", ctx, "some_refresh_token").Return(nil)
-
-	err := s.usecase.Logout(ctx, "some_refresh_token")
-
-	assert.NoError(t, err)
-	s.refresh.AssertExpectations(t)
-}
-
 func TestLogout_NilRefreshStore(t *testing.T) {
 	repo := new(mocks.MockAuthRepo)
 	hasher := new(mocks.MockPasswordHasher)
@@ -263,7 +247,6 @@ func TestRefresh_Success(t *testing.T) {
 	}, nil)
 	s.tokens.On("GenerateAccess", ctx, userID).Return("new_access_token", nil)
 	s.tokens.On("GenerateRefresh", ctx, userID).Return("new_refresh_token", refreshExp, nil)
-	s.refresh.On("SaveRefreshToken", ctx, "new_refresh_token", userID, refreshExp).Return(nil)
 	s.repo.On("GetUserCompanies", ctx, userID.String()).Return([]auth.Company{}, nil)
 
 	result, tokenPair, err := s.usecase.Refresh(ctx, cmd)

@@ -5,6 +5,7 @@ import (
 	utils "backend/internal/utils"
 	"context"
 	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
@@ -13,7 +14,14 @@ type JWTService struct {
 	secret     []byte
 	accessTTL  time.Duration
 	refreshTTL time.Duration
+	issuer     string
+	audience   string
 }
+
+const (
+	defaultJWTIssuer   = "medee-auth"
+	defaultJWTAudience = "medee-api"
+)
 
 func NewJWTService(secret string, accessTTL, refreshTTL time.Duration) *JWTService {
 	if accessTTL == 0 {
@@ -26,6 +34,8 @@ func NewJWTService(secret string, accessTTL, refreshTTL time.Duration) *JWTServi
 		secret:     []byte(secret),
 		accessTTL:  accessTTL,
 		refreshTTL: refreshTTL,
+		issuer:     defaultJWTIssuer,
+		audience:   defaultJWTAudience,
 	}
 }
 
@@ -35,12 +45,14 @@ func (s *JWTService) GetSecret() []byte {
 
 func (s *JWTService) GenerateAccess(ctx context.Context, userID uuid.UUID) (string, error) {
 	expiresAt := time.Now().Add(s.accessTTL).Unix()
-	
+
 	claims := jwt.MapClaims{
 		"sub": userID.String(),
 		"exp": expiresAt,
 		"iat": time.Now().Unix(),
 		"typ": "access",
+		"iss": s.issuer,
+		"aud": s.audience,
 	}
 	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signed, err := tok.SignedString(s.secret)
@@ -57,6 +69,8 @@ func (s *JWTService) GenerateRefresh(ctx context.Context, userID uuid.UUID) (str
 		"exp": expiresAt.Unix(),
 		"iat": time.Now().Unix(),
 		"typ": "refresh",
+		"iss": s.issuer,
+		"aud": s.audience,
 	}
 	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signed, err := tok.SignedString(s.secret)
@@ -75,12 +89,18 @@ func (s *JWTService) DecodeRefreshToken(ctx context.Context, tokenString string)
 }
 
 func (s *JWTService) decodeToken(tokenString, expectedType string) (uuid.UUID, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, jwt.ErrSignatureInvalid
-		}
-		return s.secret, nil
-	})
+	token, err := jwt.Parse(
+		tokenString,
+		func(token *jwt.Token) (interface{}, error) {
+			if token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
+				return nil, jwt.ErrSignatureInvalid
+			}
+			return s.secret, nil
+		},
+		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
+		jwt.WithIssuer(s.issuer),
+		jwt.WithAudience(s.audience),
+	)
 
 	if err != nil {
 		return uuid.Nil, err
@@ -104,16 +124,17 @@ func (s *JWTService) decodeToken(tokenString, expectedType string) (uuid.UUID, e
 
 var _ authport.TokenService = (*JWTService)(nil)
 
-
 func (s *JWTService) ParseToken(tokenString string) (*jwt.MapClaims, error) {
 
 	token, err := jwt.Parse(tokenString,
 		func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			if token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
 				return nil, jwt.ErrSignatureInvalid
 			}
 			return s.secret, nil
-		})
+		},
+		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
+	)
 
 	if err != nil {
 		return nil, err

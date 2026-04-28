@@ -7,9 +7,7 @@ import (
 	"context"
 	"errors"
 	"strings"
-	"time"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -54,19 +52,6 @@ func (r *GormRepository) Create(ctx context.Context, user auth.User) (auth.User,
 		return auth.User{}, err
 	}
 	return mapToDomainUser(entity), nil
-}
-
-func (r *GormRepository) SaveRefreshToken(ctx context.Context, token string, userID uuid.UUID, expiresAt time.Time) error {
-	rt := domain.RefreshToken{
-		Token:     token,
-		ExpiresAt: expiresAt,
-		UserID:    userID,
-	}
-	return r.db.WithContext(ctx).Create(&rt).Error
-}
-
-func (r *GormRepository) DeleteRefreshToken(ctx context.Context, token string) error {
-	return r.db.WithContext(ctx).Where("token = ?", token).Delete(&domain.RefreshToken{}).Error
 }
 
 
@@ -124,5 +109,4 @@ func isDuplicateKey(err error) bool {
 // Interfaces satisfaction
 var (
 	_ authport.AuthRepo          = (*GormRepository)(nil)
-	_ authport.RefreshTokenStore = (*GormRepository)(nil)
 )

@@ -44,7 +44,6 @@ export const useUserStore = create<UserState>((set) => ({
     });
   },
   clearAuth: async () => {
-    localStorage.removeItem("accessToken");
     set({
       user: {},
       isAuth: false,

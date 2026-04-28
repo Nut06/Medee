@@ -19,6 +19,15 @@ export const register = async (
   }
 };
 
+export const initializeCsrf = async (): Promise<void> => {
+  try {
+    await api.get("/auth/csrf-token");
+  } catch (error) {
+    console.error("CSRF initialization error:", error);
+    throw error;
+  }
+};
+
 export const loginLocal = async (
   input: LoginRequest,
 ): Promise<LoginResponse> => {

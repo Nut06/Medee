@@ -11,20 +11,17 @@ type Usecase struct {
 	users   authport.AuthRepo
 	hasher  authport.PasswordHasher
 	tokens  authport.TokenService
-	refresh authport.RefreshTokenStore
 }
 
 func NewUsecase(
 	users authport.AuthRepo,
 	hasher authport.PasswordHasher,
 	tokens authport.TokenService,
-	refresh authport.RefreshTokenStore,
 ) *Usecase {
 	return &Usecase{
 		users:   users,
 		hasher:  hasher,
 		tokens:  tokens,
-		refresh: refresh,
 	}
 }
 
@@ -65,12 +62,6 @@ func (uc *Usecase) Register(ctx context.Context, cmd authport.RegisterCommand) (
 		return nil, nil, err
 	}
 
-	if uc.refresh != nil {
-		if err := uc.refresh.SaveRefreshToken(ctx, refreshToken, created.ID, refreshExp); err != nil {
-			return nil, nil, err
-		}
-	}
-
 	return &authport.RegisterResult{
 			ID:        created.ID.String(),
 			FirstName: created.FirstName,
@@ -106,12 +97,6 @@ func (uc *Usecase) Login(ctx context.Context, cmd authport.LoginCommand) (*authp
 		return nil, nil, err
 	}
 
-	if uc.refresh != nil {
-		if err := uc.refresh.SaveRefreshToken(ctx, refreshToken, u.ID, refreshExp); err != nil {
-			return nil, nil, err
-		}
-	}
-
 	companies, err := uc.users.GetUserCompanies(ctx, u.ID.String())
 	if err != nil {
 		// Log error but don't fail login? Or fail?
@@ -131,13 +116,6 @@ func (uc *Usecase) Login(ctx context.Context, cmd authport.LoginCommand) (*authp
 			RefreshToken:     refreshToken,
 			RefreshExpiresAt: refreshExp,
 		}, nil
-}
-
-func (uc *Usecase) Logout(ctx context.Context, refreshToken string) error {
-	if uc.refresh == nil {
-		return nil
-	}
-	return uc.refresh.DeleteRefreshToken(ctx, refreshToken)
 }
 
 func (uc *Usecase) Refresh(ctx context.Context, cmd authport.RefreshCommand) (*authport.LoginResult, *auth.TokenPair, error) {
@@ -161,11 +139,6 @@ func (uc *Usecase) Refresh(ctx context.Context, cmd authport.RefreshCommand) (*a
 		return nil, nil, auth.ErrInvalidRefreshToken
 	}
 
-	if uc.refresh != nil {
-		if err := uc.refresh.SaveRefreshToken(ctx, refreshToken, u.ID, refreshExp); err != nil {
-			return nil, nil, auth.ErrInvalidRefreshToken
-		}
-	}
 
 	companies, err := uc.users.GetUserCompanies(ctx, u.ID.String())
 	if err != nil {
